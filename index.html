@@ -1,0 +1,3144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Student Pro</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+<style>
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+-webkit-tap-highlight-color: transparent;
+}
+
+body{
+font-family:'Plus Jakarta Sans',sans-serif;
+background:#0f172a;
+color:#f8fafc;
+min-height:100vh;
+}
+
+button,input,select{
+font-family:inherit;
+border:none;
+outline:none;
+}
+
+button{
+cursor:pointer;
+transition: all 0.25s ease;
+}
+
+button:active {
+transform: scale(0.96);
+}
+
+.screen{
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:16px;
+background: radial-gradient(circle at top left, #1e1b4b, #0f172a);
+}
+
+/* Vibrant Glassmorphic ATM Card UI */
+.card{
+width:100%;
+max-width:440px;
+background: rgba(30, 41, 59, 0.75);
+backdrop-filter: blur(16px);
+border: 1px solid rgba(255, 255, 255, 0.12);
+border-radius: 28px;
+padding: 28px 24px;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.logo{
+width:64px;
+height:64px;
+border-radius:20px;
+background: linear-gradient(135deg, #ff007a, #7928ca);
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+margin-bottom:20px;
+box-shadow: 0 10px 25px -5px rgba(255, 0, 122, 0.5);
+}
+
+h1{
+font-size:28px;
+font-weight:800;
+margin-bottom:6px;
+background: linear-gradient(to right, #ffffff, #cbd5e1);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+.subtitle{
+color:#94a3b8;
+font-size:14px;
+margin-bottom:24px;
+}
+
+.input-group{
+margin-bottom:18px;
+position:relative;
+}
+
+label{
+display:block;
+font-size:12px;
+font-weight:700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom:8px;
+color: #cbd5e1;
+}
+
+input, select{
+width:100%;
+padding:16px;
+background: rgba(15, 23, 42, 0.6);
+border: 1px solid rgba(255, 255, 255, 0.15);
+border-radius:16px;
+font-size:15px;
+color: #ffffff;
+transition: all 0.3s ease;
+}
+
+input:focus, select:focus{
+border-color:#818cf8;
+box-shadow:0 0 0 4px rgba(129, 140, 248, 0.2);
+background: rgba(15, 23, 42, 0.9);
+}
+
+input[readonly]{
+background: rgba(51, 65, 85, 0.4);
+color:#94a3b8;
+}
+
+.password-wrap{
+position:relative;
+}
+
+.password-wrap input{
+padding-right:50px;
+}
+
+.eye{
+position:absolute;
+right:14px;
+top:50%;
+transform:translateY(-50%);
+background:none;
+color:#94a3b8;
+font-size:16px;
+padding:8px;
+}
+
+.primary{
+width:100%;
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+color:#0f172a;
+padding:16px;
+border-radius:16px;
+font-weight:800;
+font-size:16px;
+margin-top:8px;
+box-shadow: 0 10px 20px -5px rgba(0, 242, 254, 0.4);
+}
+
+.primary:hover{
+box-shadow: 0 15px 25px -5px rgba(0, 242, 254, 0.6);
+}
+
+.link-btn{
+background:none;
+color:#38ef7d;
+font-weight:700;
+font-size: 14px;
+}
+
+.bottom{
+text-align:center;
+margin-top:24px;
+font-size:14px;
+color:#94a3b8;
+}
+
+.hidden{
+display:none!important;
+}
+
+/* Vibrant Role Selector */
+.role-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:14px;
+margin-bottom:24px;
+}
+
+.role{
+position: relative;
+overflow: hidden;
+border: 1px solid rgba(255, 255, 255, 0.15);
+padding:24px 14px;
+border-radius:20px;
+background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+text-align:center;
+cursor: pointer;
+transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.role:hover {
+transform: translateY(-3px);
+}
+
+.role i{
+font-size:32px;
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+margin-bottom:12px;
+display: inline-block;
+}
+
+.role strong{
+display:block;
+font-size:15px;
+color: #f8fafc;
+}
+
+.role.selected{
+border:2px solid #00f2fe;
+background: linear-gradient(135deg, rgba(0, 242, 254, 0.15), rgba(79, 70, 229, 0.3));
+box-shadow: 0 10px 20px -5px rgba(0, 242, 254, 0.4);
+}
+
+.msg{
+padding:14px;
+border-radius:14px;
+margin-bottom:18px;
+font-size:14px;
+display:none;
+font-weight: 500;
+}
+
+.error{
+background:rgba(239, 68, 68, 0.2);
+border: 1px solid rgba(239, 68, 68, 0.4);
+color:#fca5a5;
+}
+
+.success{
+background:rgba(34, 197, 94, 0.2);
+border: 1px solid rgba(34, 197, 94, 0.4);
+color:#86efac;
+}
+
+.back{
+background: rgba(255, 255, 255, 0.1);
+padding:10px 16px;
+border-radius:12px;
+margin-bottom:20px;
+display:inline-flex;
+align-items:center;
+gap:8px;
+font-weight:600;
+color:#e2e8f0;
+font-size: 14px;
+}
+
+/* SUBJECT FORM */
+.subject-box{
+border:1px solid rgba(255, 255, 255, 0.1);
+border-radius:20px;
+padding:20px;
+margin-bottom:16px;
+background: rgba(15, 23, 42, 0.5);
+}
+
+.subject-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:16px;
+}
+
+.subject-header strong{
+font-size:15px;
+color:#f1f5f9;
+}
+
+.remove-subject{
+background:rgba(239, 68, 68, 0.2);
+color:#fca5a5;
+width:36px;
+height:36px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.days-title{
+font-size:12px;
+font-weight:700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+margin-bottom:10px;
+color: #cbd5e1;
+}
+
+.days{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.day{
+border:1px solid rgba(255, 255, 255, 0.15);
+background: rgba(30, 41, 59, 0.6);
+padding:10px 14px;
+border-radius:12px;
+font-size:12px;
+font-weight: 600;
+cursor:pointer;
+color: #cbd5e1;
+}
+
+.day input{
+display:none;
+}
+
+.day.active{
+background: linear-gradient(135deg, #11998e, #38ef7d);
+border-color:transparent;
+color:#0f172a;
+font-weight:800;
+box-shadow: 0 4px 12px rgba(56, 239, 125, 0.3);
+}
+
+.add-subject{
+width:100%;
+border:1px dashed rgba(255, 255, 255, 0.2);
+background: rgba(30, 41, 59, 0.4);
+color:#38ef7d;
+padding:14px;
+border-radius:16px;
+font-weight:700;
+margin-bottom:20px;
+}
+
+/* DASHBOARD & VIBRANT CARDS */
+.dashboard{
+min-height:100vh;
+background:#0f172a;
+padding-bottom: 80px;
+}
+
+.nav{
+height:70px;
+background: rgba(15, 23, 42, 0.85);
+backdrop-filter: blur(16px);
+border-bottom:1px solid rgba(255, 255, 255, 0.1);
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 20px;
+position: sticky;
+top: 0;
+z-index: 50;
+}
+
+.brand{
+font-size:20px;
+font-weight:800;
+display:flex;
+align-items:center;
+gap:12px;
+color: #fff;
+}
+
+.brand span{
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+}
+
+.nav-actions{
+display:flex;
+gap:8px;
+align-items:center;
+}
+
+.nav-btn{
+padding:10px 14px;
+border-radius:12px;
+background: rgba(255, 255, 255, 0.08);
+color: #e2e8f0;
+font-weight:600;
+font-size: 13px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+
+.nav-btn.active{
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+color:#0f172a;
+}
+
+.content{
+max-width:1100px;
+margin:auto;
+padding:24px 16px;
+}
+
+.welcome{
+margin-bottom:24px;
+}
+
+.welcome h2{
+font-size:26px;
+font-weight: 800;
+}
+
+.welcome p{
+color:#94a3b8;
+margin-top:4px;
+font-size: 14px;
+}
+
+/* STATS - ATM STYLE WITHOUT SIM CHIP */
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+gap:16px;
+margin-bottom:28px;
+}
+
+.stat{
+position: relative;
+border-radius: 22px;
+padding: 22px 20px;
+overflow: hidden;
+box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+border: 1px solid rgba(255, 255, 255, 0.2);
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+min-height: 130px;
+cursor: pointer;
+transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.stat:hover {
+transform: translateY(-4px);
+box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Gradient Card Colors */
+.stat:nth-child(1) {
+background: linear-gradient(135deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+}
+.stat:nth-child(2) {
+background: linear-gradient(135deg, #0093E9 0%, #80D0C7 100%);
+}
+.stat:nth-child(3) {
+background: linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%);
+color: #0f172a;
+}
+.stat:nth-child(4) {
+background: linear-gradient(135deg, #FF9A8B 0%, #FF6A88 55%, #FF99AC 100%);
+}
+
+.stat small{
+color: rgba(255, 255, 255, 0.9);
+font-size: 12px;
+font-weight: 800;
+text-transform: uppercase;
+letter-spacing: 1px;
+text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.stat h2{
+font-size: 32px;
+font-weight: 800;
+color: #ffffff;
+margin-top: 10px;
+text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* 3 Attendance Filter Boxes */
+.attendance-boxes {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 12px;
+margin-top: 16px;
+margin-bottom: 24px;
+}
+
+.att-box {
+padding: 16px 12px;
+border-radius: 18px;
+text-align: center;
+cursor: pointer;
+border: 1px solid rgba(255,255,255,0.15);
+transition: all 0.25s ease;
+background: rgba(30, 41, 59, 0.7);
+}
+
+.att-box:hover {
+transform: translateY(-3px);
+}
+
+.att-box.high {
+background: linear-gradient(135deg, rgba(17, 153, 142, 0.3), rgba(56, 239, 125, 0.3));
+border-color: #38ef7d;
+}
+
+.att-box.mid {
+background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.3));
+border-color: #f59e0b;
+}
+
+.att-box.low {
+background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(185, 28, 28, 0.3));
+border-color: #ef4444;
+}
+
+.att-box h3 {
+font-size: 20px;
+font-weight: 800;
+margin-bottom: 4px;
+}
+
+.att-box span {
+font-size: 11px;
+font-weight: 700;
+text-transform: uppercase;
+color: #cbd5e1;
+}
+
+.section{
+background: rgba(30, 41, 59, 0.6);
+backdrop-filter: blur(12px);
+border: 1px solid rgba(255, 255, 255, 0.08);
+border-radius: 24px;
+padding: 24px;
+margin-bottom: 24px;
+box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.section-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.group{
+display:grid;
+grid-template-columns:1fr 120px 80px;
+gap:16px;
+align-items:center;
+padding:16px 0;
+border-bottom:1px solid rgba(255, 255, 255, 0.08);
+}
+
+.progress{
+height:10px;
+background: rgba(255, 255, 255, 0.1);
+border-radius:20px;
+overflow:hidden;
+}
+
+.progress div{
+height:100%;
+background: linear-gradient(90deg, #00f2fe, #4facfe);
+border-radius:20px;
+}
+
+.badge{
+padding:6px 12px;
+border-radius:20px;
+font-size:12px;
+font-weight:800;
+text-align:center;
+display: inline-block;
+}
+
+.good{
+background:rgba(34, 197, 94, 0.2);
+color:#86efac;
+border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.medium{
+background:rgba(245, 158, 11, 0.2);
+color:#fde047;
+border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.low{
+background:rgba(239, 68, 68, 0.2);
+color:#fca5a5;
+border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.invite-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:16px;
+}
+
+.code-card{
+background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+border:1px solid rgba(255, 255, 255, 0.12);
+padding:20px;
+border-radius:20px;
+position: relative;
+overflow: hidden;
+}
+
+.code{
+font-size:24px;
+font-weight:800;
+letter-spacing:3px;
+margin:12px 0;
+color: #00f2fe;
+font-family: monospace;
+}
+
+.profile-row{
+display:flex;
+justify-content:space-between;
+align-items: center;
+gap:16px;
+padding:14px 0;
+border-bottom:1px solid rgba(255, 255, 255, 0.08);
+}
+
+.profile-row span:first-child{
+color:#94a3b8;
+font-size: 14px;
+}
+
+/* ChatGPT Sidebar Drawer Styling */
+.chatgpt-sidebar-toggle {
+background: rgba(255, 255, 255, 0.1);
+border: 1px solid rgba(255,255,255,0.15);
+color: #fff;
+padding: 10px 14px;
+border-radius: 12px;
+font-size: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.sidebar-drawer {
+position: fixed;
+top: 0;
+left: -300px;
+width: 280px;
+height: 100vh;
+background: #1e293b;
+border-right: 1px solid rgba(255,255,255,0.1);
+z-index: 200;
+transition: left 0.3s ease;
+padding: 20px;
+box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+display: flex;
+flex-direction: column;
+}
+
+.sidebar-drawer.open {
+left: 0;
+}
+
+.sidebar-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 24px;
+padding-bottom: 12px;
+border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar-menu {
+display: flex;
+flex-direction: column;
+gap: 8px;
+flex: 1;
+}
+
+.sidebar-item {
+padding: 14px 16px;
+border-radius: 14px;
+background: rgba(255,255,255,0.05);
+color: #e2e8f0;
+font-weight: 600;
+display: flex;
+align-items: center;
+gap: 12px;
+text-align: left;
+width: 100%;
+}
+
+.sidebar-item:hover, .sidebar-item.active {
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+color: #0f172a;
+}
+
+.drawer-overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.6);
+z-index: 150;
+display: none;
+}
+
+.drawer-overlay.show {
+display: block;
+}
+
+/* CLASSES UI */
+.classes-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:16px;
+margin-bottom:20px;
+}
+
+.classes-header h2{
+font-size:24px;
+}
+
+.add-class-btn{
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+color:#0f172a;
+padding:12px 18px;
+border-radius:14px;
+font-weight:800;
+font-size: 14px;
+box-shadow: 0 8px 16px -4px rgba(0, 242, 254, 0.4);
+}
+
+.class-card{
+border:1px solid rgba(255, 255, 255, 0.12);
+background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+border-radius:20px;
+padding:20px;
+margin-bottom:14px;
+position: relative;
+overflow: hidden;
+box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.class-card::before {
+content: '';
+position: absolute;
+left: 0; top: 0; bottom: 0;
+width: 6px;
+background: linear-gradient(to bottom, #00f2fe, #4facfe);
+}
+
+.class-top{
+display:flex;
+justify-content:space-between;
+align-items:flex-start;
+gap:12px;
+}
+
+.class-subject{
+font-size:18px;
+font-weight:800;
+margin-bottom:6px;
+color: #ffffff;
+}
+
+.class-meta{
+color:#94a3b8;
+font-size:13px;
+line-height:1.6;
+}
+
+.class-time{
+font-size:15px;
+font-weight:800;
+color:#00f2fe;
+white-space:nowrap;
+background: rgba(0, 242, 254, 0.1);
+padding: 6px 12px;
+border-radius: 10px;
+display: inline-block;
+}
+
+.now-badge{
+display:inline-block;
+margin-top:10px;
+padding:6px 12px;
+background:rgba(34, 197, 94, 0.2);
+color:#86efac;
+border-radius:20px;
+font-size:11px;
+font-weight:800;
+border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.today-empty{
+padding:30px;
+text-align:center;
+background: rgba(15, 23, 42, 0.4);
+border-radius:20px;
+color:#94a3b8;
+font-size:14px;
+border: 1px dashed rgba(255,255,255,0.1);
+}
+
+.week-day-title{
+font-size:14px;
+font-weight:800;
+color:#cbd5e1;
+margin:22px 0 12px;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+
+.classes-tabs{
+display:flex;
+gap:10px;
+margin-bottom:20px;
+}
+
+.classes-tab{
+border:1px solid rgba(255, 255, 255, 0.1);
+background: rgba(30, 41, 59, 0.6);
+padding:12px 18px;
+border-radius:14px;
+font-size:13px;
+font-weight:700;
+color: #94a3b8;
+flex: 1;
+text-align: center;
+}
+
+.classes-tab.active{
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+border-color:transparent;
+color:#0f172a;
+box-shadow: 0 8px 16px -4px rgba(0, 242, 254, 0.4);
+}
+
+/* MODALS */
+.modal-overlay{
+position:fixed;
+inset:0;
+background:rgba(15, 23, 42, 0.85);
+backdrop-filter: blur(8px);
+z-index:100;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:16px;
+}
+
+.modal{
+width:100%;
+max-width:480px;
+max-height:90vh;
+overflow-y:auto;
+background: #1e293b;
+border: 1px solid rgba(255, 255, 255, 0.15);
+border-radius:28px;
+padding:24px;
+box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+}
+
+.modal-head{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.close-btn{
+width:36px;
+height:36px;
+border-radius:12px;
+background: rgba(255, 255, 255, 0.1);
+color: white;
+font-weight: bold;
+}
+
+.subject-edit{
+border:1px solid rgba(255, 255, 255, 0.1);
+border-radius:20px;
+padding:18px;
+margin-bottom:16px;
+background: rgba(15, 23, 42, 0.5);
+}
+
+/* Mobile Responsive Optimization */
+@media(max-width:768px){
+.stats{
+grid-template-columns:1fr 1fr;
+}
+
+.attendance-boxes {
+grid-template-columns: 1fr;
+}
+
+.group{
+grid-template-columns:1fr;
+gap: 8px;
+}
+
+.invite-grid{
+grid-template-columns:1fr;
+}
+
+.nav{
+padding:0 16px;
+}
+
+.nav-actions{
+gap:6px;
+}
+
+.classes-header{
+flex-direction: column;
+align-items: flex-start;
+}
+
+.add-class-btn {
+width: 100%;
+text-align: center;
+}
+
+.class-top{
+flex-direction:column;
+}
+
+.class-time{
+align-self: flex-start;
+margin-top: 6px;
+}
+}
+
+@media(max-width:480px){
+.stats{
+grid-template-columns:1fr;
+}
+.role-grid{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+
+<body>
+
+<!-- CHATGPT SIDEBAR DRAWER -->
+<div id="drawerOverlay" class="drawer-overlay" onclick="toggleSidebar()"></div>
+<div id="sidebarDrawer" class="sidebar-drawer">
+<div class="sidebar-header">
+<div class="brand">Student <span>Pro</span></div>
+<button class="close-btn" onclick="toggleSidebar()">X</button>
+</div>
+<div class="sidebar-menu">
+<button class="sidebar-item" onclick="navigateSidebar('home')">
+<i class="fa-solid fa-house"></i> Home Dashboard
+</button>
+<button id="sidebarClassesBtn" class="sidebar-item hidden" onclick="navigateSidebar('classes')">
+<i class="fa-solid fa-calendar-days"></i> Classes Schedule
+</button>
+<button class="sidebar-item" onclick="navigateSidebar('profile')">
+<i class="fa-solid fa-user"></i> My Profile
+</button>
+<button class="sidebar-item" style="margin-top:auto; color:#fca5a5;" onclick="logout()">
+<i class="fa-solid fa-right-from-bracket"></i> Logout
+</button>
+</div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen" class="screen">
+<div class="card">
+<div class="logo">
+<i class="fa-solid fa-graduation-cap"></i>
+</div>
+<h1>Student Pro</h1>
+<p class="subtitle">Login to your college account</p>
+
+<div id="loginMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>ID / Roll Number / Mobile Number</label>
+<input id="loginIdentity" placeholder="Enter your ID, roll number or mobile">
+</div>
+
+<div class="input-group">
+<label>Password</label>
+<div class="password-wrap">
+<input id="loginPassword" type="password" placeholder="Enter password">
+<button class="eye" onclick="togglePassword('loginPassword','loginEye')">
+<i id="loginEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<button class="primary" onclick="login()">Login</button>
+
+<div class="bottom">
+Don't have an account? 
+<button class="link-btn" onclick="showRole()">Create now</button>
+</div>
+</div>
+</div>
+
+<!-- ROLE SELECT -->
+<div id="roleScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showLogin()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Create Account</h1>
+<p class="subtitle">Select one role to continue</p>
+
+<div id="roleMsg" class="msg error"></div>
+
+<div class="role-grid">
+<div class="role" onclick="selectRole(this,'student')">
+<i class="fa-solid fa-user-graduate"></i>
+<strong>Student</strong>
+</div>
+<div class="role" onclick="selectRole(this,'lecturer')">
+<i class="fa-solid fa-chalkboard-user"></i>
+<strong>Lecturer</strong>
+</div>
+<div class="role" onclick="selectRole(this,'hod')">
+<i class="fa-solid fa-user-tie"></i>
+<strong>HOD</strong>
+</div>
+<div class="role" onclick="selectRole(this,'principal')">
+<i class="fa-solid fa-building-columns"></i>
+<strong>Principal</strong>
+</div>
+</div>
+
+<button class="primary" onclick="submitRole()">Continue</button>
+</div>
+</div>
+
+<!-- PRINCIPAL -->
+<div id="principalScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showRole()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Principal Registration</h1>
+<p class="subtitle">Create your college administrator account</p>
+
+<div id="principalMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>College Name</label>
+<input id="pCollege" placeholder="Enter college name">
+</div>
+
+<div class="input-group">
+<label>Principal Name</label>
+<input id="pName" placeholder="Enter principal name">
+</div>
+
+<div class="input-group">
+<label>Mobile Number</label>
+<input id="pMobile" maxlength="10" inputmode="numeric" placeholder="10 digit mobile number" oninput="digitsOnly(this)">
+</div>
+
+<div class="input-group">
+<label>Create Password</label>
+<div class="password-wrap">
+<input id="pPassword" type="password">
+<button class="eye" onclick="togglePassword('pPassword','pEye')">
+<i id="pEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="password-wrap">
+<input id="pConfirm" type="password">
+<button class="eye" onclick="togglePassword('pConfirm','pConfirmEye')">
+<i id="pConfirmEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<button class="primary" onclick="createPrincipal()">Create Principal Account</button>
+</div>
+</div>
+
+<!-- HOD CODE -->
+<div id="hodCodeScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showRole()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>HOD Invite Code</h1>
+<p class="subtitle">Enter the code provided by your Principal</p>
+
+<div id="hodCodeMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>Principal HOD Invite Code</label>
+<input id="hodCode" placeholder="Enter HOD invite code">
+</div>
+
+<button class="primary" onclick="verifyHodCode()">Verify Code</button>
+<p class="bottom">Don't have a code?<br>Please contact your Principal.</p>
+</div>
+</div>
+
+<!-- HOD -->
+<div id="hodScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showScreen('hodCodeScreen')">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>HOD Registration</h1>
+<p class="subtitle">Complete your department details</p>
+
+<div id="hodMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>College Name</label>
+<input id="hCollege" readonly>
+</div>
+
+<div class="input-group">
+<label>Principal Name</label>
+<input id="hPrincipal" readonly>
+</div>
+
+<div class="input-group">
+<label>HOD Name</label>
+<input id="hName" placeholder="Enter HOD name">
+</div>
+
+<div class="input-group">
+<label>Department / Group Name</label>
+<input id="hDepartment" placeholder="Example: CSE">
+</div>
+
+<div class="input-group">
+<label>Mobile Number</label>
+<input id="hMobile" maxlength="10" inputmode="numeric" placeholder="10 digit mobile number" oninput="digitsOnly(this)">
+</div>
+
+<div class="input-group">
+<label>Create Password</label>
+<div class="password-wrap">
+<input id="hPassword" type="password">
+<button class="eye" onclick="togglePassword('hPassword','hEye')">
+<i id="hEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="password-wrap">
+<input id="hConfirm" type="password">
+<button class="eye" onclick="togglePassword('hConfirm','hConfirmEye')">
+<i id="hConfirmEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<button class="primary" onclick="createHod()">Create HOD Account</button>
+</div>
+</div>
+
+<!-- STUDENT CODE -->
+<div id="studentCodeScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showRole()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Student Invite Code</h1>
+<p class="subtitle">Enter the code provided by your HOD</p>
+
+<div id="studentCodeMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>Student Invite Code</label>
+<input id="studentCode" placeholder="Enter student code">
+</div>
+
+<button class="primary" onclick="verifyStudentCode()">Verify Code</button>
+</div>
+</div>
+
+<!-- STUDENT -->
+<div id="studentScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showScreen('studentCodeScreen')">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Student Registration</h1>
+<p class="subtitle">Create your student account</p>
+
+<div id="studentMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>College Name</label>
+<input id="sCollege" readonly>
+</div>
+
+<div class="input-group">
+<label>Principal Name</label>
+<input id="sPrincipal" readonly>
+</div>
+
+<div class="input-group">
+<label>Department / Group</label>
+<input id="sDepartment" readonly>
+</div>
+
+<div class="input-group">
+<label>HOD Name</label>
+<input id="sHod" readonly>
+</div>
+
+<div class="input-group">
+<label>Student Name</label>
+<input id="sName" placeholder="Enter student name">
+</div>
+
+<div class="input-group">
+<label>Roll Number</label>
+<input id="sRoll" placeholder="Enter roll number">
+</div>
+
+<div class="input-group">
+<label>Mobile Number</label>
+<input id="sMobile" maxlength="10" inputmode="numeric" placeholder="10 digit mobile number" oninput="digitsOnly(this)">
+</div>
+
+<div class="input-group">
+<label>Parent Name</label>
+<input id="sParent" placeholder="Enter parent name">
+</div>
+
+<div class="input-group">
+<label>Parent Mobile</label>
+<input id="sParentMobile" maxlength="10" inputmode="numeric" placeholder="10 digit parent mobile" oninput="digitsOnly(this)">
+</div>
+
+<div class="input-group">
+<label>Create Password</label>
+<div class="password-wrap">
+<input id="sPassword" type="password">
+<button class="eye" onclick="togglePassword('sPassword','sEye')">
+<i id="sEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="password-wrap">
+<input id="sConfirm" type="password">
+<button class="eye" onclick="togglePassword('sConfirm','sConfirmEye')">
+<i id="sConfirmEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<button class="primary" onclick="createStudent()">Create Student Account</button>
+</div>
+</div>
+
+<!-- LECTURER CODE -->
+<div id="lecturerCodeScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showRole()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Lecturer Invite Code</h1>
+<p class="subtitle">Enter the code provided by your HOD</p>
+
+<div id="lecturerCodeMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>Lecturer / Teacher Invite Code</label>
+<input id="lecturerCode" placeholder="Enter lecturer code">
+</div>
+
+<button class="primary" onclick="verifyLecturerCode()">Verify Code</button>
+<p class="bottom">Don't have a code?<br>Please contact your HOD.</p>
+</div>
+</div>
+
+<!-- LECTURER -->
+<div id="lecturerScreen" class="screen hidden">
+<div class="card">
+<button class="back" onclick="showScreen('lecturerCodeScreen')">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+<h1>Lecturer Registration</h1>
+<p class="subtitle">Create your lecturer account</p>
+
+<div id="lecturerMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>College Name</label>
+<input id="lCollege" readonly>
+</div>
+
+<div class="input-group">
+<label>Principal Name</label>
+<input id="lPrincipal" readonly>
+</div>
+
+<div class="input-group">
+<label>HOD Name</label>
+<input id="lHod" readonly>
+</div>
+
+<div class="input-group">
+<label>Department / Group</label>
+<input id="lDepartment" readonly>
+</div>
+
+<div class="input-group">
+<label>Lecturer Name</label>
+<input id="lName" placeholder="Enter lecturer name">
+</div>
+
+<div class="input-group">
+<label>Mobile Number</label>
+<input id="lMobile" maxlength="10" inputmode="numeric" placeholder="10 digit mobile number" oninput="digitsOnly(this)">
+</div>
+
+<label>Subjects</label>
+<div id="subjectsContainer"></div>
+
+<button class="add-subject" onclick="addSubject()">
+<i class="fa-solid fa-plus"></i> Add Subject
+</button>
+
+<div class="input-group">
+<label>Create Password</label>
+<div class="password-wrap">
+<input id="lPassword" type="password">
+<button class="eye" onclick="togglePassword('lPassword','lEye')">
+<i id="lEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<div class="input-group">
+<label>Confirm Password</label>
+<div class="password-wrap">
+<input id="lConfirm" type="password">
+<button class="eye" onclick="togglePassword('lConfirm','lConfirmEye')">
+<i id="lConfirmEye" class="fa-solid fa-eye"></i>
+</button>
+</div>
+</div>
+
+<button class="primary" onclick="createLecturer()">Create Lecturer Account</button>
+</div>
+</div>
+
+<!-- SUCCESS -->
+<div id="successScreen" class="screen hidden">
+<div class="card" style="text-align:center">
+<div class="logo" style="margin:auto auto 20px">
+<i class="fa-solid fa-check"></i>
+</div>
+<h1>Account Created!</h1>
+<p id="successText" class="subtitle"></p>
+<button class="primary" onclick="showLogin()">Go to Login</button>
+</div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="dashboard hidden">
+<div class="nav">
+<div class="brand">
+<button class="chatgpt-sidebar-toggle" onclick="toggleSidebar()">
+<i class="fa-solid fa-bars-staggered"></i>
+</button>
+Student <span>Pro</span>
+</div>
+
+<div class="nav-actions">
+<button id="homeNavBtn" class="nav-btn hidden" onclick="showMainDashboardView()">
+<i class="fa-solid fa-house"></i> Home
+</button>
+
+<button id="classesNavButton" class="nav-btn hidden" onclick="showClasses()">
+<i class="fa-solid fa-calendar-days"></i> Classes
+</button>
+
+<button class="nav-btn" onclick="openProfile()">
+<i class="fa-solid fa-user"></i> Profile
+</button>
+
+<button class="nav-btn" onclick="logout()">
+<i class="fa-solid fa-right-from-bracket"></i>
+</button>
+</div>
+</div>
+
+<div class="content">
+<div id="mainDashboard">
+<div class="welcome">
+<h2 id="dashTitle"></h2>
+<p id="dashSubtitle"></p>
+</div>
+
+<!-- PRINCIPAL DASHBOARD -->
+<div id="principalDash">
+<div class="stats">
+<div class="stat">
+<small>Groups</small>
+<h2 id="groupCount">0</h2>
+</div>
+<div class="stat">
+<small>HODs</small>
+<h2 id="hodCount">0</h2>
+</div>
+<div class="stat">
+<small>Students</small>
+<h2 id="studentCount">0</h2>
+</div>
+<div class="stat">
+<small>Overall Attendance</small>
+<h2 id="overallAttendance">0%</h2>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+<h3>Group-wise Attendance</h3>
+</div>
+<div id="groups"></div>
+</div>
+
+<div class="section">
+<div class="section-title">
+<h3>HOD Invite Code</h3>
+</div>
+<div class="code-card">
+<strong>HOD Invite Code</strong>
+<div class="code" id="principalHodCode"></div>
+<small style="color:#94a3b8">Give this code to your HOD</small>
+</div>
+</div>
+</div>
+
+<!-- HOD DASHBOARD -->
+<div id="hodDash" class="hidden">
+<div class="stats">
+<div class="stat" onclick="showHodStudentsList('all')">
+<small>Department</small>
+<h2 id="hodDepartment"></h2>
+</div>
+<div class="stat" onclick="showHodStudentsList('all')">
+<small>Students (Click to view)</small>
+<h2 id="hodStudentCount"></h2>
+</div>
+<div class="stat" onclick="showHodLecturersList()">
+<small>Lecturers (Click for Codes)</small>
+<h2 id="hodLecturerCount"></h2>
+</div>
+<div class="stat">
+<small>Attendance</small>
+<h2 id="hodAttendance"></h2>
+</div>
+</div>
+
+<!-- 3 ATTENDANCE RANGE BOXES FOR HOD -->
+<div class="attendance-boxes">
+<div class="att-box high" onclick="showHodStudentsList('high')">
+<h3 id="hodHighCount">0</h3>
+<span>≥ 75% Attendance</span>
+</div>
+<div class="att-box mid" onclick="showHodStudentsList('mid')">
+<h3 id="hodMidCount">0</h3>
+<span>50% - 74% Attendance</span>
+</div>
+<div class="att-box low" onclick="showHodStudentsList('low')">
+<h3 id="hodLowCount">0</h3>
+<span>Below 49% Attendance</span>
+</div>
+</div>
+
+<div class="section">
+<div class="section-title">
+<h3>Invite Codes</h3>
+</div>
+<div class="invite-grid">
+<div class="code-card">
+<strong>Student Invite Code</strong>
+<div class="code" id="hodStudentCode"></div>
+<small style="color:#94a3b8">Give this code to students</small>
+</div>
+<div class="code-card">
+<strong>Lecturer Invite Code</strong>
+<div class="code" id="hodLecturerCode"></div>
+<small style="color:#94a3b8">Give this code to lecturers</small>
+</div>
+</div>
+</div>
+
+<div id="hodDynamicListSection" class="section hidden">
+<div class="section-title">
+<h3 id="hodListTitle">Student Details</h3>
+<button class="back" style="margin-bottom:0;" onclick="hideHodDynamicList()">Close</button>
+</div>
+<div id="hodDynamicListContent"></div>
+</div>
+</div>
+
+<!-- STUDENT DASHBOARD -->
+<div id="studentDash" class="hidden">
+<div class="stats">
+<div class="stat">
+<small>Department</small>
+<h2 id="studentDepartment"></h2>
+</div>
+<div class="stat">
+<small>Roll Number</small>
+<h2 id="studentRoll"></h2>
+</div>
+<div class="stat">
+<small>Attendance</small>
+<h2 id="studentAttendance"></h2>
+</div>
+<div class="stat">
+<small>Status</small>
+<h2>Active</h2>
+</div>
+</div>
+
+<div class="stats">
+<div class="stat">
+<small>Total Working Days</small>
+<h2 id="studentTotalWorkingDays">0</h2>
+</div>
+<div class="stat">
+<small>Present Days</small>
+<h2 id="studentPresentDays">0</h2>
+</div>
+<div class="stat">
+<small>Absent Days</small>
+<h2 id="studentAbsentDays">0</h2>
+</div>
+<div class="stat">
+<small>Percentage</small>
+<h2 id="studentOverallPercentage">0%</h2>
+</div>
+</div>
+
+<div class="section">
+<h3>Subject-wise Attendance Breakdown</h3>
+<p style="color:#94a3b8; font-size:13px; margin-bottom:16px;">Click on any subject to view detailed history</p>
+<div id="studentSubjectsList"></div>
+</div>
+
+<div id="subjectHistorySection" class="section hidden">
+<div style="margin-bottom:16px;">
+<button class="back" style="margin-bottom:0;" onclick="closeSubjectHistory()">
+<i class="fa-solid fa-arrow-left"></i> Back to Subjects
+</button>
+</div>
+<h3 id="selectedSubjectTitle" style="margin-bottom:16px;">Subject History</h3>
+<div id="subjectHistoryRecords"></div>
+</div>
+
+<div class="section">
+<h3>Academic Details</h3>
+<div class="profile-row">
+<span>Principal</span>
+<strong id="studentPrincipal"></strong>
+</div>
+<div class="profile-row">
+<span>HOD</span>
+<strong id="studentHod"></strong>
+</div>
+<div class="profile-row">
+<span>College</span>
+<strong id="studentCollege"></strong>
+</div>
+</div>
+</div>
+
+<!-- LECTURER DASHBOARD -->
+<div id="lecturerDash" class="hidden">
+<div class="stats">
+<div class="stat" onclick="toggleLecturerGroupFilter()">
+<small>Department Group</small>
+<h2 id="lecturerDepartment"></h2>
+</div>
+<div class="stat">
+<small>Subjects</small>
+<h2 id="lecturerSubjectCount"></h2>
+</div>
+<div class="stat">
+<small>Mobile</small>
+<h2 id="lecturerMobile"></h2>
+</div>
+<div class="stat">
+<small>Status</small>
+<h2>Active</h2>
+</div>
+</div>
+
+<!-- 3 ATTENDANCE RANGE BOXES FOR LECTURER (GROUP SELECT) -->
+<div id="lecturerGroupBoxes" class="attendance-boxes hidden">
+<div class="att-box high" onclick="showLecturerStudentsList('high')">
+<h3 id="lecHighCount">0</h3>
+<span>≥ 75% Attendance</span>
+</div>
+<div class="att-box mid" onclick="showLecturerStudentsList('mid')">
+<h3 id="lecMidCount">0</h3>
+<span>50% - 74% Attendance</span>
+</div>
+<div class="att-box low" onclick="showLecturerStudentsList('low')">
+<h3 id="lecLowCount">0</h3>
+<span>Below 49% Attendance</span>
+</div>
+</div>
+
+<div id="lecturerDynamicListSection" class="section hidden">
+<div class="section-title">
+<h3 id="lecturerListTitle">Department Students</h3>
+<button class="back" style="margin-bottom:0;" onclick="hideLecturerDynamicList()">Close</button>
+</div>
+<div id="lecturerDynamicListContent"></div>
+</div>
+
+<div style="margin-bottom:24px;">
+<button class="primary" style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;padding:18px;" onclick="toggleManualAttendance()">
+<i class="fa-solid fa-clipboard-user"></i> MANUAL ATTENDANCE
+</button>
+</div>
+
+<div class="section">
+<h3>My Subjects</h3>
+<div id="lecturerSubjects" class="subject-list"></div>
+</div>
+
+<div id="manualAttendanceSection" class="section hidden">
+<div style="margin-bottom:16px;">
+<button class="back" onclick="toggleManualAttendance()">
+<i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+</button>
+</div>
+<div class="section-title">
+<h3><i class="fa-solid fa-pen-to-square"></i> Manual Attendance & Location Update</h3>
+</div>
+
+<div id="attMsg" class="msg error"></div>
+
+<div class="input-group">
+<label>Select Subject</label>
+<select id="attSubjectSelect"></select>
+</div>
+
+<div class="input-group">
+<label>Select Student</label>
+<select id="attStudentSelect"></select>
+</div>
+
+<div class="input-group">
+<label>Date</label>
+<input id="attDate" type="date">
+</div>
+
+<div class="input-group">
+<label>Status</label>
+<select id="attStatus">
+<option value="Present">Present</option>
+<option value="Absent">Absent</option>
+<option value="Late">Late</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Current Location Coordinates</label>
+<div style="display:flex;gap:10px;">
+<input id="attLocation" placeholder="Click button to fetch location" readonly>
+<button type="button" class="nav-btn" style="white-space:nowrap;" onclick="fetchLocation()"><i class="fa-solid fa-location-dot"></i> Get Location</button>
+</div>
+</div>
+
+<button class="primary" onclick="submitAttendanceRecord()">Submit Attendance</button>
+</div>
+</div>
+</div>
+
+<!-- CLASSES PAGE -->
+<div id="classesPage" class="hidden">
+<div style="margin-bottom:16px;">
+<button class="back" onclick="showMainDashboardView()">
+<i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+</button>
+</div>
+
+<div class="classes-header">
+<div>
+<h2>Classes</h2>
+<p id="classesSubtitle" style="color:#94a3b8; font-size:13px; margin-top:4px"></p>
+</div>
+
+<button id="addClassFromClasses" class="add-class-btn hidden" onclick="openAddSubjectModal()">
+<i class="fa-solid fa-plus"></i> Add Subject
+</button>
+</div>
+
+<div class="classes-tabs">
+<button class="classes-tab active" onclick="changeClassTab('today',this)">Today</button>
+<button class="classes-tab" onclick="changeClassTab('week',this)">Weekly Schedule</button>
+</div>
+
+<div id="todayClasses">
+<div class="section">
+<h3 style="margin-bottom:16px">Today's Classes</h3>
+<div id="todayClassList"></div>
+</div>
+</div>
+
+<div id="weekClasses" class="hidden">
+<div class="section">
+<h3 style="margin-bottom:16px">Weekly Schedule</h3>
+<div id="weeklyClassList"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal" class="modal-overlay hidden">
+<div class="modal">
+<button class="back" onclick="closeProfile()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+
+<div class="modal-head">
+<h2>Profile</h2>
+<button class="close-btn" onclick="closeProfile()">X</button>
+</div>
+
+<div id="profileContent"></div>
+</div>
+</div>
+
+<!-- ADD SUBJECT MODAL -->
+<div id="subjectModal" class="modal-overlay hidden">
+<div class="modal">
+<button class="back" onclick="closeAddSubjectModal()">
+<i class="fa-solid fa-arrow-left"></i> Back
+</button>
+
+<div class="modal-head">
+<div>
+<h2>Add Subject</h2>
+<p style="color:#94a3b8; font-size:12px; margin-top:4px">Add another class to your schedule</p>
+</div>
+<button class="close-btn" onclick="closeAddSubjectModal()">X</button>
+</div>
+
+<div id="addSubjectMsg" class="msg error"></div>
+
+<div class="subject-edit">
+<div class="input-group">
+<label>Subject Name</label>
+<input id="newSubjectName" placeholder="Example: Data Structures">
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:10px">
+<div class="input-group">
+<label>Start Time</label>
+<input id="newSubjectStart" type="time">
+</div>
+<div class="input-group">
+<label>End Time</label>
+<input id="newSubjectEnd" type="time">
+</div>
+</div>
+
+<div class="days-title">Select Week Days</div>
+<div class="days" id="newSubjectDays">
+<label class="day"><input type="checkbox" value="Monday"> Mon</label>
+<label class="day"><input type="checkbox" value="Tuesday"> Tue</label>
+<label class="day"><input type="checkbox" value="Wednesday"> Wed</label>
+<label class="day"><input type="checkbox" value="Thursday"> Thu</label>
+<label class="day"><input type="checkbox" value="Friday"> Fri</label>
+<label class="day"><input type="checkbox" value="Saturday"> Sat</label>
+<label class="day"><input type="checkbox" value="Sunday"> Sun</label>
+</div>
+</div>
+
+<button class="primary" onclick="saveAdditionalSubject()">Add Subject</button>
+</div>
+</div>
+
+<script>
+let selectedRole=null;
+let verifiedPrincipal=null;
+let verifiedHod=null;
+let currentUser=null;
+
+function getData(key){
+return JSON.parse(localStorage.getItem(key)||"[]");
+}
+
+function saveData(key,data){
+localStorage.setItem(key,JSON.stringify(data));
+}
+
+async function hashPassword(password){
+const encoder=new TextEncoder();
+const data=encoder.encode(password);
+const hash=await crypto.subtle.digest("SHA-256",data);
+return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+function digitsOnly(input){
+input.value=input.value.replace(/\D/g,"").slice(0,10);
+}
+
+function validMobile(mobile){
+return /^\d{10}$/.test(mobile);
+}
+
+function validPassword(password){
+return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+}
+
+function showMsg(id,text,type="error"){
+const el=document.getElementById(id);
+el.innerText=text;
+el.className="msg "+type;
+el.style.display="block";
+}
+
+function hideMsg(id){
+document.getElementById(id).style.display="none";
+}
+
+function togglePassword(inputId,iconId){
+const input=document.getElementById(inputId);
+const icon=document.getElementById(iconId);
+if(input.type==="password"){
+input.type="text";
+icon.className="fa-solid fa-eye-slash";
+}else{
+input.type="password";
+icon.className="fa-solid fa-eye";
+}
+}
+
+function generateId(prefix,key){
+const data=getData(key);
+return prefix+String(data.length+1).padStart(4,"0");
+}
+
+function generateCode(prefix){
+return prefix+"-"+Math.random().toString(36).substring(2,7).toUpperCase();
+}
+
+function mobileAlreadyUsed(mobile){
+const principals=getData("principals");
+const hods=getData("hods");
+const students=getData("students");
+const lecturers=getData("lecturers");
+
+return(
+principals.some(x=>x.mobile===mobile)||
+hods.some(x=>x.mobile===mobile)||
+students.some(x=>x.mobile===mobile)||
+lecturers.some(x=>x.mobile===mobile)
+);
+}
+
+/* SIDEBAR DRAWER TOGGLE */
+function toggleSidebar(){
+const drawer = document.getElementById("sidebarDrawer");
+const overlay = document.getElementById("drawerOverlay");
+drawer.classList.toggle("open");
+overlay.classList.toggle("show");
+}
+
+function navigateSidebar(view){
+toggleSidebar();
+if(view === 'home') showMainDashboardView();
+if(view === 'classes') showClasses();
+if(view === 'profile') openProfile();
+}
+
+function hideAll(){
+document.querySelectorAll(".screen").forEach(x=>{
+x.classList.add("hidden");
+});
+document.getElementById("dashboard").classList.add("hidden");
+document.getElementById("profileModal").classList.add("hidden");
+document.getElementById("subjectModal").classList.add("hidden");
+}
+
+function showScreen(screenId){
+hideAll();
+document.getElementById(screenId).classList.remove("hidden");
+}
+
+function showLogin(){
+showScreen("loginScreen");
+}
+
+function showRole(){
+showScreen("roleScreen");
+selectedRole=null;
+document.querySelectorAll(".role").forEach(x=>x.classList.remove("selected"));
+}
+
+function selectRole(element,role){
+selectedRole=role;
+document.querySelectorAll(".role").forEach(x=>x.classList.remove("selected"));
+element.classList.add("selected");
+}
+
+function submitRole(){
+if(!selectedRole){
+showMsg("roleMsg","Please select one role.");
+return;
+}
+
+hideAll();
+
+if(selectedRole==="principal"){
+showScreen("principalScreen");
+}else if(selectedRole==="hod"){
+showScreen("hodCodeScreen");
+}else if(selectedRole==="student"){
+showScreen("studentCodeScreen");
+}else if(selectedRole==="lecturer"){
+showScreen("lecturerCodeScreen");
+}
+}
+
+async function createPrincipal(){
+hideMsg("principalMsg");
+
+const college=document.getElementById("pCollege").value.trim();
+const name=document.getElementById("pName").value.trim();
+const mobile=document.getElementById("pMobile").value.trim();
+const password=document.getElementById("pPassword").value;
+const confirm=document.getElementById("pConfirm").value;
+
+if(!college||!name||!mobile||!password||!confirm){
+showMsg("principalMsg","Please fill all fields.");
+return;
+}
+
+if(!validMobile(mobile)){
+showMsg("principalMsg","Mobile number must contain exactly 10 digits.");
+return;
+}
+
+if(mobileAlreadyUsed(mobile)){
+showMsg("principalMsg","This mobile number is already registered.");
+return;
+}
+
+if(!validPassword(password)){
+showMsg("principalMsg","Password must be 8+ characters with letters, numbers and symbols.");
+return;
+}
+
+if(password!==confirm){
+showMsg("principalMsg","Passwords do not match.");
+return;
+}
+
+const principals=getData("principals");
+const id=generateId("PRI","principals");
+
+const principal={
+id,
+role:"principal",
+college,
+name,
+mobile,
+passwordHash:await hashPassword(password),
+hodInviteCode:generateCode("HOD"),
+createdAt:new Date().toISOString()
+};
+
+principals.push(principal);
+saveData("principals",principals);
+
+document.getElementById("successText").innerHTML=`Principal account created successfully.<br><br><b>Your ID: ${id}</b><br>Use your ID or mobile number to login.`;
+showScreen("successScreen");
+}
+
+function verifyHodCode(){
+const code=document.getElementById("hodCode").value.trim().toUpperCase();
+const principals=getData("principals");
+const principal=principals.find(x=>x.hodInviteCode===code);
+
+if(!principal){
+showMsg("hodCodeMsg","Invalid code. Please contact your Principal.");
+return;
+}
+
+verifiedPrincipal=principal;
+document.getElementById("hCollege").value=principal.college;
+document.getElementById("hPrincipal").value=principal.name;
+showScreen("hodScreen");
+}
+
+async function createHod(){
+hideMsg("hodMsg");
+
+const name=document.getElementById("hName").value.trim();
+const department=document.getElementById("hDepartment").value.trim();
+const mobile=document.getElementById("hMobile").value.trim();
+const password=document.getElementById("hPassword").value;
+const confirm=document.getElementById("hConfirm").value;
+
+if(!name||!department||!mobile||!password||!confirm){
+showMsg("hodMsg","Please fill all fields.");
+return;
+}
+
+if(!validMobile(mobile)){
+showMsg("hodMsg","Mobile number must contain exactly 10 digits.");
+return;
+}
+
+if(mobileAlreadyUsed(mobile)){
+showMsg("hodMsg","This mobile number is already registered.");
+return;
+}
+
+if(!validPassword(password)){
+showMsg("hodMsg","Password must be 8+ characters with letters, numbers and symbols.");
+return;
+}
+
+if(password!==confirm){
+showMsg("hodMsg","Passwords do not match.");
+return;
+}
+
+const hods=getData("hods");
+const id=generateId("HOD","hods");
+
+const hod={
+id,
+role:"hod",
+principalId:verifiedPrincipal.id,
+college:verifiedPrincipal.college,
+principalName:verifiedPrincipal.name,
+name,
+department,
+mobile,
+passwordHash:await hashPassword(password),
+studentInviteCode:generateCode("STU"),
+lecturerInviteCode:generateCode("LEC"),
+createdAt:new Date().toISOString()
+};
+
+hods.push(hod);
+saveData("hods",hods);
+
+document.getElementById("successText").innerHTML=`HOD account created successfully.<br><br><b>Your ID: ${id}</b><br>You can now login.`;
+showScreen("successScreen");
+}
+
+function verifyStudentCode(){
+const code=document.getElementById("studentCode").value.trim().toUpperCase();
+const hods=getData("hods");
+const hod=hods.find(x=>x.studentInviteCode===code);
+
+if(!hod){
+showMsg("studentCodeMsg","Invalid code. Please contact your HOD.");
+return;
+}
+
+verifiedHod=hod;
+document.getElementById("sCollege").value=hod.college;
+document.getElementById("sPrincipal").value=hod.principalName;
+document.getElementById("sDepartment").value=hod.department;
+document.getElementById("sHod").value=hod.name;
+showScreen("studentScreen");
+}
+
+async function createStudent(){
+hideMsg("studentMsg");
+
+const name=document.getElementById("sName").value.trim();
+const roll=document.getElementById("sRoll").value.trim();
+const mobile=document.getElementById("sMobile").value.trim();
+const parent=document.getElementById("sParent").value.trim();
+const parentMobile=document.getElementById("sParentMobile").value.trim();
+const password=document.getElementById("sPassword").value;
+const confirm=document.getElementById("sConfirm").value;
+
+if(!name||!roll||!mobile||!parent||!parentMobile||!password||!confirm){
+showMsg("studentMsg","Please fill all fields.");
+return;
+}
+
+if(!validMobile(mobile)||!validMobile(parentMobile)){
+showMsg("studentMsg","Mobile numbers must contain exactly 10 digits.");
+return;
+}
+
+if(mobileAlreadyUsed(mobile)){
+showMsg("studentMsg","This mobile number is already registered.");
+return;
+}
+
+if(!validPassword(password)){
+showMsg("studentMsg","Password must be 8+ characters with letters, numbers and symbols.");
+return;
+}
+
+if(password!==confirm){
+showMsg("studentMsg","Passwords do not match.");
+return;
+}
+
+const students=getData("students");
+
+if(students.some(x=>x.roll.toLowerCase()===roll.toLowerCase())){
+showMsg("studentMsg","This roll number already exists.");
+return;
+}
+
+const id=generateId("STU","students");
+
+const student={
+id,
+role:"student",
+principalId:verifiedHod.principalId,
+hodId:verifiedHod.id,
+college:verifiedHod.college,
+principalName:verifiedHod.principalName,
+department:verifiedHod.department,
+hodName:verifiedHod.name,
+name,
+roll,
+mobile,
+parentName:parent,
+parentMobile,
+passwordHash:await hashPassword(password),
+attendancePercentage:0,
+createdAt:new Date().toISOString()
+};
+
+students.push(student);
+saveData("students",students);
+
+document.getElementById("successText").innerHTML=`Student account created successfully.<br><br><b>Your Roll No: ${roll}</b><br>Use Roll No or mobile to login.`;
+showScreen("successScreen");
+}
+
+function verifyLecturerCode(){
+const code=document.getElementById("lecturerCode").value.trim().toUpperCase();
+const hods=getData("hods");
+const hod=hods.find(x=>x.lecturerInviteCode===code);
+
+if(!hod){
+showMsg("lecturerCodeMsg","Invalid code. Please contact your HOD.");
+return;
+}
+
+verifiedHod=hod;
+document.getElementById("lCollege").value=hod.college;
+document.getElementById("lPrincipal").value=hod.principalName;
+document.getElementById("lHod").value=hod.name;
+document.getElementById("lDepartment").value=hod.department;
+
+document.getElementById("subjectsContainer").innerHTML="";
+addSubject();
+
+showScreen("lecturerScreen");
+}
+
+function addSubject(){
+const container=document.getElementById("subjectsContainer");
+const count=container.children.length+1;
+
+const box=document.createElement("div");
+box.className="subject-box";
+
+box.innerHTML=`
+<div class="subject-header">
+<strong>Subject #${count}</strong>
+${count>1?`<button class="remove-subject" onclick="removeSubject(this)"><i class="fa-solid fa-trash"></i></button>`:''}
+</div>
+
+<div class="input-group">
+<label>Subject Name</label>
+<input class="subj-name" placeholder="Example: Mathematics">
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+
+<div class="input-group">
+<label>Start Time</label>
+<input class="subj-start" type="time">
+</div>
+
+<div class="input-group">
+<label>End Time</label>
+<input class="subj-end" type="time">
+</div>
+
+</div>
+
+<div class="days-title">Select Week Days</div>
+
+<div class="days">
+
+<label class="day"><input type="checkbox" value="Monday">Mon</label>
+
+<label class="day"><input type="checkbox" value="Tuesday">Tue</label>
+
+<label class="day"><input type="checkbox" value="Wednesday">Wed</label>
+
+<label class="day"><input type="checkbox" value="Thursday">Thu</label>
+
+<label class="day"><input type="checkbox" value="Friday">Fri</label>
+
+<label class="day"><input type="checkbox" value="Saturday">Sat</label>
+
+<label class="day"><input type="checkbox" value="Sunday">Sun</label>
+
+</div>
+`;
+
+container.appendChild(box);
+bindDaysEvents(box);
+}
+
+function removeSubject(btn){
+btn.closest(".subject-box").remove();
+}
+
+function bindDaysEvents(scope){
+scope.querySelectorAll(".day input").forEach(ch=>{
+ch.addEventListener("change",function(){
+if(this.checked){
+this.parentElement.classList.add("active");
+}else{
+this.parentElement.classList.remove("active");
+}
+});
+});
+}
+
+async function createLecturer(){
+hideMsg("lecturerMsg");
+
+const name=document.getElementById("lName").value.trim();
+const mobile=document.getElementById("lMobile").value.trim();
+const password=document.getElementById("lPassword").value;
+const confirm=document.getElementById("lConfirm").value;
+
+if(!name||!mobile||!password||!confirm){
+showMsg("lecturerMsg","Please fill all fields.");
+return;
+}
+
+if(!validMobile(mobile)){
+showMsg("lecturerMsg","Mobile number must contain exactly 10 digits.");
+return;
+}
+
+if(mobileAlreadyUsed(mobile)){
+showMsg("lecturerMsg","This mobile number is already registered.");
+return;
+}
+
+const subjectBoxes=document.querySelectorAll("#subjectsContainer .subject-box");
+
+if(!subjectBoxes.length){
+showMsg("lecturerMsg","Please add at least one subject.");
+return;
+}
+
+const subjects=[];
+
+for(let box of subjectBoxes){
+const subjName=box.querySelector(".subj-name").value.trim();
+const start=box.querySelector(".subj-start").value;
+const end=box.querySelector(".subj-end").value;
+
+const days=[];
+box.querySelectorAll(".days input:checked").forEach(c=>{
+days.push(c.value);
+});
+
+if(!subjName||!start||!end||!days.length){
+showMsg("lecturerMsg","Please fill all subject details and select days.");
+return;
+}
+
+subjects.push({
+name:subjName,
+startTime:start,
+endTime:end,
+days:days
+});
+}
+
+if(!validPassword(password)){
+showMsg("lecturerMsg","Password must be 8+ characters with letters, numbers and symbols.");
+return;
+}
+
+if(password!==confirm){
+showMsg("lecturerMsg","Passwords do not match.");
+return;
+}
+
+const lecturers=getData("lecturers");
+const id=generateId("LEC","lecturers");
+
+const lecturer={
+id,
+role:"lecturer",
+principalId:verifiedHod.principalId,
+hodId:verifiedHod.id,
+college:verifiedHod.college,
+principalName:verifiedHod.principalName,
+department:verifiedHod.department,
+hodName:verifiedHod.name,
+name,
+mobile,
+passwordHash:await hashPassword(password),
+subjects:subjects,
+createdAt:new Date().toISOString()
+};
+
+lecturers.push(lecturer);
+saveData("lecturers",lecturers);
+
+document.getElementById("successText").innerHTML=`Lecturer account created successfully.<br><br><b>Your ID: ${id}</b><br>Use ID or mobile to login.`;
+showScreen("successScreen");
+}
+
+async function login(){
+hideMsg("loginMsg");
+
+const identity=document.getElementById("loginIdentity").value.trim();
+const password=document.getElementById("loginPassword").value;
+
+if(!identity||!password){
+showMsg("loginMsg","Please enter login ID and password.");
+return;
+}
+
+const hash=await hashPassword(password);
+
+const principals=getData("principals");
+const hods=getData("hods");
+const students=getData("students");
+const lecturers=getData("lecturers");
+
+let user=
+principals.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash)||
+hods.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash)||
+students.find(x=>(x.id===identity||x.roll===identity||x.mobile===identity)&&x.passwordHash===hash)||
+lecturers.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash);
+
+if(!user){
+showMsg("loginMsg","Invalid credentials.");
+return;
+}
+
+currentUser=user;
+openDashboard();
+}
+
+function openDashboard(){
+hideAll();
+document.getElementById("dashboard").classList.remove("hidden");
+
+document.getElementById("dashTitle").innerText="Welcome, "+currentUser.name;
+document.getElementById("dashSubtitle").innerText="Role: "+currentUser.role.toUpperCase();
+
+document.getElementById("principalDash").classList.add("hidden");
+document.getElementById("hodDash").classList.add("hidden");
+document.getElementById("studentDash").classList.add("hidden");
+document.getElementById("lecturerDash").classList.add("hidden");
+
+const classesBtn=document.getElementById("classesNavButton");
+const sidebarClassesBtn=document.getElementById("sidebarClassesBtn");
+
+if(currentUser.role==="student"||currentUser.role==="lecturer"){
+classesBtn.classList.remove("hidden");
+sidebarClassesBtn.classList.remove("hidden");
+}else{
+classesBtn.classList.add("hidden");
+sidebarClassesBtn.classList.add("hidden");
+}
+
+if(currentUser.role==="principal"){
+loadPrincipalDash();
+}else if(currentUser.role==="hod"){
+loadHodDash();
+}else if(currentUser.role==="student"){
+loadStudentDash();
+}else if(currentUser.role==="lecturer"){
+loadLecturerDash();
+}
+}
+
+function loadPrincipalDash(){
+document.getElementById("principalDash").classList.remove("hidden");
+
+const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
+const students=getData("students").filter(x=>x.principalId===currentUser.id);
+
+document.getElementById("groupCount").innerText=hods.length;
+document.getElementById("hodCount").innerText=hods.length;
+document.getElementById("studentCount").innerText=students.length;
+
+let avg=0;
+if(students.length){
+let sum=students.reduce((a,b)=>a+(b.attendancePercentage||0),0);
+avg=Math.round(sum/students.length);
+}
+
+document.getElementById("overallAttendance").innerText=avg+"%";
+document.getElementById("principalHodCode").innerText=currentUser.hodInviteCode;
+
+const groupsEl=document.getElementById("groups");
+groupsEl.innerHTML="";
+
+hods.forEach(h=>{
+const deptStudents=students.filter(s=>s.hodId===h.id);
+let deptAvg=0;
+
+if(deptStudents.length){
+let sum=deptStudents.reduce((a,b)=>a+(b.attendancePercentage||0),0);
+deptAvg=Math.round(sum/deptStudents.length);
+}
+
+let badgeClass="good";
+if(deptAvg<75) badgeClass="low";
+else if(deptAvg<85) badgeClass="medium";
+
+groupsEl.innerHTML+=`
+<div class="group">
+<div>
+<strong>${h.department} Department</strong><br>
+<small style="color:#94a3b8">HOD: ${h.name} | ${deptStudents.length} Students</small>
+</div>
+
+<div class="progress">
+<div style="width:${deptAvg}%"></div>
+</div>
+
+<div>
+<span class="badge ${badgeClass}">${deptAvg}%</span>
+</div>
+</div>
+`;
+});
+}
+
+function loadHodDash(){
+document.getElementById("hodDash").classList.remove("hidden");
+
+const students=getData("students").filter(x=>x.hodId===currentUser.id);
+const lecturers=getData("lecturers").filter(x=>x.hodId===currentUser.id);
+
+document.getElementById("hodDepartment").innerText=currentUser.department;
+document.getElementById("hodStudentCount").innerText=students.length;
+document.getElementById("hodLecturerCount").innerText=lecturers.length;
+
+let avg=0;
+if(students.length){
+let sum=students.reduce((a,b)=>a+(b.attendancePercentage||0),0);
+avg=Math.round(sum/students.length);
+}
+
+document.getElementById("hodAttendance").innerText=avg+"%";
+document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode;
+document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode;
+
+// Calculate 3 Range Categories for HOD
+const high = students.filter(s => (s.attendancePercentage || 0) >= 75).length;
+const mid = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75).length;
+const low = students.filter(s => (s.attendancePercentage || 0) < 50).length;
+
+document.getElementById("hodHighCount").innerText = high;
+document.getElementById("hodMidCount").innerText = mid;
+document.getElementById("hodLowCount").innerText = low;
+}
+
+/* HOD DETAILED STUDENT LIST FILTER */
+function showHodStudentsList(type){
+const students = getData("students").filter(x => x.hodId === currentUser.id);
+let filtered = students;
+let title = "All Students";
+
+if(type === 'high'){
+filtered = students.filter(s => (s.attendancePercentage || 0) >= 75);
+title = "Students with ≥ 75% Attendance";
+}else if(type === 'mid'){
+filtered = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75);
+title = "Students with 50% - 74% Attendance";
+}else if(type === 'low'){
+filtered = students.filter(s => (s.attendancePercentage || 0) < 50);
+title = "Students with Below 49% Attendance";
+}
+
+document.getElementById("hodListTitle").innerText = title;
+const container = document.getElementById("hodDynamicListContent");
+container.innerHTML = "";
+
+if(!filtered.length){
+container.innerHTML = `<div class="today-empty">No student records found in this category.</div>`;
+}else{
+filtered.forEach(s => {
+let badgeClass = "good";
+const att = s.attendancePercentage || 0;
+if(att < 50) badgeClass = "low";
+else if(att < 75) badgeClass = "medium";
+
+container.innerHTML += `
+<div class="profile-row">
+<div>
+<strong>${s.name} (Roll: ${s.roll})</strong><br>
+<small style="color:#94a3b8">Mobile: ${s.mobile} | Parent: ${s.parentName} (${s.parentMobile})</small>
+</div>
+<div>
+<span class="badge ${badgeClass}">${att}%</span>
+</div>
+</div>
+`;
+});
+}
+
+const section = document.getElementById("hodDynamicListSection");
+section.classList.remove("hidden");
+section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function showHodLecturersList(){
+const lecturers = getData("lecturers").filter(x => x.hodId === currentUser.id);
+document.getElementById("hodListTitle").innerText = "Lecturers Details & Codes";
+const container = document.getElementById("hodDynamicListContent");
+container.innerHTML = "";
+
+if(!lecturers.length){
+container.innerHTML = `<div class="today-empty">No lecturers registered in this department.</div>`;
+}else{
+lecturers.forEach(l => {
+container.innerHTML += `
+<div class="profile-row">
+<div>
+<strong>${l.name} (ID: ${l.id})</strong><br>
+<small style="color:#94a3b8">Mobile: ${l.mobile} | Subjects: ${l.subjects.map(s => s.name).join(", ")}</small>
+</div>
+<div>
+<span class="badge good">Lecturer Code: ${currentUser.lecturerInviteCode}</span>
+</div>
+</div>
+`;
+});
+}
+
+const section = document.getElementById("hodDynamicListSection");
+section.classList.remove("hidden");
+section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideHodDynamicList(){
+document.getElementById("hodDynamicListSection").classList.add("hidden");
+}
+
+function loadStudentDash(){
+document.getElementById("studentDash").classList.remove("hidden");
+
+document.getElementById("studentDepartment").innerText=currentUser.department;
+document.getElementById("studentRoll").innerText=currentUser.roll;
+document.getElementById("studentAttendance").innerText=(currentUser.attendancePercentage||0)+"%";
+
+document.getElementById("studentPrincipal").innerText=currentUser.principalName;
+document.getElementById("studentHod").innerText=currentUser.hodName;
+document.getElementById("studentCollege").innerText=currentUser.college;
+
+loadStudentDetailedAttendance();
+}
+
+function loadStudentDetailedAttendance(){
+const attendanceRecords = getData("attendanceRecords");
+const studentRecords = attendanceRecords.filter(r => r.studentId === currentUser.id);
+
+const totalWorkingDays = studentRecords.length;
+const presentDays = studentRecords.filter(r => r.status === "Present" || r.status === "Late").length;
+const absentDays = studentRecords.filter(r => r.status === "Absent").length;
+const percentage = totalWorkingDays > 0 ? Math.round((presentDays / totalWorkingDays) * 100) : 0;
+
+document.getElementById("studentTotalWorkingDays").innerText = totalWorkingDays;
+document.getElementById("studentPresentDays").innerText = presentDays;
+document.getElementById("studentAbsentDays").innerText = absentDays;
+document.getElementById("studentOverallPercentage").innerText = percentage + "%";
+
+const lecturers = getData("lecturers").filter(l => l.department === currentUser.department);
+let subjectsMap = {};
+
+lecturers.forEach(l => {
+if(l.subjects && Array.isArray(l.subjects)){
+l.subjects.forEach(s => {
+if(!subjectsMap[s.name]){
+subjectsMap[s.name] = {
+name: s.name,
+records: []
+};
+}
+});
+}
+});
+
+studentRecords.forEach(r => {
+if(!subjectsMap[r.subjectName]){
+subjectsMap[r.subjectName] = {
+name: r.subjectName,
+records: []
+};
+}
+});
+
+studentRecords.forEach(r => {
+if(subjectsMap[r.subjectName]){
+subjectsMap[r.subjectName].records.push(r);
+}
+});
+
+const subjectsListEl = document.getElementById("studentSubjectsList");
+subjectsListEl.innerHTML = "";
+
+const subjectNames = Object.keys(subjectsMap);
+
+if(!subjectNames.length){
+subjectsListEl.innerHTML = `<div class="today-empty">No subject records found.</div>`;
+return;
+}
+
+subjectNames.forEach(subjName => {
+const records = subjectsMap[subjName].records;
+const subjTotal = records.length;
+const subjPresent = records.filter(r => r.status === "Present" || r.status === "Late").length;
+const subjPercentage = subjTotal > 0 ? Math.round((subjPresent / subjTotal) * 100) : 0;
+
+let badgeClass = "good";
+if(subjPercentage < 75) badgeClass = "low";
+else if(subjPercentage < 85) badgeClass = "medium";
+
+const card = document.createElement("div");
+card.className = "class-card";
+card.style.cursor = "pointer";
+card.onclick = () => showSubjectHistory(subjName, records);
+
+card.innerHTML = `
+<div class="class-top">
+<div>
+<div class="class-subject">${subjName}</div>
+<div class="class-meta">Total Working Days: <strong>${subjTotal}</strong> | Present: <strong>${subjPresent}</strong></div>
+</div>
+<div>
+<span class="badge ${badgeClass}">${subjPercentage}%</span>
+</div>
+</div>
+`;
+
+subjectsListEl.appendChild(card);
+});
+}
+
+function showSubjectHistory(subjectName, records){
+document.getElementById("subjectHistorySection").classList.remove("hidden");
+document.getElementById("selectedSubjectTitle").innerText = subjectName + " - Attendance History";
+
+const container = document.getElementById("subjectHistoryRecords");
+container.innerHTML = "";
+
+if(!records || !records.length){
+container.innerHTML = `<div class="today-empty">No attendance history available for this subject.</div>`;
+return;
+}
+
+records.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+records.forEach(r => {
+let badgeClass = "good";
+if(r.status === "Absent") badgeClass = "low";
+if(r.status === "Late") badgeClass = "medium";
+
+container.innerHTML += `
+<div class="profile-row">
+<div>
+<strong>Date: ${r.date}</strong><br>
+<small style="color:#94a3b8">Location: ${r.location || 'Not Recorded'}</small>
+</div>
+<div>
+<span class="badge ${badgeClass}">${r.status}</span>
+</div>
+</div>
+`;
+});
+
+document.getElementById("subjectHistorySection").scrollIntoView({ behavior: 'smooth' });
+}
+
+function closeSubjectHistory(){
+document.getElementById("subjectHistorySection").classList.add("hidden");
+}
+
+function loadLecturerDash(){
+document.getElementById("lecturerDash").classList.remove("hidden");
+
+document.getElementById("lecturerDepartment").innerText=currentUser.department;
+document.getElementById("lecturerSubjectCount").innerText=currentUser.subjects.length;
+document.getElementById("lecturerMobile").innerText=currentUser.mobile;
+
+const container=document.getElementById("lecturerSubjects");
+container.innerHTML="";
+
+currentUser.subjects.forEach(s=>{
+container.innerHTML+=`
+<div class="class-card">
+<div class="class-top">
+<div>
+<div class="class-subject">${s.name}</div>
+<div class="class-meta">
+Days: ${s.days.join(", ")}
+</div>
+</div>
+<div class="class-time">
+${s.startTime} - ${s.endTime}
+</div>
+</div>
+</div>
+`;
+});
+
+// Update 3 attendance boxes for Lecturer Department
+const deptStudents = getData("students").filter(s => s.department === currentUser.department);
+const high = deptStudents.filter(s => (s.attendancePercentage || 0) >= 75).length;
+const mid = deptStudents.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75).length;
+const low = deptStudents.filter(s => (s.attendancePercentage || 0) < 50).length;
+
+document.getElementById("lecHighCount").innerText = high;
+document.getElementById("lecMidCount").innerText = mid;
+document.getElementById("lecLowCount").innerText = low;
+
+populateManualAttendanceDropdowns();
+}
+
+function toggleLecturerGroupFilter(){
+const boxes = document.getElementById("lecturerGroupBoxes");
+boxes.classList.toggle("hidden");
+}
+
+function showLecturerStudentsList(type){
+const students = getData("students").filter(s => s.department === currentUser.department);
+let filtered = students;
+let title = "Department Students";
+
+if(type === 'high'){
+filtered = students.filter(s => (s.attendancePercentage || 0) >= 75);
+title = "Department Students (≥ 75% Attendance)";
+}else if(type === 'mid'){
+filtered = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75);
+title = "Department Students (50% - 74% Attendance)";
+}else if(type === 'low'){
+filtered = students.filter(s => (s.attendancePercentage || 0) < 50);
+title = "Department Students (Below 49% Attendance)";
+}
+
+document.getElementById("lecturerListTitle").innerText = title;
+const container = document.getElementById("lecturerDynamicListContent");
+container.innerHTML = "";
+
+if(!filtered.length){
+container.innerHTML = `<div class="today-empty">No students found in this range.</div>`;
+}else{
+filtered.forEach(s => {
+let badgeClass = "good";
+const att = s.attendancePercentage || 0;
+if(att < 50) badgeClass = "low";
+else if(att < 75) badgeClass = "medium";
+
+container.innerHTML += `
+<div class="profile-row">
+<div>
+<strong>${s.name} (Roll: ${s.roll})</strong><br>
+<small style="color:#94a3b8">Mobile: ${s.mobile}</small>
+</div>
+<div>
+<span class="badge ${badgeClass}">${att}%</span>
+</div>
+</div>
+`;
+});
+}
+
+const section = document.getElementById("lecturerDynamicListSection");
+section.classList.remove("hidden");
+section.scrollIntoView({ behavior: 'smooth' });
+}
+
+function hideLecturerDynamicList(){
+document.getElementById("lecturerDynamicListSection").classList.add("hidden");
+}
+
+function toggleManualAttendance(){
+const sec = document.getElementById("manualAttendanceSection");
+sec.classList.toggle("hidden");
+if(!sec.classList.contains("hidden")){
+populateManualAttendanceDropdowns();
+}
+}
+
+function populateManualAttendanceDropdowns(){
+if(!currentUser || currentUser.role !== "lecturer") return;
+
+const subjSelect = document.getElementById("attSubjectSelect");
+subjSelect.innerHTML = "<option value=''>Select Subject</option>";
+currentUser.subjects.forEach(s => {
+subjSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+});
+
+const studentSelect = document.getElementById("attStudentSelect");
+studentSelect.innerHTML = "<option value=''>Select Student</option>";
+const students = getData("students").filter(s => s.department === currentUser.department);
+students.forEach(s => {
+studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.roll})</option>`;
+});
+
+document.getElementById("attDate").value = new Date().toISOString().split("T")[0];
+}
+
+function fetchLocation(){
+if(navigator.geolocation){
+navigator.geolocation.getCurrentPosition(position => {
+const lat = position.coords.latitude.toFixed(5);
+const lon = position.coords.longitude.toFixed(5);
+document.getElementById("attLocation").value = `Lat: ${lat}, Lon: ${lon}`;
+}, err => {
+alert("Unable to fetch location. Please check browser permissions.");
+});
+}else{
+alert("Geolocation is not supported by your browser.");
+}
+}
+
+function submitAttendanceRecord(){
+hideMsg("attMsg");
+const subjectName = document.getElementById("attSubjectSelect").value;
+const studentId = document.getElementById("attStudentSelect").value;
+const date = document.getElementById("attDate").value;
+const status = document.getElementById("attStatus").value;
+const location = document.getElementById("attLocation").value;
+
+if(!subjectName || !studentId || !date){
+showMsg("attMsg", "Please select Subject, Student, and Date.");
+return;
+}
+
+const attendanceRecords = getData("attendanceRecords");
+const newRecord = {
+id: generateId("ATT", "attendanceRecords"),
+subjectName,
+studentId,
+lecturerId: currentUser.id,
+date,
+status,
+location: location || "Not Recorded",
+createdAt: new Date().toISOString()
+};
+
+attendanceRecords.push(newRecord);
+saveData("attendanceRecords", attendanceRecords);
+updateStudentAttendancePercentage(studentId);
+showMsg("attMsg", "Attendance submitted successfully!", "success");
+}
+
+function updateStudentAttendancePercentage(studentId){
+const attendanceRecords = getData("attendanceRecords");
+const studentRecords = attendanceRecords.filter(r => r.studentId === studentId);
+if(!studentRecords.length) return;
+
+const presentCount = studentRecords.filter(r => r.status === "Present" || r.status === "Late").length;
+const totalCount = studentRecords.length;
+const percentage = Math.round((presentCount / totalCount) * 100);
+
+const students = getData("students");
+const index = students.findIndex(s => s.id === studentId);
+if(index !== -1){
+students[index].attendancePercentage = percentage;
+saveData("students", students);
+}
+}
+
+function showClasses(){
+document.getElementById("mainDashboard").classList.add("hidden");
+document.getElementById("classesPage").classList.remove("hidden");
+
+const addBtn=document.getElementById("addClassFromClasses");
+if(currentUser.role==="lecturer"){
+addBtn.classList.remove("hidden");
+}else{
+addBtn.classList.add("hidden");
+}
+
+renderClasses();
+}
+
+function showMainDashboardView(){
+document.getElementById("mainDashboard").classList.remove("hidden");
+document.getElementById("classesPage").classList.add("hidden");
+}
+
+function changeClassTab(tab,btn){
+document.querySelectorAll(".classes-tab").forEach(x=>x.classList.remove("active"));
+btn.classList.add("active");
+
+if(tab==="today"){
+document.getElementById("todayClasses").classList.remove("hidden");
+document.getElementById("weekClasses").classList.add("hidden");
+}else{
+document.getElementById("todayClasses").classList.add("hidden");
+document.getElementById("weekClasses").classList.remove("hidden");
+}
+}
+
+function renderClasses(){
+const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const todayName=days[new Date().getDay()];
+
+document.getElementById("classesSubtitle").innerText="Today is "+todayName;
+
+let subjectsList=[];
+
+if(currentUser.role==="lecturer"){
+subjectsList=currentUser.subjects.map(s=>({...s,lecturerName:currentUser.name}));
+}else if(currentUser.role==="student"){
+const lecturers=getData("lecturers").filter(x=>x.department===currentUser.department);
+lecturers.forEach(l=>{
+l.subjects.forEach(s=>{
+subjectsList.push({
+...s,
+lecturerName:l.name
+});
+});
+});
+}
+
+const todayListEl=document.getElementById("todayClassList");
+todayListEl.innerHTML="";
+
+const todayClasses=subjectsList.filter(s=>s.days.includes(todayName));
+
+if(!todayClasses.length){
+todayListEl.innerHTML=`<div class="today-empty">No classes scheduled for today (${todayName}).</div>`;
+}else{
+todayClasses.forEach(s=>{
+todayListEl.innerHTML+=`
+<div class="class-card">
+<div class="class-top">
+<div>
+<div class="class-subject">${s.name}</div>
+<div class="class-meta">Lecturer: ${s.lecturerName}</div>
+</div>
+<div class="class-time">${s.startTime} - ${s.endTime}</div>
+</div>
+</div>
+`;
+});
+}
+
+const weeklyListEl=document.getElementById("weeklyClassList");
+weeklyListEl.innerHTML="";
+
+const weekDays=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+
+weekDays.forEach(day=>{
+const dayClasses=subjectsList.filter(s=>s.days.includes(day));
+
+let html=`<div class="week-day-title">${day}</div>`;
+
+if(!dayClasses.length){
+html+=`<div class="today-empty" style="padding:15px; margin-bottom:12px;">No classes scheduled</div>`;
+}else{
+dayClasses.forEach(s=>{
+html+=`
+<div class="class-card">
+<div class="class-top">
+<div>
+<div class="class-subject">${s.name}</div>
+<div class="class-meta">Lecturer: ${s.lecturerName}</div>
+</div>
+<div class="class-time">${s.startTime} - ${s.endTime}</div>
+</div>
+</div>
+`;
+});
+}
+
+weeklyListEl.innerHTML+=html;
+});
+}
+
+function openProfile(){
+const container=document.getElementById("profileContent");
+container.innerHTML="";
+
+if(currentUser.role==="principal"){
+container.innerHTML=`
+<div class="profile-row"><span>Role</span><strong>Principal</strong></div>
+<div class="profile-row"><span>ID</span><strong>${currentUser.id}</strong></div>
+<div class="profile-row"><span>Name</span><strong>${currentUser.name}</strong></div>
+<div class="profile-row"><span>College</span><strong>${currentUser.college}</strong></div>
+<div class="profile-row"><span>Mobile</span><strong>${currentUser.mobile}</strong></div>
+<div class="profile-row"><span>HOD Code</span><strong>${currentUser.hodInviteCode}</strong></div>
+`;
+}else if(currentUser.role==="hod"){
+container.innerHTML=`
+<div class="profile-row"><span>Role</span><strong>HOD</strong></div>
+<div class="profile-row"><span>ID</span><strong>${currentUser.id}</strong></div>
+<div class="profile-row"><span>Name</span><strong>${currentUser.name}</strong></div>
+<div class="profile-row"><span>Department</span><strong>${currentUser.department}</strong></div>
+<div class="profile-row"><span>College</span><strong>${currentUser.college}</strong></div>
+<div class="profile-row"><span>Mobile</span><strong>${currentUser.mobile}</strong></div>
+<div class="profile-row"><span>Student Code</span><strong>${currentUser.studentInviteCode}</strong></div>
+<div class="profile-row"><span>Lecturer Code</span><strong>${currentUser.lecturerInviteCode}</strong></div>
+`;
+}else if(currentUser.role==="student"){
+container.innerHTML=`
+<div class="profile-row"><span>Role</span><strong>Student</strong></div>
+<div class="profile-row"><span>ID</span><strong>${currentUser.id}</strong></div>
+<div class="profile-row"><span>Name</span><strong>${currentUser.name}</strong></div>
+<div class="profile-row"><span>Roll Number</span><strong>${currentUser.roll}</strong></div>
+<div class="profile-row"><span>Department</span><strong>${currentUser.department}</strong></div>
+<div class="profile-row"><span>College</span><strong>${currentUser.college}</strong></div>
+<div class="profile-row"><span>Mobile</span><strong>${currentUser.mobile}</strong></div>
+<div class="profile-row"><span>Parent</span><strong>${currentUser.parentName} (${currentUser.parentMobile})</strong></div>
+`;
+}else if(currentUser.role==="lecturer"){
+container.innerHTML=`
+<div class="profile-row"><span>Role</span><strong>Lecturer</strong></div>
+<div class="profile-row"><span>ID</span><strong>${currentUser.id}</strong></div>
+<div class="profile-row"><span>Name</span><strong>${currentUser.name}</strong></div>
+<div class="profile-row"><span>Department</span><strong>${currentUser.department}</strong></div>
+<div class="profile-row"><span>College</span><strong>${currentUser.college}</strong></div>
+<div class="profile-row"><span>Mobile</span><strong>${currentUser.mobile}</strong></div>
+`;
+}
+
+document.getElementById("profileModal").classList.remove("hidden");
+}
+
+function closeProfile(){
+document.getElementById("profileModal").classList.add("hidden");
+}
+
+function openAddSubjectModal(){
+hideMsg("addSubjectMsg");
+document.getElementById("newSubjectName").value="";
+document.getElementById("newSubjectStart").value="";
+document.getElementById("newSubjectEnd").value="";
+document.querySelectorAll("#newSubjectDays input").forEach(c=>{
+c.checked=false;
+c.parentElement.classList.remove("active");
+});
+
+document.getElementById("subjectModal").classList.remove("hidden");
+bindDaysEvents(document.getElementById("subjectModal"));
+}
+
+function closeAddSubjectModal(){
+document.getElementById("subjectModal").classList.add("hidden");
+}
+
+function saveAdditionalSubject(){
+hideMsg("addSubjectMsg");
+
+const name=document.getElementById("newSubjectName").value.trim();
+const start=document.getElementById("newSubjectStart").value;
+const end=document.getElementById("newSubjectEnd").value;
+
+const days=[];
+document.querySelectorAll("#newSubjectDays input:checked").forEach(c=>{
+days.push(c.value);
+});
+
+if(!name||!start||!end||!days.length){
+showMsg("addSubjectMsg","Please fill all details and select days.");
+return;
+}
+
+const newSubject={
+name,
+startTime:start,
+endTime:end,
+days
+};
+
+currentUser.subjects.push(newSubject);
+
+const lecturers=getData("lecturers");
+const idx=lecturers.findIndex(l=>l.id===currentUser.id);
+if(idx!==-1){
+lecturers[idx]=currentUser;
+saveData("lecturers",lecturers);
+}
+
+closeAddSubjectModal();
+if(!document.getElementById("classesPage").classList.contains("hidden")){
+renderClasses();
+}
+if(currentUser.role==="lecturer"){
+loadLecturerDash();
+}
+}
+
+function logout(){
+currentUser=null;
+verifiedPrincipal=null;
+verifiedHod=null;
+showLogin();
+}
+</script>
+
+</body>
+</html>
