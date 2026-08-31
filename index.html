@@ -2508,11 +2508,6 @@ localStorage.setItem("currentLecturerSession",JSON.stringify(user));
 window.location.href="lecturer.html";
 return;
 }
-if(user.role==="hod"){
-localStorage.setItem("currentHodSession",JSON.stringify(user));
-window.location.href="hod.html";
-return;
-}
 openDashboard();
 }
 
