@@ -1338,10 +1338,6 @@ Don't have an account?
 <label>Subjects</label>
 <div id="subjectsContainer"></div>
 
-<button class="add-subject" onclick="addSubject()">
-<i class="fa-solid fa-plus"></i> Add Subject
-</button>
-
 <div class="input-group">
 <label>Create Password</label>
 <div class="password-wrap">
@@ -1710,8 +1706,7 @@ Student <span>Pro</span>
 <p id="classesSubtitle" style="color:#94a3b8; font-size:13px; margin-top:4px"></p>
 </div>
 
-<button id="addClassFromClasses" class="add-class-btn hidden" onclick="openAddSubjectModal()">
-<i class="fa-solid fa-plus"></i> Add Subject
+<button id="addClassFromClasses" class="add-class-btn hidden" style="display:none">
 </button>
 </div>
 
@@ -2381,6 +2376,11 @@ return;
 }
 
 currentUser=user;
+if(user.role==="student"){
+localStorage.setItem("currentStudentSession",JSON.stringify(user));
+window.location.href="student.html";
+return;
+}
 openDashboard();
 }
 

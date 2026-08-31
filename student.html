@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Portal | Dashboard</title>
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ==========================================================================
+           1. DESIGN SYSTEM & BASE STYLES
+           ========================================================================== */
+        :root {
+            /* Color Palette - Clean Royal Blue Theme */
+            --primary: #1A56DB;
+            --primary-hover: #1E429F;
+            --primary-light: #EBF5FF;
+            --secondary: #475569;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            
+            /* Status Colors */
+            --success: #0E9F6E;
+            --success-light: #DEF7EC;
+            --danger: #F05252;
+            --danger-light: #FDE8E8;
+            --warning: #C27803;
+            --warning-light: #FEF08A;
+            --info: #1A56DB;
+            
+            /* Typography */
+            --font-main: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --text-white: #FFFFFF;
+            
+            /* Elevation & Layout */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-bottom: 80px; /* Space for bottom nav bar */
+        }
+
+        /* Responsive Container */
+        .app-container {
+            width: 100%;
+            max-width: 600px; /* Tablet/Mobile-first card wrapper for clean desktop view */
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: var(--background);
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.03);
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 768px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 900px;
+            }
+        }
+
+        /* SVG Icon Base Styles */
+        .icon {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .icon-lg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .icon-xl {
+            width: 32px;
+            height: 32px;
+        }
+
+        /* Header Bar */
+        .app-header {
+            background: var(--surface);
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header-logo {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .header-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Section Routing Architecture */
+        .page-section {
+            display: none;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .page-section.active {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Card Elements */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--text-white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            background-color: #94A3B8;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--secondary);
+        }
+
+        .btn-outline:hover {
+            background-color: #F1F5F9;
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--text-white);
+        }
+
+        /* Status Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge-danger {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge-warning {
+            background-color: var(--warning-light);
+            color: var(--warning);
+        }
+
+        .badge-info {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #E2E8F0;
+            border-radius: var(--radius-full);
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: var(--radius-full);
+            transition: width 0.5s ease-in-out;
+        }
+
+        /* Floating Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            width: calc(100% - 40px);
+            max-width: 400px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1E293B;
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.875rem;
+            margin-bottom: 10px;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Modal Architecture */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: var(--surface);
+            width: calc(100% - 40px);
+            max-width: 440px;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: transform 0.2s ease;
+        }
+
+        .modal-backdrop.active .modal-card {
+            transform: scale(1);
+        }
+
+        /* ==========================================================================
+           2. NAVIGATION COMPONENTS
+           ========================================================================== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 600px;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            z-index: 50;
+            box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        @media (min-width: 768px) {
+            .bottom-nav { max-width: 768px; }
+        }
+        @media (min-width: 1024px) {
+            .bottom-nav { max-width: 900px; }
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+            width: 20%;
+        }
+
+        .nav-item .icon {
+            margin-bottom: 4px;
+            transition: var(--transition);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-item.active .icon {
+            transform: translateY(-2px);
+            stroke: var(--primary);
+        }
+
+        /* ==========================================================================
+           3. HOME DASHBOARD STYLES
+           ========================================================================== */
+        .welcome-card {
+            background: linear-gradient(135deg, #1A56DB 0%, #1E429F 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .student-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .meta-item {
+            text-align: center;
+        }
+
+        .meta-item .label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+        }
+
+        .meta-item .value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        /* Horizontal 3-Box Stats Layout */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 14px 10px;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-top: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .stat-card.highlight .stat-value {
+            color: var(--primary);
+        }
+
+        /* Subject Cards Layout */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        @media (min-width: 600px) {
+            .subject-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .subject-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .subject-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        /* Timeline / History Records */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+        }
+
+        .history-date {
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .history-subtext {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Filter Pills */
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+
+        .filter-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: var(--radius-full);
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* ==========================================================================
+           4. ATTENDANCE SUBMISSION ENGINE STYLES
+           ========================================================================== */
+        .session-card {
+            border: 2px solid var(--primary-light);
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-variant-numeric: tabular-nums;
+            margin: 12px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .condition-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .condition-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.85rem;
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            background-color: var(--background);
+        }
+
+        .condition-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            border-radius: var(--radius-full);
+            flex-shrink: 0;
+        }
+
+        /* ==========================================================================
+           5. MARKS VIEW STYLES
+           ========================================================================== */
+        .marks-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.875rem;
+        }
+
+        .marks-table th {
+            color: var(--text-muted);
+            font-weight: 500;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .marks-table td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .marks-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ==========================================================================
+           6. PROFILE VIEW STYLES
+           ========================================================================== */
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: var(--radius-full);
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 600;
+            margin: 0 auto 12px auto;
+        }
+
+        .profile-field {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.875rem;
+        }
+
+        .profile-field:last-child {
+            border-bottom: none;
+        }
+
+        .profile-label {
+            color: var(--text-muted);
+        }
+
+        .profile-value {
+            font-weight: 600;
+            color: var(--text-main);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Main Container -->
+    <div class="app-container">
+
+        <!-- Top Header Bar -->
+        <header class="app-header">
+            <div class="header-brand">
+                <div class="header-logo">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                </div>
+                <div>
+                    <div class="header-title">Student Portal</div>
+                    <div class="header-subtitle" id="headerCollege">ABC Degree College</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ==========================================================================
+             SECTION 1: HOME DASHBOARD
+             ========================================================================== -->
+        <section id="sec-home" class="page-section active">
+            <!-- Student Header Banner -->
+            <div class="card welcome-card">
+                <div style="font-size: 0.85rem; opacity: 0.9;">Welcome back,</div>
+                <h2 id="homeStudentName" style="font-size: 1.4rem; font-weight: 600; margin-top: 2px;">Kesava Reddy</h2>
+                
+                <div class="student-meta-grid">
+                    <div class="meta-item">
+                        <div class="label">Roll No</div>
+                        <div class="value" id="homeRollNumber">23A001</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="label">Group</div>
+                        <div class="value" id="homeGroup">B.Sc CS - A</div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="label">Year</div>
+                        <div class="value" id="homeYear">2nd Year</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attendance Summary 3-Box Horizontal Row -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Days</div>
+                    <div class="stat-value" id="statTotalDays">120</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Present</div>
+                    <div class="stat-value" style="color: var(--success);" id="statPresentDays">98</div>
+                </div>
+                <div class="stat-card highlight">
+                    <div class="stat-label">Percentage</div>
+                    <div class="stat-value" id="statPercentage">81.67%</div>
+                </div>
+            </div>
+
+            <!-- View Attendance Action CTA -->
+            <button class="btn btn-primary" onclick="openAllAttendanceView()" style="margin-bottom: 24px;">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                View Attendance History
+            </button>
+
+            <!-- Subject Wise Attendance Card Grid -->
+            <div class="card-header">
+                <span class="card-title">Subject Attendance</span>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Tap for history</span>
+            </div>
+            
+            <div class="subject-grid" id="subjectGridContainer">
+                <!-- Subject Cards populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+             SECTION 1B: VIEW ALL ATTENDANCE HISTORY
+             ========================================================================== -->
+        <section id="sec-all-attendance" class="page-section">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <button class="btn btn-outline" onclick="navigateTo('home')" style="width: auto; padding: 8px 12px;">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <h2 style="font-size: 1.1rem; font-weight: 600;">Attendance History</h2>
+            </div>
+
+            <!-- History Filter Tabs -->
+            <div class="filter-bar">
+                <button class="filter-btn active" onclick="filterAttendanceHistory('all', this)">All Records</button>
+                <button class="filter-btn" onclick="filterAttendanceHistory('Present', this)">Present</button>
+                <button class="filter-btn" onclick="filterAttendanceHistory('Absent', this)">Absent</button>
+            </div>
+
+            <div class="history-list" id="allAttendanceList">
+                <!-- Dynamic attendance items -->
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+             SECTION 1C: DEDICATED SUBJECT DETAIL VIEW
+             ========================================================================== -->
+        <section id="sec-subject-detail" class="page-section">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <button class="btn btn-outline" onclick="navigateTo('home')" style="width: auto; padding: 8px 12px;">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                </button>
+                <h2 style="font-size: 1.1rem; font-weight: 600;" id="detailSubjectTitle">Subject Details</h2>
+            </div>
+
+            <!-- Subject Overview Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Attendance Ratio</div>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);" id="detailPercentage">0%</div>
+                    </div>
+                    <span class="badge badge-info" id="detailRatioBadge">0/0 Classes</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="detailProgressBar" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.8rem;">
+                    <span>Present: <strong id="detailPresentCount" style="color: var(--success);">0</strong></span>
+                    <span>Absent: <strong id="detailAbsentCount" style="color: var(--danger);">0</strong></span>
+                    <span>Total: <strong id="detailTotalCount">0</strong></span>
+                </div>
+            </div>
+
+            <h3 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 12px;">Class History Log</h3>
+            <div class="history-list" id="subjectAttendanceList">
+                <!-- Subject-specific dynamic log -->
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+             SECTION 2: LIVE ATTENDANCE SUBMISSION ENGINE
+             ========================================================================== -->
+        <section id="sec-attendance" class="page-section">
+            <div style="margin-bottom: 16px;">
+                <h2 style="font-size: 1.2rem; font-weight: 600;">Active Class Session</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">Submit your live location-verified attendance</p>
+            </div>
+
+            <div class="session-card">
+                <!-- Dynamic Status Header -->
+                <div id="sessionBadgeContainer">
+                    <span class="badge badge-warning" id="sessionStatusBadge">Checking Session...</span>
+                </div>
+
+                <div class="timer-display" id="sessionTimerDisplay">00:00</div>
+                
+                <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);" id="sessionSubject">Python Programming</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;" id="sessionLecturer">Lecturer: Mr. Kumar</div>
+
+                <!-- Simulation & Rules Status Check Box -->
+                <div class="condition-list">
+                    <!-- Rule 1: Time Window -->
+                    <div class="condition-item">
+                        <div class="condition-icon" id="iconCondTime" style="background: var(--border);">
+                            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight: 600;">Session Window</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);" id="textCondTime">Checking time window...</div>
+                        </div>
+                    </div>
+
+                    <!-- Rule 2: Geolocation Proximity -->
+                    <div class="condition-item">
+                        <div class="condition-icon" id="iconCondDistance" style="background: var(--border);">
+                            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight: 600;">Location Proximity</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);" id="textCondDistance">Calculating distance...</div>
+                        </div>
+                    </div>
+
+                    <!-- Rule 3: Single Submission Check -->
+                    <div class="condition-item">
+                        <div class="condition-icon" id="iconCondSubmitted" style="background: var(--border);">
+                            <svg class="icon" style="width:14px; height:14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight: 600;">Submission Status</div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);" id="textCondSubmitted">Not submitted yet</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button class="btn btn-primary" id="btnSubmitAttendance" onclick="handleAttendanceSubmission()" disabled>
+                    Submit Attendance
+                </button>
+
+                <!-- Location Simulation Override Controls -->
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed var(--border); text-align: left;">
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Distance Simulation Toggle</div>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="setSimulatedDistance(32)">In Range (32m)</button>
+                        <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;" onclick="setSimulatedDistance(87)">Out of Range (87m)</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+             SECTION 3: MARKS VIEW
+             ========================================================================== -->
+        <section id="sec-marks" class="page-section">
+            <div style="margin-bottom: 16px;">
+                <h2 style="font-size: 1.2rem; font-weight: 600;">Internal Marks Summary</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted);">View-only evaluation report card</p>
+            </div>
+
+            <!-- Marks Statistics Box -->
+            <div class="card" style="background: var(--primary-light); border-color: rgba(26, 86, 219, 0.2);">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); text-align: center;">
+                    <div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">TOTAL MARKS</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);" id="marksTotal">178/200</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">AVERAGE</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--primary);" id="marksAvg">89.0%</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted);">GRADE</div>
+                        <div style="font-size: 1.1rem; font-weight: 700; color: var(--success);" id="marksGrade">A+</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marks Detail Table Container -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table class="marks-table">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Internal</th>
+                            <th>Max</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marksTableBody">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Lecturer Note -->
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 12px; padding: 10px; background: #FFFBEB; border: 1px solid #FCD34D; border-radius: var(--radius-sm); font-size: 0.75rem; color: #92400E;">
+                <svg class="icon" style="flex-shrink:0;" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>Internal marks are compiled and updated directly by subject lecturers.</span>
+            </div>
+        </section>
+
+        <!-- ==========================================================================
+             SECTION 4: PROFILE VIEW
+             ========================================================================== -->
+        <section id="sec-profile" class="page-section">
+            <div class="card" style="text-align: center;">
+                <div class="profile-avatar" id="profileInitials">KR</div>
+                <h2 style="font-size: 1.2rem; font-weight: 600;" id="profileName">Kesava Reddy</h2>
+                <div style="font-size: 0.8rem; color: var(--text-muted);" id="profileCollege">ABC Degree College</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Academic Details</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Student ID</span>
+                    <span class="profile-value" id="profileStudentId">STU0001</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Roll Number</span>
+                    <span class="profile-value" id="profileRollNo">23A001</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Academic Group</span>
+                    <span class="profile-value" id="profileGroup">B.Sc CS - A</span>
+                </div>
+                <div class="profile-field">
+                    <span class="profile-label">Current Year</span>
+                    <span class="profile-value" id="profileYear">2nd Year</span>
+                </div>
+            </div>
+
+            <button class="btn btn-danger" onclick="confirmLogout()">
+                <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Logout Session
+            </button>
+        </section>
+
+        <!-- Fixed 5-Button Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="navigateTo('home')">
+                <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('attendance')">
+                <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>Attendance</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('marks')">
+                <svg class="icon icon-lg" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <span>Marks</span>
+            </button>
+            <button class="nav-item" onclick="navigateTo('profile')">
+                <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <span>Profile</span>
+            </button>
+            <button class="nav-item" onclick="confirmLogout()">
+                <svg class="icon icon-lg" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                <span>Logout</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- Confirmation Modal Architecture -->
+    <div id="logoutModal" class="modal-backdrop">
+        <div class="modal-card">
+            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Confirm Logout</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Are you sure you want to log out of your student portal?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-outline" onclick="closeLogoutModal()">Cancel</button>
+                <button class="btn btn-danger" onclick="executeLogout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         JAVASCRIPT LOGIC & FRONTEND CONTROLLER
+         ========================================================================== -->
+    <script>
+        /* ==========================================================================
+           DATA LAYER (Modular design structured for ready integration with API backend)
+           ========================================================================== */
+        
+        // Active Logged-in Student Info Model
+        let studentProfileData = {
+            id: "STU0001",
+            name: "Kesava Reddy",
+            rollNumber: "23A001",
+            college: "ABC Degree College",
+            group: "B.Sc CS - A",
+            year: "2nd Year"
+        };
+
+        // Course Subject Cards Data
+        let subjectsData = [
+            { id: "python", name: "Python Programming", totalClasses: 50, present: 41, absent: 9 },
+            { id: "dbms", name: "Database Management", totalClasses: 45, present: 34, absent: 11 },
+            { id: "java", name: "Java Programming", totalClasses: 44, present: 40, absent: 4 },
+            { id: "maths", name: "Mathematics", totalClasses: 50, present: 34, absent: 16 },
+            { id: "english", name: "English Communication", totalClasses: 33, present: 29, absent: 4 }
+        ];
+
+        // Overall Attendance Historical Records Data
+        let attendanceHistoryData = [
+            { id: "101", date: "01 Aug 2026", day: "Saturday", subject: "Python Programming", status: "Present", time: "10:04 AM" },
+            { id: "102", date: "02 Aug 2026", day: "Sunday", subject: "Database Management", status: "Present", time: "11:02 AM" },
+            { id: "103", date: "03 Aug 2026", day: "Monday", subject: "Mathematics", status: "Absent", time: "09:00 AM" },
+            { id: "104", date: "04 Aug 2026", day: "Tuesday", subject: "Java Programming", status: "Present", time: "10:01 AM" },
+            { id: "105", date: "05 Aug 2026", day: "Wednesday", subject: "Python Programming", status: "Present", time: "10:05 AM" },
+            { id: "106", date: "06 Aug 2026", day: "Thursday", subject: "English Communication", status: "Present", time: "02:00 PM" },
+            { id: "107", date: "07 Aug 2026", day: "Friday", subject: "Database Management", status: "Absent", time: "11:00 AM" }
+        ];
+
+        // Student Marks Academic Data
+        let studentMarksData = [
+            { subject: "Python Programming", internal: 38, max: 40, grade: "A+" },
+            { subject: "Database Management", internal: 35, max: 40, grade: "A" },
+            { subject: "Java Programming", internal: 37, max: 40, grade: "A+" },
+            { subject: "Mathematics", internal: 32, max: 40, grade: "B+" },
+            { subject: "English Communication", internal: 36, max: 40, grade: "A" }
+        ];
+
+        // Dynamic Active Attendance Session Object (Controlled by simulated lecturer state)
+        // Window configured dynamically around current time for prototype testing
+        let activeAttendanceSession = {
+            sessionId: "ATT20260811001",
+            lecturer: "Mr. Kumar",
+            subject: "Python Programming",
+            group: "B.Sc CS - A",
+            startTime: new Date(Date.now() - 2 * 60 * 1000), // Started 2 mins ago
+            endTime: new Date(Date.now() + 8 * 60 * 1000),   // Ends in 8 mins
+            allowedRadius: 50, // Meters
+            active: true
+        };
+
+        // Geolocation Simulation & Tracking Variables
+        let simulatedDistanceMeters = 32; // Default inside range (50m radius)
+        let timerInterval = null;
+
+        /* ==========================================================================
+           SERVICES & API CONTROLLER LAYER (Ready to swap with Python Backend API)
+           ========================================================================== */
+        
+        function getStudentData() { return studentProfileData; }
+        function getSubjects() { return subjectsData; }
+        function getAttendance() { return attendanceHistoryData; }
+        function getMarks() { return studentMarksData; }
+        function getActiveAttendanceSession() { return activeAttendanceSession; }
+
+        /**
+         * Checks LocalStorage to verify if user has already submitted attendance
+         * @param {string} studentId 
+         * @param {string} sessionId 
+         * @returns {boolean}
+         */
+        function checkSubmissionStatus(studentId, sessionId) {
+            const key = `attendance_submitted_${studentId}_${sessionId}`;
+            return localStorage.getItem(key) === "true";
+        }
+
+        /**
+         * Persists submission record locally (Simulating Backend DB Commit)
+         */
+        function submitAttendance(studentId, sessionId) {
+            const key = `attendance_submitted_${studentId}_${sessionId}`;
+            localStorage.setItem(key, "true");
+            
+            // Append record to local history store
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            attendanceHistoryData.unshift({
+                id: String(Date.now()),
+                date: "11 Aug 2026",
+                day: "Tuesday",
+                subject: activeAttendanceSession.subject,
+                status: "Present",
+                time: timeStr
+            });
+
+            // Update Subject present count
+            let pySub = subjectsData.find(s => s.id === "python");
+            if(pySub) {
+                pySub.present += 1;
+                pySub.totalClasses += 1;
+            }
+        }
+
+        /* ==========================================================================
+           UI NAVIGATION & ROUTING
+           ========================================================================== */
+
+        /**
+         * Switches visible application page section smoothly
+         * @param {string} targetSectionId 
+         */
+        function navigateTo(targetSectionId) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+
+            // Show target section
+            const target = document.getElementById(`sec-${targetSectionId}`);
+            if(target) {
+                target.classList.add('active');
+            }
+
+            // Update active state in bottom nav
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.classList.remove('active');
+                if(item.getAttribute('onclick') && item.getAttribute('onclick').includes(targetSectionId)) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Refresh view components when navigated
+            if(targetSectionId === 'home') renderDashboard();
+            if(targetSectionId === 'attendance') renderAttendanceSessionView();
+            if(targetSectionId === 'marks') renderMarksView();
+            if(targetSectionId === 'profile') renderProfileView();
+
+            window.scrollTo(0,0);
+        }
+
+        /* ==========================================================================
+           HOME DASHBOARD RENDERER
+           ========================================================================== */
+        function renderDashboard() {
+            const student = getStudentData();
+            
+            // Header & Welcome Card Bindings
+            document.getElementById('homeStudentName').textContent = student.name;
+            document.getElementById('homeRollNumber').textContent = student.rollNumber;
+            document.getElementById('homeGroup').textContent = student.group;
+            document.getElementById('homeYear').textContent = student.year;
+            document.getElementById('headerCollege').textContent = student.college;
+
+            // Stats Calculations
+            const subjects = getSubjects();
+            let totalClassesSum = 0;
+            let totalPresentSum = 0;
+
+            subjects.forEach(sub => {
+                totalClassesSum += sub.totalClasses;
+                totalPresentSum += sub.present;
+            });
+
+            const overallPct = totalClassesSum > 0 ? ((totalPresentSum / totalClassesSum) * 100).toFixed(2) : "0.00";
+
+            document.getElementById('statTotalDays').textContent = totalClassesSum;
+            document.getElementById('statPresentDays').textContent = totalPresentSum;
+            document.getElementById('statPercentage').textContent = `${overallPct}%`;
+
+            // Render Subject Cards
+            const container = document.getElementById('subjectGridContainer');
+            container.innerHTML = '';
+
+            subjects.forEach(sub => {
+                const pct = ((sub.present / sub.totalClasses) * 100).toFixed(1);
+                
+                const card = document.createElement('div');
+                card.className = 'subject-card';
+                card.onclick = () => openSubjectDetail(sub.id);
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                        <h4 style="font-size:0.9rem; font-weight:600; color:var(--text-main);">${sub.name}</h4>
+                        <span class="badge ${pct >= 75 ? 'badge-success' : 'badge-danger'}">${pct}%</span>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:6px;">
+                        Present: ${sub.present} / Total: ${sub.totalClasses}
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar" style="width: ${pct}%;"></div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /* ==========================================================================
+           ALL ATTENDANCE VIEW & FILTERS
+           ========================================================================== */
+        function openAllAttendanceView() {
+            navigateTo('all-attendance');
+            renderAttendanceList('all');
+        }
+
+        function filterAttendanceHistory(filter, btnElement) {
+            // Update active pill state
+            const buttons = document.querySelectorAll('.filter-bar .filter-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            renderAttendanceList(filter);
+        }
+
+        function renderAttendanceList(filter) {
+            const listContainer = document.getElementById('allAttendanceList');
+            listContainer.innerHTML = '';
+
+            let records = getAttendance();
+
+            if(filter !== 'all') {
+                records = records.filter(r => r.status.toLowerCase() === filter.toLowerCase());
+            }
+
+            if(records.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:0.85rem;">No attendance records found.</div>`;
+                return;
+            }
+
+            records.forEach(rec => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.innerHTML = `
+                    <div>
+                        <div class="history-date">${rec.date} <span style="font-weight:400; font-size:0.75rem; color:var(--text-muted);">(${rec.day})</span></div>
+                        <div class="history-subtext">${rec.subject} • ${rec.time}</div>
+                    </div>
+                    <span class="badge ${rec.status === 'Present' ? 'badge-success' : 'badge-danger'}">${rec.status}</span>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        /* ==========================================================================
+           SUBJECT SPECIFIC DETAIL VIEW
+           ========================================================================== */
+        function openSubjectDetail(subjectId) {
+            const subjects = getSubjects();
+            const subject = subjects.find(s => s.id === subjectId);
+            if(!subject) return;
+
+            document.getElementById('detailSubjectTitle').textContent = `${subject.name} Attendance`;
+            
+            const pct = ((subject.present / subject.totalClasses) * 100).toFixed(1);
+            document.getElementById('detailPercentage').textContent = `${pct}%`;
+            document.getElementById('detailRatioBadge').textContent = `${subject.present}/${subject.totalClasses} Classes`;
+            document.getElementById('detailProgressBar').style.width = `${pct}%`;
+            
+            document.getElementById('detailPresentCount').textContent = subject.present;
+            document.getElementById('detailAbsentCount').textContent = subject.absent;
+            document.getElementById('detailTotalCount').textContent = subject.totalClasses;
+
+            // Filter history ONLY for selected subject
+            const listContainer = document.getElementById('subjectAttendanceList');
+            listContainer.innerHTML = '';
+
+            const filteredHistory = getAttendance().filter(r => r.subject.toLowerCase() === subject.name.toLowerCase());
+
+            if(filteredHistory.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem;">No specific history logs found for this subject.</div>`;
+            } else {
+                filteredHistory.forEach(rec => {
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <div>
+                            <div class="history-date">${rec.date}</div>
+                            <div class="history-subtext">${rec.day} • ${rec.time}</div>
+                        </div>
+                        <span class="badge ${rec.status === 'Present' ? 'badge-success' : 'badge-danger'}">${rec.status}</span>
+                    `;
+                    listContainer.appendChild(item);
+                });
+            }
+
+            // Navigate to view section
+            const sections = document.querySelectorAll('.page-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+            document.getElementById('sec-subject-detail').classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        /* ==========================================================================
+           LIVE ATTENDANCE ENGINE & VALIDATION ENGINE
+           ========================================================================== */
+        function renderAttendanceSessionView() {
+            const session = getActiveAttendanceSession();
+            const student = getStudentData();
+
+            document.getElementById('sessionSubject').textContent = session.subject;
+            document.getElementById('sessionLecturer').textContent = `Lecturer: ${session.lecturer}`;
+
+            // Initialize browser GPS if available
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        // Prototype note: In live implementation, compute actual distance formula (Haversine) 
+                        // against backend session lat/long coordinates.
+                        evaluateSessionRules();
+                    },
+                    (error) => {
+                        // Fallback to simulated distance
+                        evaluateSessionRules();
+                    }
+                );
+            } else {
+                evaluateSessionRules();
+            }
+
+            startTimer();
+        }
+
+        function setSimulatedDistance(distMeters) {
+            simulatedDistanceMeters = distMeters;
+            evaluateSessionRules();
+            showToast(`Simulated distance set to ${distMeters}m`);
+        }
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+
+            function updateTimer() {
+                const now = new Date();
+                const session = getActiveAttendanceSession();
+                const remainingMs = session.endTime - now;
+
+                if (remainingMs <= 0) {
+                    document.getElementById('sessionTimerDisplay').textContent = "00:00";
+                    evaluateSessionRules();
+                    clearInterval(timerInterval);
+                } else {
+                    const mins = Math.floor(remainingMs / 60000);
+                    const secs = Math.floor((remainingMs % 60000) / 1000);
+                    document.getElementById('sessionTimerDisplay').textContent = 
+                        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+                }
+            }
+
+            updateTimer();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        /**
+         * core Validation Rule Engine
+         */
+        function evaluateSessionRules() {
+            const session = getActiveAttendanceSession();
+            const student = getStudentData();
+            const now = new Date();
+
+            // Condition Checkers
+            const isTimeValid = (now >= session.startTime && now <= session.endTime);
+            const isDistanceValid = simulatedDistanceMeters <= session.allowedRadius;
+            const isAlreadySubmitted = checkSubmissionStatus(student.id, session.sessionId);
+
+            // Element References
+            const statusBadge = document.getElementById('sessionStatusBadge');
+            const submitBtn = document.getElementById('btnSubmitAttendance');
+
+            const iconTime = document.getElementById('iconCondTime');
+            const textTime = document.getElementById('textCondTime');
+
+            const iconDistance = document.getElementById('iconCondDistance');
+            const textDistance = document.getElementById('textCondDistance');
+
+            const iconSubmitted = document.getElementById('iconCondSubmitted');
+            const textSubmitted = document.getElementById('textCondSubmitted');
+
+            // 1. Evaluate Time Condition UI
+            if (now < session.startTime) {
+                textTime.textContent = "Attendance Session Not Started";
+                setIconState(iconTime, 'warning');
+            } else if (now > session.endTime) {
+                textTime.textContent = "Attendance Session Expired Window Closed";
+                setIconState(iconTime, 'danger');
+            } else {
+                textTime.textContent = "Session Open (10:00 AM – 10:10 AM)";
+                setIconState(iconTime, 'success');
+            }
+
+            // 2. Evaluate Distance Condition UI
+            textDistance.textContent = `Distance: ${simulatedDistanceMeters}m (Allowed: Within ${session.allowedRadius}m)`;
+            if (isDistanceValid) {
+                setIconState(iconDistance, 'success');
+            } else {
+                setIconState(iconDistance, 'danger');
+            }
+
+            // 3. Evaluate Submission Record UI
+            if (isAlreadySubmitted) {
+                textSubmitted.textContent = "Attendance Already Submitted";
+                setIconState(iconSubmitted, 'success');
+            } else {
+                textSubmitted.textContent = "Not Submitted Yet";
+                setIconState(iconSubmitted, 'neutral');
+            }
+
+            // Global State Machine Decision
+            if (isAlreadySubmitted) {
+                statusBadge.className = "badge badge-success";
+                statusBadge.textContent = "ATTENDANCE SUBMITTED";
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Already Marked";
+            } else if (!isTimeValid) {
+                statusBadge.className = "badge badge-danger";
+                statusBadge.textContent = "SESSION EXPIRED";
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Window Closed";
+            } else if (!isDistanceValid) {
+                statusBadge.className = "badge badge-warning";
+                statusBadge.textContent = "OUTSIDE ALLOWED RANGE";
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Move Closer To Classroom";
+            } else {
+                statusBadge.className = "badge badge-info";
+                statusBadge.textContent = "ATTENDANCE OPEN";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Attendance";
+            }
+        }
+
+        function setIconState(element, state) {
+            if (state === 'success') {
+                element.style.background = "var(--success-light)";
+                element.style.color = "var(--success)";
+            } else if (state === 'danger') {
+                element.style.background = "var(--danger-light)";
+                element.style.color = "var(--danger)";
+            } else if (state === 'warning') {
+                element.style.background = "var(--warning-light)";
+                element.style.color = "var(--warning)";
+            } else {
+                element.style.background = "var(--border)";
+                element.style.color = "var(--secondary)";
+            }
+        }
+
+        function handleAttendanceSubmission() {
+            const session = getActiveAttendanceSession();
+            const student = getStudentData();
+
+            // Perform submission persistence
+            submitAttendance(student.id, session.sessionId);
+
+            showToast("Attendance Submitted Successfully!");
+            evaluateSessionRules();
+        }
+
+        /* ==========================================================================
+           MARKS VIEW RENDERER
+           ========================================================================== */
+        function renderMarksView() {
+            const marksData = getMarks();
+            const tbody = document.getElementById('marksTableBody');
+            tbody.innerHTML = '';
+
+            let grandTotal = 0;
+            let grandMax = 0;
+
+            marksData.forEach(item => {
+                grandTotal += item.internal;
+                grandMax += item.max;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight:600; color:var(--text-main);">${item.subject}</td>
+                    <td>${item.internal}</td>
+                    <td style="color:var(--text-muted);">${item.max}</td>
+                    <td><span class="badge badge-info">${item.grade}</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const avgPct = ((grandTotal / grandMax) * 100).toFixed(1);
+            document.getElementById('marksTotal').textContent = `${grandTotal}/${grandMax}`;
+            document.getElementById('marksAvg').textContent = `${avgPct}%`;
+            document.getElementById('marksGrade').textContent = avgPct >= 90 ? 'A+' : avgPct >= 80 ? 'A' : 'B';
+        }
+
+        /* ==========================================================================
+           PROFILE VIEW RENDERER
+           ========================================================================== */
+        function renderProfileView() {
+            const student = getStudentData();
+            document.getElementById('profileName').textContent = student.name;
+            document.getElementById('profileCollege').textContent = student.college;
+            document.getElementById('profileStudentId').textContent = student.id;
+            document.getElementById('profileRollNo').textContent = student.rollNumber;
+            document.getElementById('profileGroup').textContent = student.group;
+            document.getElementById('profileYear').textContent = student.year;
+
+            // Dynamic initials for avatar box
+            const initials = student.name.split(' ').map(n => n[0]).join('');
+            document.getElementById('profileInitials').textContent = initials;
+        }
+
+        /* ==========================================================================
+           MODAL & TOAST UI UTILITIES
+           ========================================================================== */
+        function showToast(message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerHTML = `
+                <svg class="icon" style="color:var(--success)" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function confirmLogout() {
+            document.getElementById('logoutModal').classList.add('active');
+        }
+
+        function closeLogoutModal() {
+            document.getElementById('logoutModal').classList.remove('active');
+        }
+
+        function executeLogout() {
+            closeLogoutModal();
+            showToast("Logged out successfully");
+            setTimeout(() => {
+                localStorage.removeItem("currentStudentSession");
+                window.location.href = "index.html";
+            }, 1000);
+        }
+
+        /* ==========================================================================
+           APPLICATION INITIALIZATION ENTRY POINT
+           ========================================================================== */
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const session = JSON.parse(localStorage.getItem("currentStudentSession") || "null");
+                if (session && session.role === "student") {
+                    studentProfileData = {
+                        id: session.id || studentProfileData.id,
+                        name: session.name || studentProfileData.name,
+                        rollNumber: session.roll || session.rollNumber || studentProfileData.rollNumber,
+                        college: session.college || studentProfileData.college,
+                        group: session.department || session.group || studentProfileData.group,
+                        year: session.year || studentProfileData.year
+                    };
+                }
+            } catch (e) {}
+            renderDashboard();
+        });
+    </script>
+</body>
+</html>
