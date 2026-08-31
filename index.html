@@ -1439,7 +1439,7 @@ Student <span>Pro</span>
 <i class="fa-solid fa-house"></i> Home
 </button>
 
-<button id="studentsNavButton" class="nav-btn hidden" onclick="openPrincipalStudentsSearch()">
+<button id="studentsNavButton" class="nav-btn hidden" onclick="openPrincipalStudentsSearch()" style="display:none !important">
 <i class="fa-solid fa-user-graduate"></i> Students
 </button>
 
@@ -1447,11 +1447,7 @@ Student <span>Pro</span>
 <i class="fa-solid fa-calendar-days"></i> Classes
 </button>
 
-<button class="nav-btn" onclick="openProfile()">
-<i class="fa-solid fa-user"></i> Profile
-</button>
-
-<button class="nav-btn" onclick="logout()">
+<button class="nav-btn" onclick="logout()" title="Logout">
 <i class="fa-solid fa-right-from-bracket"></i>
 </button>
 </div>
@@ -2546,10 +2542,10 @@ sidebarClassesBtn.classList.add("hidden");
 }
 
 if(currentUser.role==="principal"){
-if(studentsBtn) studentsBtn.classList.remove("hidden");
+if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
 }else{
-if(studentsBtn) studentsBtn.classList.add("hidden");
+if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
 }
 
