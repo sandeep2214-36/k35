@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack - Student Attendance Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome for professional icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="h-full font-sans antialiased text-slate-800 flex flex-col">
+
+    <!-- ========================================== -->
+    <!-- 1. LOGIN SCREEN VIEW                       -->
+    <!-- ========================================== -->
+    <div id="view-login" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 px-4 sm:px-6 lg:px-8 absolute inset-0 z-50">
+        <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden p-8 sm:p-10 transform transition-all">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-blue-50 text-blue-600 mb-4 shadow-inner">
+                    <i class="fa-solid fa-graduation-cap text-3xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold tracking-tight text-slate-900">EduTrack Portal</h2>
+                <p class="text-sm text-slate-500 mt-1">Student Attendance Management System</p>
+            </div>
+
+            <form id="login-form" onsubmit="handleLogin(event)" class="space-y-5">
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Username / Faculty ID</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-regular fa-user"></i>
+                        </span>
+                        <input type="text" id="login-username" required value="admin"
+                            class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                            placeholder="Enter username">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-2">Password</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="login-password" required value="password"
+                            class="block w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
+                            placeholder="Enter password">
+                    </div>
+                </div>
+
+                <div id="login-error" class="hidden rounded-lg bg-red-50 p-3 text-sm text-red-700 font-medium flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation flex-shrink-0"></i>
+                    <span id="login-error-text">Invalid credentials. Please try again.</span>
+                </div>
+
+                <button type="submit"
+                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all">
+                    Sign In to Dashboard
+                </button>
+            </form>
+
+            <div class="mt-6 text-center text-xs text-slate-400">
+                Authorized Faculty & Administration Only &bull; Secure System v2.6
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APP MAIN LAYOUT (Hidden until logged in)   -->
+    <!-- ========================================== -->
+    <div id="app-container" class="hidden flex-1 flex flex-col h-full">
+
+        <!-- Top Navigation Bar -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-md">
+                            <i class="fa-solid fa-graduation-cap text-lg"></i>
+                        </div>
+                        <div>
+                            <span class="font-bold text-slate-900 text-lg leading-tight block">EduTrack</span>
+                            <span class="text-xs text-slate-500 block">Attendance Manager</span>
+                        </div>
+                    </div>
+
+                    <!-- Breadcrumb Navigation Links -->
+                    <div class="hidden md:flex items-center space-x-1 text-sm text-slate-600">
+                        <button onclick="router('dashboard')" class="px-3 py-2 rounded-md hover:bg-slate-100 font-medium transition-colors">Dashboard</button>
+                        <span class="text-slate-300">/</span>
+                        <button id="nav-subject-label" onclick="router('subject-attendance')" class="px-3 py-2 rounded-md hover:bg-slate-100 font-medium transition-colors hidden">Subject Attendance</button>
+                        <span id="nav-subject-sep" class="text-slate-300 hidden">/</span>
+                        <span id="nav-student-label" class="px-3 py-2 font-medium text-blue-600 hidden">Student Profile</span>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <div class="hidden md:flex items-center gap-2 text-xs">
+                            <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-semibold">STU: <span id="hod-student-invite-code">—</span></span>
+                            <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">LEC: <span id="hod-lecturer-invite-code">—</span></span>
+                        </div>
+                        <div class="text-right hidden sm:block">
+                            <span class="block text-sm font-medium text-slate-900" id="current-user-name">Prof. Robert Fox</span>
+                            <span class="block text-xs text-slate-500" id="current-user-dept">Department of Computer Science</span>
+                        </div>
+                        <button onclick="handleLogout()" title="Logout"
+                            class="p-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area Container -->
+        <main class="flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6 lg:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
+
+                <!-- ====================================== -->
+                <!-- 2. & 8. DASHBOARD VIEW                 -->
+                <!-- ====================================== -->
+                <section id="view-dashboard" class="space-y-6">
+                    <!-- Invite Codes Panel -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Invite Codes</h3>
+                                <p class="text-sm text-slate-500">Share these codes so students and lecturers can register under your department.</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+                                <div class="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">Student Invite Code</div>
+                                <div class="text-xl font-bold text-slate-900 font-mono" id="panel-student-invite">—</div>
+                                <p class="text-xs text-slate-500 mt-1">Give this code to students during registration</p>
+                            </div>
+                            <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
+                                <div class="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">Lecturer Invite Code</div>
+                                <div class="text-xl font-bold text-slate-900 font-mono" id="panel-lecturer-invite">—</div>
+                                <p class="text-xs text-slate-500 mt-1">Give this code to lecturers during registration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters Toolbar -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Attendance Dashboard & Analytics</h3>
+                                <p class="text-sm text-slate-500">Filter and monitor student records across groups, subjects, and semesters.</p>
+                            </div>
+                            <button onclick="resetFilters()" class="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors self-start md:self-auto">
+                                <i class="fa-solid fa-rotate-right mr-1"></i> Reset Filters
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Group</label>
+                                <select id="filter-group" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                    <option value="All">All Groups</option>
+                                    <option value="B.Sc Group A">B.Sc Group A</option>
+                                    <option value="B.Sc Group B">B.Sc Group B</option>
+                                    <option value="B.Tech CS">B.Tech CS</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Subject</label>
+                                <select id="filter-subject" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                    <option value="All">All Subjects</option>
+                                    <option value="Python Programming">Python Programming</option>
+                                    <option value="Data Structures">Data Structures</option>
+                                    <option value="Database Systems">Database Systems</option>
+                                    <option value="Web Development">Web Development</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Class / Year</label>
+                                <select id="filter-year" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                    <option value="All">All Years</option>
+                                    <option value="Year 1">Year 1</option>
+                                    <option value="Year 2">Year 2</option>
+                                    <option value="Year 3">Year 3</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1">Semester</label>
+                                <select id="filter-semester" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                    <option value="All">All Semesters</option>
+                                    <option value="Semester 1">Semester 1</option>
+                                    <option value="Semester 2">Semester 2</option>
+                                    <option value="Semester 3">Semester 3</option>
+                                    <option value="Semester 4">Semester 4</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Analysis Stats Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Total Students</div>
+                            <div class="text-2xl font-bold text-slate-900" id="stat-total-students">0</div>
+                            <div class="text-xs text-slate-400 mt-1">Enrolled records</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-emerald-600 mb-1">Above 75%</div>
+                            <div class="text-2xl font-bold text-emerald-600" id="stat-above-75">0</div>
+                            <div class="text-xs text-slate-400 mt-1">Good standing</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-red-600 mb-1">Below 75%</div>
+                            <div class="text-2xl font-bold text-red-600" id="stat-below-75">0</div>
+                            <div class="text-xs text-slate-400 mt-1">Deficit attendance</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-blue-600 mb-1">Avg Attendance</div>
+                            <div class="text-2xl font-bold text-blue-600" id="stat-avg-attendance">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Group average</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Highest</div>
+                            <div class="text-2xl font-bold text-slate-900" id="stat-highest">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Peak record</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+                            <div class="text-xs font-semibold uppercase text-slate-500 mb-1">Lowest</div>
+                            <div class="text-2xl font-bold text-slate-900" id="stat-lowest">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Critical threshold</div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Subject Cards Section -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-lg font-bold text-slate-900">Available Subjects</h3>
+                            <span class="text-xs text-slate-500 bg-white border border-slate-200 px-3 py-1 rounded-full shadow-xs">Click card to open subject ledger</span>
+                        </div>
+                        <div id="subject-cards-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                            <!-- Dynamic Subject Cards injected via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====================================== -->
+                <!-- 5. SUBJECT ATTENDANCE LIST VIEW        -->
+                <!-- ====================================== -->
+                <section id="view-subject-attendance" class="hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="router('dashboard')" class="p-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <div>
+                                <span class="text-xs font-semibold uppercase text-blue-600 tracking-wider">Subject Detailed Ledger</span>
+                                <h2 class="text-xl font-bold text-slate-900" id="current-subject-title">Subject Name</h2>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200" id="subject-meta-badge">
+                                Group A &bull; Semester 3
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <h3 class="font-bold text-slate-900">Enrolled Students Attendance Roster</h3>
+                            <div class="relative w-full sm:w-64">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                    <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                                </span>
+                                <input type="text" id="student-search-input" onkeyup="filterStudentTable()" placeholder="Search student or roll no..."
+                                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                                        <th class="py-3.5 px-4">Student Name</th>
+                                        <th class="py-3.5 px-4">Roll Number</th>
+                                        <th class="py-3.5 px-4">Group</th>
+                                        <th class="py-3.5 px-4 text-center">Total Classes</th>
+                                        <th class="py-3.5 px-4 text-center">Present</th>
+                                        <th class="py-3.5 px-4 text-center">Absent</th>
+                                        <th class="py-3.5 px-4">Attendance Percentage</th>
+                                        <th class="py-3.5 px-4">Status</th>
+                                        <th class="py-3.5 px-4 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="student-table-body" class="divide-y divide-slate-200 text-sm">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ====================================== -->
+                <!-- 6. STUDENT DETAILS / ATTENDANCE HISTORY -->
+                <!-- ====================================== -->
+                <section id="view-student-history" class="hidden space-y-6">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <button onclick="router('subject-attendance')" class="p-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all">
+                                <i class="fa-solid fa-arrow-left"></i>
+                            </button>
+                            <div>
+                                <span class="text-xs font-semibold uppercase text-blue-600 tracking-wider">Individual Student Profile</span>
+                                <h2 class="text-xl font-bold text-slate-900" id="history-student-name">Student Name</h2>
+                            </div>
+                        </div>
+                        <div id="history-status-badge">
+                            <!-- Injected Badge -->
+                        </div>
+                    </div>
+
+                    <!-- Profile Info Summary Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4">
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Roll Number</div>
+                            <div class="text-base font-bold text-slate-900" id="hs-roll">23A01</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Group</div>
+                            <div class="text-base font-bold text-slate-900" id="hs-group">Group A</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Subject</div>
+                            <div class="text-base font-bold text-slate-900 truncate" id="hs-subject">Python</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Semester</div>
+                            <div class="text-base font-bold text-slate-900" id="hs-semester">Semester 3</div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-slate-400 mb-1">Total Classes</div>
+                            <div class="text-xl font-bold text-slate-900" id="hs-total">42</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-emerald-600 mb-1">Present Classes</div>
+                            <div class="text-xl font-bold text-emerald-600" id="hs-present">38</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-red-600 mb-1">Absent Classes</div>
+                            <div class="text-xl font-bold text-red-600" id="hs-absent">4</div>
+                        </div>
+                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 col-span-2">
+                            <div class="text-xs font-semibold uppercase text-blue-600 mb-1">Current Attendance</div>
+                            <div class="text-xl font-bold text-blue-600" id="hs-percentage">90%</div>
+                        </div>
+                    </div>
+
+                    <!-- Chronological Attendance Log Table -->
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 border-b border-slate-200">
+                            <h3 class="font-bold text-slate-900">Complete Chronological Attendance Ledger</h3>
+                            <p class="text-xs text-slate-500 mt-0.5">Detailed period-by-period attendance log for this semester.</p>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider border-b border-slate-200">
+                                        <th class="py-3.5 px-4">Date</th>
+                                        <th class="py-3.5 px-4">Class / Period</th>
+                                        <th class="py-3.5 px-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="history-log-body" class="divide-y divide-slate-200 text-sm">
+                                    <!-- Dynamic Log Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT APPLICATION CORE & DATA LOGIC   -->
+    <!-- ========================================== -->
+    <script>
+        // --- 11. DATA LOGIC & MOCK DATA ---
+        const subjectsList = [
+            { id: 'sub-1', name: 'Python Programming', group: 'B.Sc Group A', year: 'Year 2', semester: 'Semester 3' },
+            { id: 'sub-2', name: 'Data Structures', group: 'B.Sc Group A', year: 'Year 2', semester: 'Semester 3' },
+            { id: 'sub-3', name: 'Database Systems', group: 'B.Sc Group B', year: 'Year 3', semester: 'Semester 5' },
+            { id: 'sub-4', name: 'Web Development', group: 'B.Tech CS', year: 'Year 3', semester: 'Semester 5' }
+        ];
+
+        const studentsDatabase = [
+            { id: 'std-1', name: 'Alex Johnson', rollNo: '23A01', group: 'B.Sc Group A', year: 'Year 2', semester: 'Semester 3', subject: 'Python Programming', present: 38, total: 42, history: [
+                { date: '01-08-2026', period: 'Period 1', status: 'Present' },
+                { date: '02-08-2026', period: 'Period 1', status: 'Present' },
+                { date: '03-08-2026', period: 'Period 1', status: 'Absent' },
+                { date: '04-08-2026', period: 'Period 2', status: 'Present' }
+            ]},
+            { id: 'std-2', name: 'Samantha Smith', rollNo: '23A02', group: 'B.Sc Group A', year: 'Year 2', semester: 'Semester 3', subject: 'Python Programming', present: 28, total: 42, history: [
+                { date: '01-08-2026', period: 'Period 1', status: 'Present' },
+                { date: '02-08-2026', period: 'Period 1', status: 'Absent' },
+                { date: '03-08-2026', period: 'Period 1', status: 'Absent' },
+                { date: '04-08-2026', period: 'Period 2', status: 'Present' }
+            ]},
+            { id: 'std-3', name: 'Michael Brown', rollNo: '23A03', group: 'B.Sc Group A', year: 'Year 2', semester: 'Semester 3', subject: 'Data Structures', present: 40, total: 40, history: [
+                { date: '01-08-2026', period: 'Period 2', status: 'Present' },
+                { date: '02-08-2026', period: 'Period 2', status: 'Present' }
+            ]},
+            { id: 'std-4', name: 'Emily Davis', rollNo: '23B01', group: 'B.Sc Group B', year: 'Year 3', semester: 'Semester 5', subject: 'Database Systems', present: 25, total: 40, history: [
+                { date: '01-08-2026', period: 'Period 3', status: 'Absent' },
+                { date: '02-08-2026', period: 'Period 3', status: 'Present' }
+            ]},
+            { id: 'std-5', name: 'David Wilson', rollNo: '23C01', group: 'B.Tech CS', year: 'Year 3', semester: 'Semester 5', subject: 'Web Development', present: 36, total: 45, history: [
+                { date: '01-08-2026', period: 'Period 4', status: 'Present' },
+                { date: '02-08-2026', period: 'Period 4', status: 'Present' }
+            ]}
+        ];
+
+        let state = {
+            isLoggedIn: false,
+            currentView: 'dashboard',
+            selectedSubject: null,
+            selectedStudent: null,
+            filters: {
+                group: 'All',
+                subject: 'All',
+                year: 'All',
+                semester: 'All'
+            }
+        };
+
+        // --- AUTHENTICATION LOGIC ---
+        function applyHodSessionUI(session) {
+            const name = (session && session.name) ? session.name : 'HOD';
+            const dept = (session && (session.department || session.college)) ? (session.department || session.college) : 'Department';
+            const stuCode = (session && session.studentInviteCode) ? session.studentInviteCode : '—';
+            const lecCode = (session && session.lecturerInviteCode) ? session.lecturerInviteCode : '—';
+
+            const nameEl = document.getElementById('current-user-name');
+            const deptEl = document.getElementById('current-user-dept');
+            if (nameEl) nameEl.innerText = name;
+            if (deptEl) deptEl.innerText = dept;
+
+            const headerStu = document.getElementById('hod-student-invite-code');
+            const headerLec = document.getElementById('hod-lecturer-invite-code');
+            const panelStu = document.getElementById('panel-student-invite');
+            const panelLec = document.getElementById('panel-lecturer-invite');
+            if (headerStu) headerStu.innerText = stuCode;
+            if (headerLec) headerLec.innerText = lecCode;
+            if (panelStu) panelStu.innerText = stuCode;
+            if (panelLec) panelLec.innerText = lecCode;
+        }
+
+        function enterHodApp(session) {
+            state.isLoggedIn = true;
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            applyHodSessionUI(session || null);
+            initDashboard();
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            // Prefer main portal session if present
+            try {
+                const session = JSON.parse(localStorage.getItem('currentHodSession') || 'null');
+                if (session && session.role === 'hod') {
+                    enterHodApp(session);
+                    return;
+                }
+            } catch (err) {}
+
+            const user = document.getElementById('login-username').value.trim();
+            const pass = document.getElementById('login-password').value.trim();
+            const errBox = document.getElementById('login-error');
+
+            if (user && pass) {
+                errBox.classList.add('hidden');
+                enterHodApp({ name: user === 'admin' ? 'Prof. Robert Fox' : user, department: 'Department of Computer Science', studentInviteCode: '—', lecturerInviteCode: '—' });
+            } else {
+                errBox.classList.remove('hidden');
+                document.getElementById('login-error-text').innerText = 'Please provide valid credentials.';
+            }
+        }
+
+        function handleLogout() {
+            state.isLoggedIn = false;
+            state.currentView = 'dashboard';
+            try { localStorage.removeItem('currentHodSession'); } catch (e) {}
+            window.location.href = 'index.html';
+        }
+
+        // Auto-enter dashboard when arriving from main Student Pro login
+        (function bootstrapHodSession() {
+            try {
+                const session = JSON.parse(localStorage.getItem('currentHodSession') || 'null');
+                if (session && session.role === 'hod') {
+                    document.addEventListener('DOMContentLoaded', function () {
+                        enterHodApp(session);
+                    });
+                }
+            } catch (e) {}
+        })();
+
+        // --- ROUTING SYSTEM ---
+        function router(viewName, param = null) {
+            state.currentView = viewName;
+            
+            // Hide all views
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-subject-attendance').classList.add('hidden');
+            document.getElementById('view-student-history').classList.add('hidden');
+
+            // Breadcrumb elements
+            const subLabel = document.getElementById('nav-subject-label');
+            const subSep = document.getElementById('nav-subject-sep');
+            const stdLabel = document.getElementById('nav-student-label');
+
+            if (viewName === 'dashboard') {
+                document.getElementById('view-dashboard').classList.remove('hidden');
+                subLabel.classList.add('hidden');
+                subSep.classList.add('hidden');
+                stdLabel.classList.add('hidden');
+                initDashboard();
+            } else if (viewName === 'subject-attendance') {
+                if (param) state.selectedSubject = param;
+                document.getElementById('view-subject-attendance').classList.remove('hidden');
+                subLabel.innerText = state.selectedSubject;
+                subLabel.classList.remove('hidden');
+                subSep.classList.remove('hidden');
+                stdLabel.classList.add('hidden');
+                initSubjectAttendance(state.selectedSubject);
+            } else if (viewName === 'student-history') {
+                if (param) state.selectedStudent = param;
+                document.getElementById('view-student-history').classList.remove('hidden');
+                subLabel.classList.remove('hidden');
+                subSep.classList.remove('hidden');
+                stdLabel.innerText = state.selectedStudent.name;
+                stdLabel.classList.remove('hidden');
+                initStudentHistory(state.selectedStudent);
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- FILTERING SYSTEM & DATA CALCULATION ---
+        function applyFilters() {
+            state.filters.group = document.getElementById('filter-group').value;
+            state.filters.subject = document.getElementById('filter-subject').value;
+            state.filters.year = document.getElementById('filter-year').value;
+            state.filters.semester = document.getElementById('filter-semester').value;
+            initDashboard();
+        }
+
+        function resetFilters() {
+            document.getElementById('filter-group').value = 'All';
+            document.getElementById('filter-subject').value = 'All';
+            document.getElementById('filter-year').value = 'All';
+            document.getElementById('filter-semester').value = 'All';
+            state.filters = { group: 'All', subject: 'All', year: 'All', semester: 'All' };
+            initDashboard();
+        }
+
+        function getFilteredStudents() {
+            return studentsDatabase.filter(s => {
+                let matchGroup = state.filters.group === 'All' || s.group === state.filters.group;
+                let matchSubject = state.filters.subject === 'All' || s.subject === state.filters.subject;
+                let matchYear = state.filters.year === 'All' || s.year === state.filters.year;
+                let matchSemester = state.filters.semester === 'All' || s.semester === state.filters.semester;
+                return matchGroup && matchSubject && matchYear && matchSemester;
+            });
+        }
+
+        // --- DASHBOARD INITIALIZATION ---
+        function initDashboard() {
+            const filtered = getFilteredStudents();
+            
+            // Calculate Analytics (Section 8 & 11)
+            const totalStudents = filtered.length;
+            let totalPercentageSum = 0;
+            let above75 = 0;
+            let below75 = 0;
+            let percentages = [];
+
+            filtered.forEach(s => {
+                let pct = Math.round((s.present / s.total) * 100);
+                percentages.push(pct);
+                totalPercentageSum += pct;
+                if (pct >= 75) above75++;
+                else below75++;
+            });
+
+            const avgAttendance = totalStudents > 0 ? Math.round(totalPercentageSum / totalStudents) : 0;
+            const highest = percentages.length > 0 ? Math.max(...percentages) : 0;
+            const lowest = percentages.length > 0 ? Math.min(...percentages) : 0;
+
+            document.getElementById('stat-total-students').innerText = totalStudents;
+            document.getElementById('stat-above-75').innerText = above75;
+            document.getElementById('stat-below-75').innerText = below75;
+            document.getElementById('stat-avg-attendance').innerText = avgAttendance + '%';
+            document.getElementById('stat-highest').innerText = highest + '%';
+            document.getElementById('stat-lowest').innerText = lowest + '%';
+
+            // Render Subject Cards (Section 3 & 4)
+            const cardsContainer = document.getElementById('subject-cards-container');
+            cardsContainer.innerHTML = '';
+
+            let filteredSubjects = subjectsList.filter(sub => {
+                let matchGrp = state.filters.group === 'All' || sub.group === state.filters.group;
+                let matchSub = state.filters.subject === 'All' || sub.name === state.filters.subject;
+                let matchSem = state.filters.semester === 'All' || sub.semester === state.filters.semester;
+                return matchGrp && matchSub && matchSem;
+            });
+
+            if (filteredSubjects.length === 0) {
+                cardsContainer.innerHTML = `<div class="col-span-full py-8 text-center text-slate-400 bg-white rounded-xl border border-slate-200">No subjects match the selected filters.</div>`;
+                return;
+            }
+
+            filteredSubjects.forEach(sub => {
+                // Calculate aggregate subject stats from students taking this subject
+                const subStudents = studentsDatabase.filter(s => s.subject === sub.name);
+                let totalClasses = subStudents.reduce((acc, curr) => acc + curr.total, 0) || 40;
+                let totalPresent = subStudents.reduce((acc, curr) => acc + curr.present, 0) || 32;
+                let totalAbsent = totalClasses - totalPresent;
+                let avgPct = Math.round((totalPresent / totalClasses) * 100);
+
+                const isGood = avgPct >= 75;
+                const statusBadge = isGood 
+                    ? `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check mr-1.5 text-emerald-600"></i> Good Attendance</span>`
+                    : `<span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-red-50 text-red-700 border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-1.5 text-red-600"></i> Below Requirement</span>`;
+
+                const progressBarColor = isGood ? 'bg-emerald-500' : 'bg-red-500';
+
+                const cardHTML = `
+                    <div onclick="router('subject-attendance', '${sub.name}')" 
+                        class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer flex flex-col justify-between group">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-3">
+                                <div>
+                                    <span class="text-xs font-semibold uppercase text-slate-400 block">${sub.group}</span>
+                                    <h4 class="font-bold text-slate-900 text-base group-hover:text-blue-600 transition-colors">${sub.name}</h4>
+                                </div>
+                                <span class="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md">${sub.semester}</span>
+                            </div>
+                            <div class="my-4">
+                                <div class="flex justify-between items-baseline mb-1.5">
+                                    <span class="text-xs text-slate-500 font-medium">Average Attendance</span>
+                                    <span class="text-lg font-bold text-slate-900">${avgPct}%</span>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                    <div class="${progressBarColor} h-2 rounded-full transition-all duration-500" style="width: ${avgPct}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <div class="text-xs text-slate-500 space-x-2">
+                                <span>Total: <b>${totalClasses}</b></span>
+                                <span>&bull;</span>
+                                <span class="text-emerald-600">Att: <b>${totalPresent}</b></span>
+                                <span>&bull;</span>
+                                <span class="text-red-600">Abs: <b>${totalAbsent}</b></span>
+                            </div>
+                            <div>${statusBadge}</div>
+                        </div>
+                    </div>
+                `;
+                cardsContainer.innerHTML += cardHTML;
+            });
+        }
+
+        // --- SUBJECT ATTENDANCE PAGE INITIALIZATION ---
+        function initSubjectAttendance(subjectName) {
+            document.getElementById('current-subject-title').innerText = subjectName;
+            document.getElementById('subject-meta-badge').innerText = `${state.filters.group !== 'All' ? state.filters.group : 'All Groups'} &bull; ${state.filters.semester !== 'All' ? state.filters.semester : 'Semester 3'}`;
+
+            const tbody = document.getElementById('student-table-body');
+            tbody.innerHTML = '';
+
+            const subjectStudents = studentsDatabase.filter(s => s.subject === subjectName);
+
+            if (subjectStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400">No student attendance logs found for ${subjectName}.</td></tr>`;
+                return;
+            }
+
+            subjectStudents.forEach(std => {
+                let pct = Math.round((std.present / std.total) * 100);
+                let isGood = pct >= 75;
+                let statusBadge = isGood 
+                    ? `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check mr-1.5"></i> Good Attendance</span>`
+                    : `<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Below Requirement</span>`;
+
+                let rowHTML = `
+                    <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick='router("student-history", ${JSON.stringify(std)})'>
+                        <td class="py-3.5 px-4 font-semibold text-slate-900">${std.name}</td>
+                        <td class="py-3.5 px-4 text-slate-600 font-mono text-xs">${std.rollNo}</td>
+                        <td class="py-3.5 px-4 text-slate-600">${std.group}</td>
+                        <td class="py-3.5 px-4 text-center text-slate-700 font-medium">${std.total}</td>
+                        <td class="py-3.5 px-4 text-center text-emerald-600 font-semibold">${std.present}</td>
+                        <td class="py-3.5 px-4 text-center text-red-600 font-semibold">${std.total - std.present}</td>
+                        <td class="py-3.5 px-4 font-bold text-slate-900">${pct}%</td>
+                        <td class="py-3.5 px-4">${statusBadge}</td>
+                        <td class="py-3.5 px-4 text-right">
+                            <button class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-semibold transition-all shadow-xs">
+                                View Profile <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += rowHTML;
+            });
+        }
+
+        // --- STUDENT ATTENDANCE HISTORY INITIALIZATION ---
+        function initStudentHistory(std) {
+            document.getElementById('history-student-name').innerText = std.name;
+            document.getElementById('hs-roll').innerText = std.rollNo;
+            document.getElementById('hs-group').innerText = std.group;
+            document.getElementById('hs-subject').innerText = std.subject;
+            document.getElementById('hs-semester').innerText = std.semester;
+            document.getElementById('hs-total').innerText = std.total;
+            document.getElementById('hs-present').innerText = std.present;
+            document.getElementById('hs-absent').innerText = std.total - std.present;
+
+            let pct = Math.round((std.present / std.total) * 100);
+            document.getElementById('hs-percentage').innerText = pct + '%';
+
+            let isGood = pct >= 75;
+            let badgeContainer = document.getElementById('history-status-badge');
+            badgeContainer.innerHTML = isGood
+                ? `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-circle-check mr-2"></i> ${pct}% — Good Attendance</span>`
+                : `<span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-bold bg-red-50 text-red-700 border border-red-200"><i class="fa-solid fa-triangle-exclamation mr-2"></i> ${pct}% — Attendance Below Requirement</span>`;
+
+            // Populate chronological logs
+            const logBody = document.getElementById('history-log-body');
+            logBody.innerHTML = '';
+
+            if (!std.history || std.history.length === 0) {
+                logBody.innerHTML = `<tr><td colspan="3" class="py-8 text-center text-slate-400">No attendance log history available.</td></tr>`;
+                return;
+            }
+
+            std.history.forEach(log => {
+                let statusBadge = log.status === 'Present'
+                    ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-700"><i class="fa-solid fa-check mr-1.5"></i> Present</span>`
+                    : `<span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-red-50 text-red-700"><i class="fa-solid fa-xmark mr-1.5"></i> Absent</span>`;
+
+                logBody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="py-3.5 px-4 font-mono text-xs text-slate-700">${log.date}</td>
+                        <td class="py-3.5 px-4 text-slate-800 font-medium">${log.period}</td>
+                        <td class="py-3.5 px-4">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- SEARCH TABLE FILTER UTILITY ---
+        function filterStudentTable() {
+            let input = document.getElementById('student-search-input').value.toLowerCase();
+            let rows = document.getElementById('student-table-body').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                let text = rows[i].innerText.toLowerCase();
+                if (text.includes(input)) {
+                    rows[i].style.display = "";
+                } else {
+                    rows[i].style.display = "none";
+                }
+            }
+        }
+    </script>
+</body>
+</html>
