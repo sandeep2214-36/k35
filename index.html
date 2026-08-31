@@ -602,6 +602,22 @@ justify-content: space-between;
 align-items: center;
 }
 
+.filter-btn{
+background: rgba(30,41,59,0.8);
+border: 1px solid rgba(255,255,255,0.12);
+padding: 8px 14px;
+border-radius: 999px;
+font-size: 12px;
+font-weight: 600;
+color: #94a3b8;
+cursor: pointer;
+}
+.filter-btn.active{
+background: linear-gradient(135deg, #00f2fe, #4facfe);
+color: #0f172a;
+border-color: transparent;
+}
+
 .progress{
 height:10px;
 background: rgba(255, 255, 255, 0.1);
@@ -1010,6 +1026,12 @@ grid-template-columns:1fr;
 </button>
 <button id="sidebarStudentsBtn" class="sidebar-item hidden" onclick="navigateSidebar('students')">
 <i class="fa-solid fa-user-graduate"></i> Students
+</button>
+<button id="sidebarTimetableBtn" class="sidebar-item hidden" onclick="navigateSidebar('timetable')">
+<i class="fa-solid fa-clock"></i> Time Table
+</button>
+<button id="sidebarNotifyBtn" class="sidebar-item hidden" onclick="navigateSidebar('notifications')">
+<i class="fa-solid fa-bell"></i> Notifications
 </button>
 <button id="sidebarClassesBtn" class="sidebar-item hidden" onclick="navigateSidebar('classes')">
 <i class="fa-solid fa-calendar-days"></i> Classes Schedule
@@ -1573,45 +1595,27 @@ Student <span>Pro</span>
 
 <!-- HOD DASHBOARD -->
 <div id="hodDash" class="hidden">
+<div class="section" style="margin-bottom:16px;">
+<div class="section-title"><h3 id="hodDepartmentTitle">Department</h3></div>
+</div>
 <div class="stats">
-<div class="stat" onclick="showHodStudentsList('all')">
-<small>Department</small>
-<h2 id="hodDepartment"></h2>
+<div class="stat" style="cursor:default">
+<small>Total Students</small>
+<h2 id="hodStudentCount">0</h2>
 </div>
-<div class="stat" onclick="showHodStudentsList('all')">
-<small>Students (Click to view)</small>
-<h2 id="hodStudentCount"></h2>
-</div>
-<div class="stat" onclick="showHodLecturersList()">
-<small>Lecturers (Click for Codes)</small>
-<h2 id="hodLecturerCount"></h2>
-</div>
-<div class="stat">
-<small>Attendance</small>
-<h2 id="hodAttendance"></h2>
-</div>
-</div>
-
-<!-- 3 ATTENDANCE RANGE BOXES FOR HOD -->
-<div class="attendance-boxes">
-<div class="att-box high" onclick="showHodStudentsList('high')">
-<h3 id="hodHighCount">0</h3>
-<span>≥ 75% Attendance</span>
-</div>
-<div class="att-box mid" onclick="showHodStudentsList('mid')">
-<h3 id="hodMidCount">0</h3>
-<span>50% - 74% Attendance</span>
-</div>
-<div class="att-box low" onclick="showHodStudentsList('low')">
-<h3 id="hodLowCount">0</h3>
-<span>Below 49% Attendance</span>
+<div class="stat" style="cursor:default">
+<small>Avg Attendance</small>
+<h2 id="hodAttendance">0%</h2>
 </div>
 </div>
 
 <div class="section">
-<div class="section-title">
-<h3>Invite Codes</h3>
+<div class="section-title"><h3>Subjects</h3></div>
+<div id="hodSubjectsGrid" class="principal-box-grid"></div>
 </div>
+
+<div class="section">
+<div class="section-title"><h3>Invite Codes</h3></div>
 <div class="invite-grid">
 <div class="code-card">
 <strong>Student Invite Code</strong>
@@ -1625,13 +1629,77 @@ Student <span>Pro</span>
 </div>
 </div>
 </div>
-
-<div id="hodDynamicListSection" class="section hidden">
-<div class="section-title">
-<h3 id="hodListTitle">Student Details</h3>
-<button class="back" style="margin-bottom:0;" onclick="hideHodDynamicList()">Close</button>
 </div>
-<div id="hodDynamicListContent"></div>
+
+<!-- HOD DRILL-DOWN PAGES -->
+<div id="hodSubjectCatsPage" class="hidden">
+<button class="back" onclick="closeHodDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3 id="hodSubjectCatsTitle">Attendance Categories</h3></div>
+<div class="attendance-boxes">
+<div class="att-box high" onclick="openHodCategoryStudents('high')"><h3 id="hodCatHigh">0</h3><span>Above 75%</span></div>
+<div class="att-box mid" onclick="openHodCategoryStudents('mid')"><h3 id="hodCatMid">0</h3><span>50% – 74%</span></div>
+<div class="att-box low" onclick="openHodCategoryStudents('low')"><h3 id="hodCatLow">0</h3><span>Below 49%</span></div>
+</div>
+</div>
+</div>
+
+<div id="hodCategoryStudentsPage" class="hidden">
+<button class="back" onclick="openHodSubjectCatsPage(hodDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section">
+<div class="section-title"><h3 id="hodCategoryStudentsTitle">Students</h3></div>
+<div id="hodCategoryStudentsList"></div>
+</div>
+</div>
+
+<div id="hodStudentHistoryPage" class="hidden">
+<button class="back" onclick="openHodCategoryStudents(hodDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<div class="section">
+<div class="section-title"><h3 id="hodStudentHistoryTitle">Attendance History</h3></div>
+<div id="hodStudentHistoryList"></div>
+</div>
+</div>
+
+<div id="hodStudentsSearchPage" class="hidden">
+<button class="back" onclick="closeHodDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Search Student</h3></div>
+<p style="color:#94a3b8; font-size:13px; margin-bottom:16px;">Enter Roll Number or Mobile Number (your department only).</p>
+<div class="input-group">
+<label>Roll Number / Mobile Number</label>
+<input id="hodStudentSearchInput" placeholder="Enter roll number or mobile">
+</div>
+<button class="primary" onclick="searchHodStudent()" style="margin-top:8px;"><i class="fa-solid fa-magnifying-glass"></i> Search Student</button>
+<div id="hodStudentSearchMsg" class="msg error" style="margin-top:12px;"></div>
+</div>
+<div id="hodStudentSearchResult" class="section hidden" style="margin-top:16px;">
+<div class="section-title"><h3>Student Account Details</h3></div>
+<div id="hodStudentSearchDetails"></div>
+</div>
+</div>
+
+<div id="hodTimetablePage" class="hidden">
+<button class="back" onclick="closeHodDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Department Time Table</h3></div>
+<div class="filter-bar" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;" id="hodDayFilters">
+<button class="filter-btn active" onclick="renderHodTimetable('Monday', this)">Monday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Tuesday', this)">Tuesday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Wednesday', this)">Wednesday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Thursday', this)">Thursday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Friday', this)">Friday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Saturday', this)">Saturday</button>
+<button class="filter-btn" onclick="renderHodTimetable('Sunday', this)">Sunday</button>
+</div>
+<div id="hodTimetableList"></div>
+</div>
+</div>
+
+<div id="hodNotificationsPage" class="hidden">
+<button class="back" onclick="closeHodDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Notifications</h3></div>
+<div class="today-empty">No new notifications.</div>
 </div>
 </div>
 
@@ -2008,10 +2076,21 @@ overlay.classList.toggle("show");
 
 function navigateSidebar(view){
 toggleSidebar();
-if(view === 'home') showMainDashboardView();
+if(view === 'home'){
+closeHodDrillDown && closeHodDrillDown();
+closePrincipalDrillDown && closePrincipalDrillDown();
+showMainDashboardView();
+if(currentUser && currentUser.role==="hod") loadHodDash();
+if(currentUser && currentUser.role==="principal") loadPrincipalDash();
+}
 if(view === 'classes') showClasses();
 if(view === 'profile') openProfile();
-if(view === 'students') openPrincipalStudentsSearch();
+if(view === 'students'){
+if(currentUser && currentUser.role==="principal") openPrincipalStudentsSearch();
+if(currentUser && currentUser.role==="hod") openHodStudentsSearch();
+}
+if(view === 'timetable') openHodTimetable();
+if(view === 'notifications') openHodNotifications();
 }
 
 function hideAll(){
@@ -2536,12 +2615,21 @@ classesBtn.classList.add("hidden");
 sidebarClassesBtn.classList.add("hidden");
 }
 
+if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
+const sidebarTimetableBtn=document.getElementById("sidebarTimetableBtn");
+const sidebarNotifyBtn=document.getElementById("sidebarNotifyBtn");
 if(currentUser.role==="principal"){
-if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
+if(sidebarNotifyBtn) sidebarNotifyBtn.classList.add("hidden");
+}else if(currentUser.role==="hod"){
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
+if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
 }else{
-if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
+if(sidebarNotifyBtn) sidebarNotifyBtn.classList.add("hidden");
 }
 
 if(currentUser.role==="principal"){
@@ -2875,117 +2963,312 @@ list.innerHTML+=`
 });
 }
 
+let hodDrillState = { subjectName: null, category: null, studentId: null };
+
+function hideAllHodDrillPages(){
+["hodDash","hodSubjectCatsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage"].forEach(id=>{
+const el=document.getElementById(id);
+if(el) el.classList.add("hidden");
+});
+}
+
+function closeHodDrillDown(){
+if(!currentUser || currentUser.role!=="hod") return;
+hideAllHodDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("hodDash").classList.remove("hidden");
+loadHodDash();
+}
+
+function hodStudentSubjectPct(studentId, subjectName){
+const records = getData("attendanceRecords").filter(r => r.studentId === studentId && (!subjectName || r.subjectName === subjectName));
+if(!records.length){
+const st = getData("students").find(s => s.id === studentId);
+return st ? (st.attendancePercentage || 0) : 0;
+}
+const present = records.filter(r => r.status === "Present" || r.status === "Late").length;
+return Math.round((present / records.length) * 100);
+}
+
+function hodDepartmentSubjects(){
+const lecturers = getData("lecturers").filter(l => l.hodId === currentUser.id);
+const subjects = [];
+lecturers.forEach(l => {
+if(Array.isArray(l.subjects)){
+l.subjects.forEach(s => {
+if(s && s.name && !subjects.includes(s.name)) subjects.push(s.name);
+});
+}
+});
+const records = getData("attendanceRecords").filter(r => {
+const st = getData("students").find(s => s.id === r.studentId);
+return st && st.hodId === currentUser.id && r.subjectName;
+});
+records.forEach(r => {
+if(r.subjectName && !subjects.includes(r.subjectName)) subjects.push(r.subjectName);
+});
+if(!subjects.length) subjects.push("General");
+return subjects;
+}
+
 function loadHodDash(){
+hideAllHodDrillPages();
 document.getElementById("hodDash").classList.remove("hidden");
 
 const students=getData("students").filter(x=>x.hodId===currentUser.id);
-const lecturers=getData("lecturers").filter(x=>x.hodId===currentUser.id);
 
-document.getElementById("hodDepartment").innerText=currentUser.department;
+const deptTitle=document.getElementById("hodDepartmentTitle");
+if(deptTitle) deptTitle.innerText = currentUser.department || "Department";
 document.getElementById("hodStudentCount").innerText=students.length;
-document.getElementById("hodLecturerCount").innerText=lecturers.length;
 
 let avg=0;
 if(students.length){
 let sum=students.reduce((a,b)=>a+(b.attendancePercentage||0),0);
 avg=Math.round(sum/students.length);
 }
-
 document.getElementById("hodAttendance").innerText=avg+"%";
-document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode;
-document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode;
+document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode||"—";
+document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode||"—";
 
-// Calculate 3 Range Categories for HOD
-const high = students.filter(s => (s.attendancePercentage || 0) >= 75).length;
-const mid = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75).length;
-const low = students.filter(s => (s.attendancePercentage || 0) < 50).length;
-
-document.getElementById("hodHighCount").innerText = high;
-document.getElementById("hodMidCount").innerText = mid;
-document.getElementById("hodLowCount").innerText = low;
+const grid=document.getElementById("hodSubjectsGrid");
+grid.innerHTML="";
+const subjects=hodDepartmentSubjects();
+subjects.forEach(subj=>{
+let sum=0,cnt=0;
+students.forEach(st=>{
+const pct=hodStudentSubjectPct(st.id, subj==="General"?null:subj);
+sum+=pct; cnt++;
+});
+const subAvg=cnt?Math.round(sum/cnt):0;
+let badgeClass="good";
+if(subAvg<50) badgeClass="low";
+else if(subAvg<75) badgeClass="medium";
+const safe=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`
+<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')">
+<div>
+<h4>${subj}</h4>
+<p>${students.length} students</p>
+</div>
+<div class="box-footer"><span class="badge ${badgeClass}">${subAvg}%</span></div>
+</div>`;
+});
 }
 
-/* HOD DETAILED STUDENT LIST FILTER */
-function showHodStudentsList(type){
-const students = getData("students").filter(x => x.hodId === currentUser.id);
-let filtered = students;
-let title = "All Students";
-
-if(type === 'high'){
-filtered = students.filter(s => (s.attendancePercentage || 0) >= 75);
-title = "Students with ≥ 75% Attendance";
-}else if(type === 'mid'){
-filtered = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75);
-title = "Students with 50% - 74% Attendance";
-}else if(type === 'low'){
-filtered = students.filter(s => (s.attendancePercentage || 0) < 50);
-title = "Students with Below 49% Attendance";
+function openHodSubjectCatsPage(subjectName){
+hodDrillState.subjectName=subjectName;
+hideAllHodDrillPages();
+document.getElementById("hodSubjectCatsPage").classList.remove("hidden");
+document.getElementById("hodSubjectCatsTitle").innerText=`${subjectName} – Categories`;
+const students=getData("students").filter(s=>s.hodId===currentUser.id);
+let high=0,mid=0,low=0;
+students.forEach(st=>{
+const pct=hodStudentSubjectPct(st.id, subjectName==="General"?null:subjectName);
+if(pct>=75) high++; else if(pct>=50) mid++; else low++;
+});
+document.getElementById("hodCatHigh").innerText=high;
+document.getElementById("hodCatMid").innerText=mid;
+document.getElementById("hodCatLow").innerText=low;
 }
 
-document.getElementById("hodListTitle").innerText = title;
-const container = document.getElementById("hodDynamicListContent");
-container.innerHTML = "";
-
+function openHodCategoryStudents(category){
+hodDrillState.category=category;
+hideAllHodDrillPages();
+document.getElementById("hodCategoryStudentsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+document.getElementById("hodCategoryStudentsTitle").innerText=`${hodDrillState.subjectName||"Subject"} – ${titleMap[category]||category}`;
+const students=getData("students").filter(s=>s.hodId===currentUser.id);
+const list=document.getElementById("hodCategoryStudentsList");
+const filtered=students.filter(st=>{
+const pct=hodStudentSubjectPct(st.id, hodDrillState.subjectName==="General"?null:hodDrillState.subjectName);
+if(category==="high") return pct>=75;
+if(category==="mid") return pct>=50 && pct<75;
+return pct<50;
+});
 if(!filtered.length){
-container.innerHTML = `<div class="today-empty">No student records found in this category.</div>`;
-}else{
-filtered.forEach(s => {
-let badgeClass = "good";
-const att = s.attendancePercentage || 0;
-if(att < 50) badgeClass = "low";
-else if(att < 75) badgeClass = "medium";
-
-container.innerHTML += `
-<div class="profile-row">
+list.innerHTML=`<div class="today-empty">No students in this category.</div>`;
+return;
+}
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+filtered.forEach(st=>{
+const pct=hodStudentSubjectPct(st.id, hodDrillState.subjectName==="General"?null:hodDrillState.subjectName);
+let badgeClass="good";
+if(pct<50) badgeClass="low";
+else if(pct<75) badgeClass="medium";
+grid.innerHTML+=`
+<div class="principal-box" onclick="openHodStudentHistory('${st.id}')">
 <div>
-<strong>${s.name} (Roll: ${s.roll})</strong><br>
-<small style="color:#94a3b8">Mobile: ${s.mobile} | Parent: ${s.parentName} (${s.parentMobile})</small>
+<h4>${st.name}</h4>
+<p>Roll: ${st.roll||"—"}</p>
+<p>Mobile: ${st.mobile||"—"}</p>
 </div>
-<div>
-<span class="badge ${badgeClass}">${att}%</span>
-</div>
-</div>
-`;
+<div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div>
+</div>`;
 });
 }
 
-const section = document.getElementById("hodDynamicListSection");
-section.classList.remove("hidden");
-section.scrollIntoView({ behavior: 'smooth' });
+function openHodStudentHistory(studentId){
+hodDrillState.studentId=studentId;
+hideAllHodDrillPages();
+document.getElementById("hodStudentHistoryPage").classList.remove("hidden");
+const st=getData("students").find(s=>s.id===studentId);
+document.getElementById("hodStudentHistoryTitle").innerText=`${st?st.name:"Student"} – Attendance History`;
+const subjectName=hodDrillState.subjectName==="General"?null:hodDrillState.subjectName;
+let records=getData("attendanceRecords").filter(r=>r.studentId===studentId && (!subjectName || r.subjectName===subjectName));
+records.sort((a,b)=>new Date(b.date)-new Date(a.date));
+const list=document.getElementById("hodStudentHistoryList");
+if(!records.length){
+list.innerHTML=`<div class="today-empty">No attendance history available.</div>`;
+return;
 }
-
-function showHodLecturersList(){
-const lecturers = getData("lecturers").filter(x => x.hodId === currentUser.id);
-document.getElementById("hodListTitle").innerText = "Lecturers Details & Codes";
-const container = document.getElementById("hodDynamicListContent");
-container.innerHTML = "";
-
-if(!lecturers.length){
-container.innerHTML = `<div class="today-empty">No lecturers registered in this department.</div>`;
-}else{
-lecturers.forEach(l => {
-container.innerHTML += `
-<div class="profile-row">
+list.innerHTML="";
+records.forEach(r=>{
+let badgeClass="good";
+if(r.status==="Absent") badgeClass="low";
+if(r.status==="Late") badgeClass="medium";
+list.innerHTML+=`
+<div class="group">
 <div>
-<strong>${l.name} (ID: ${l.id})</strong><br>
-<small style="color:#94a3b8">Mobile: ${l.mobile} | Subjects: ${l.subjects.map(s => s.name).join(", ")}</small>
+<strong>${r.date||"—"}</strong><br>
+<small style="color:#94a3b8">${r.subjectName||"Subject"} ${r.time?"• "+r.time:""}</small>
 </div>
-<div>
-<span class="badge good">Lecturer Code: ${currentUser.lecturerInviteCode}</span>
-</div>
-</div>
-`;
+<span class="badge ${badgeClass}">${r.status||"—"}</span>
+</div>`;
 });
 }
 
-const section = document.getElementById("hodDynamicListSection");
-section.classList.remove("hidden");
-section.scrollIntoView({ behavior: 'smooth' });
+function openHodStudentsSearch(){
+if(!currentUser || currentUser.role!=="hod") return;
+hideAllHodDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("hodStudentsSearchPage").classList.remove("hidden");
+const input=document.getElementById("hodStudentSearchInput");
+const msg=document.getElementById("hodStudentSearchMsg");
+const result=document.getElementById("hodStudentSearchResult");
+if(input) input.value="";
+if(msg){ msg.style.display="none"; msg.innerText=""; }
+if(result) result.classList.add("hidden");
 }
 
-function hideHodDynamicList(){
-document.getElementById("hodDynamicListSection").classList.add("hidden");
+function searchHodStudent(){
+const msg=document.getElementById("hodStudentSearchMsg");
+const result=document.getElementById("hodStudentSearchResult");
+const details=document.getElementById("hodStudentSearchDetails");
+const q=(document.getElementById("hodStudentSearchInput").value||"").trim().toLowerCase();
+msg.style.display="none";
+result.classList.add("hidden");
+details.innerHTML="";
+if(!q){
+msg.innerText="Please enter roll number or mobile number.";
+msg.style.display="block";
+return;
 }
+const students=getData("students").filter(x=>x.hodId===currentUser.id);
+const student=students.find(s=>
+(s.roll && String(s.roll).toLowerCase()===q) ||
+(s.mobile && String(s.mobile).toLowerCase()===q) ||
+(s.id && String(s.id).toLowerCase()===q)
+);
+if(!student){
+msg.innerText="No student found in your department with this roll/mobile.";
+msg.style.display="block";
+return;
+}
+const att=student.attendancePercentage||0;
+let badgeClass="good";
+if(att<50) badgeClass="low";
+else if(att<75) badgeClass="medium";
+details.innerHTML=`
+<div class="principal-box-grid">
+<div class="principal-box" style="cursor:default; grid-column:1 / -1;">
+<div>
+<h4>${student.name||"—"}</h4>
+<p>Student ID: ${student.id||"—"}</p>
+<p>Roll Number: ${student.roll||"—"}</p>
+<p>Mobile: ${student.mobile||"—"}</p>
+<p>College: ${student.college||"—"}</p>
+<p>Department / Group: ${student.department||"—"}</p>
+<p>HOD: ${student.hodName||currentUser.name||"—"}</p>
+<p>Principal: ${student.principalName||"—"}</p>
+<p>Parent Name: ${student.parentName||"—"}</p>
+<p>Parent Mobile: ${student.parentMobile||"—"}</p>
+<p>Created: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "—"}</p>
+</div>
+<div class="box-footer"><span class="badge ${badgeClass}">Attendance ${att}%</span></div>
+</div>
+</div>`;
+result.classList.remove("hidden");
+}
+
+function openHodTimetable(){
+if(!currentUser || currentUser.role!=="hod") return;
+hideAllHodDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("hodTimetablePage").classList.remove("hidden");
+const firstBtn=document.querySelector("#hodDayFilters .filter-btn");
+renderHodTimetable("Monday", firstBtn);
+}
+
+function renderHodTimetable(day, btn){
+if(btn){
+document.querySelectorAll("#hodDayFilters .filter-btn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+const list=document.getElementById("hodTimetableList");
+const lecturers=getData("lecturers").filter(l=>l.hodId===currentUser.id);
+const items=[];
+lecturers.forEach(l=>{
+if(!Array.isArray(l.subjects)) return;
+l.subjects.forEach(s=>{
+const days=s.days||s.weekDays||[];
+const dayMatch=!days.length || days.some(d=>String(d).toLowerCase()===String(day).toLowerCase());
+if(dayMatch){
+items.push({
+lecturer:l.name||"—",
+subject:s.name||"—",
+start:s.start||s.startTime||"—",
+end:s.end||s.endTime||"—"
+});
+}
+});
+});
+if(!items.length){
+list.innerHTML=`<div class="today-empty">No classes scheduled for ${day}.</div>`;
+return;
+}
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+items.forEach(it=>{
+grid.innerHTML+=`
+<div class="principal-box" style="cursor:default">
+<div>
+<h4>${it.subject}</h4>
+<p>Lecturer: ${it.lecturer}</p>
+<p>Time: ${it.start} – ${it.end}</p>
+<p>Day: ${day}</p>
+</div>
+</div>`;
+});
+}
+
+function openHodNotifications(){
+if(!currentUser || currentUser.role!=="hod") return;
+hideAllHodDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("hodNotificationsPage").classList.remove("hidden");
+}
+
+function showHodLecturersList(){ /* legacy removed – HOD uses subject drill-down */ }
+function hideHodDynamicList(){ /* legacy removed */ }
 
 function loadStudentDash(){
 document.getElementById("studentDash").classList.remove("hidden");
