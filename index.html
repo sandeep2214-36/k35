@@ -2381,6 +2381,11 @@ localStorage.setItem("currentStudentSession",JSON.stringify(user));
 window.location.href="student.html";
 return;
 }
+if(user.role==="lecturer"){
+localStorage.setItem("currentLecturerSession",JSON.stringify(user));
+window.location.href="lecturer.html";
+return;
+}
 openDashboard();
 }
 

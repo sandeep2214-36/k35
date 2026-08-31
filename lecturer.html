@@ -1,0 +1,1843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Student Management & Attendance Tracker</title>
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ==========================================
+           CSS ARCHITECTURE & THEME (Royal Blue)
+           ========================================== */
+        :root {
+            --primary: #1a56db;
+            --primary-dark: #1e429f;
+            --primary-light: #e1effe;
+            --accent: #3f83f8;
+            --success: #0e9f6e;
+            --success-light: #def7ec;
+            --danger: #f05252;
+            --danger-light: #fde8e8;
+            --warning: #ff5a1f;
+            --warning-light: #feecdc;
+            --dark: #111827;
+            --gray-dark: #4b5563;
+            --gray: #9ca3af;
+            --gray-light: #f3f4f6;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --transition: all 0.25s ease-in-out;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--gray-light);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 70px; /* Space for bottom nav on mobile */
+        }
+
+        /* Layout Structure */
+        .app-container {
+            display: flex;
+            flex: 1;
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Navigation (Desktop) */
+        aside {
+            width: 260px;
+            background-color: var(--white);
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .brand-container {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .brand-container i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .brand-container h1 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-dark);
+        }
+
+        .nav-links {
+            list-style: none;
+            padding: 20px 12px;
+            flex: 1;
+        }
+
+        .nav-links li {
+            margin-bottom: 6px;
+        }
+
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: var(--radius);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .nav-links a i {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-footer {
+            padding: 16px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .demo-btn {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border: 1px dashed var(--primary);
+            border-radius: var(--radius);
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .demo-btn:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        /* Bottom Navigation (Mobile - matches uploaded design) */
+        .bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background-color: var(--white);
+            border-top: 1px solid #e5e7eb;
+            z-index: 1000;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: var(--gray);
+            font-size: 11px;
+            font-weight: 500;
+            transition: var(--transition);
+            gap: 4px;
+            flex: 1;
+        }
+
+        .bottom-nav-item i {
+            font-size: 20px;
+        }
+
+        .bottom-nav-item.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Main Content Area */
+        main {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        /* Top Header */
+        header {
+            background-color: var(--white);
+            height: 70px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+
+        .header-title h2 {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .header-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .notification-badge {
+            position: relative;
+            cursor: pointer;
+            color: var(--gray-dark);
+            font-size: 18px;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .profile-details h4 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .profile-details p {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        /* View Container */
+        .content-body {
+            padding: 32px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Common UI Elements */
+        .card {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1px solid #e5e7eb;
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: var(--primary);
+        }
+
+        .stat-card.warning::after { background-color: var(--warning); }
+        .stat-card.danger::after { background-color: var(--danger); }
+        .stat-card.success::after { background-color: var(--success); }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--gray-dark);
+            font-weight: 500;
+        }
+
+        /* Tables & Lists */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #f9fafb;
+            color: var(--gray-dark);
+            font-weight: 600;
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            color: var(--dark);
+        }
+
+        tr:hover td {
+            background-color: #f9fafb;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge.good, .badge.present, .badge.active {
+            background-color: var(--success-light);
+            color: var(--success);
+        }
+
+        .badge.red-alert, .badge.absent, .badge.closed {
+            background-color: var(--danger-light);
+            color: var(--danger);
+        }
+
+        .badge.warning {
+            background-color: var(--warning-light);
+            color: var(--warning);
+        }
+
+        /* Buttons & Forms */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #d1d5db;
+            color: var(--gray-dark);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--gray-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: var(--gray-dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: var(--radius);
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+            background-color: var(--white);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Modals & Detail Panels */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(17, 24, 39, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-container {
+            background-color: var(--white);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 650px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.95);
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Detail View / Back Navigation Wrapper */
+        .detail-view {
+            display: none;
+        }
+        .detail-view.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 12px;
+            color: #d1d5db;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Progress Bar */
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e5e7eb;
+            border-radius: 50px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 50px;
+            transition: width 0.4s ease;
+        }
+
+        /* Responsive */
+        @media(max-width: 900px) {
+            aside {
+                display: none; /* Hide sidebar on mobile */
+            }
+            main {
+                margin-left: 0;
+            }
+            .bottom-nav {
+                display: flex; /* Show bottom nav on mobile */
+            }
+            body {
+                padding-bottom: 75px;
+            }
+            header {
+                padding: 0 16px;
+            }
+            .content-body {
+                padding: 16px;
+            }
+        }
+
+        @media(max-width: 600px) {
+            .attendance-header-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 12px;
+            }
+            .attendance-header-row .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Sidebar Navigation (Desktop) -->
+        <aside>
+            <div class="brand-container">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <h1>EduTracker</h1>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#" class="nav-item active" data-target="home-section"><i class="fa-solid fa-house"></i><span>Home</span></a></li>
+                <li><a href="#" class="nav-item" data-target="attendance-section"><i class="fa-solid fa-qrcode"></i><span>Attendance</span></a></li>
+                <li><a href="#" class="nav-item" data-target="students-section"><i class="fa-solid fa-user-plus"></i><span>Add Students</span></a></li>
+                <li><a href="#" class="nav-item" data-target="marks-section"><i class="fa-solid fa-marker"></i><span>Add Marks</span></a></li>
+            </ul>
+            <div class="sidebar-footer">
+                <button class="demo-btn" onclick="loadDemoData()"><i class="fa-solid fa-database"></i> Load Demo Data</button>
+            </div>
+        </aside>
+
+        <!-- Bottom Navigation Bar (Mobile - matches uploaded design) -->
+        <nav class="bottom-nav">
+            <a href="#" class="bottom-nav-item nav-item active" data-target="home-section">
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="bottom-nav-item nav-item" data-target="attendance-section">
+                <i class="fa-solid fa-square-check"></i>
+                <span>Attendance</span>
+            </a>
+            <a href="#" class="bottom-nav-item nav-item" data-target="marks-section">
+                <i class="fa-solid fa-chart-bar"></i>
+                <span>Marks</span>
+            </a>
+            <a href="#" class="bottom-nav-item nav-item" data-target="students-section">
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="lecturerLogout(); return false;">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span>Logout</span>
+            </a>
+        </nav>
+
+        <!-- Main Wrapper -->
+        <main>
+            <!-- Top Header -->
+            <header>
+                <div class="header-title">
+                    <h2 id="page-heading">Dashboard Overview</h2>
+                </div>
+                <div class="header-profile">
+                    <div class="notification-badge"><i class="fa-regular fa-bell"></i></div>
+                    <div class="profile-info">
+                        <div class="avatar" id="lecturer-avatar">DR</div>
+                        <div class="profile-details">
+                            <h4 id="lecturer-name">Dr. Robert Smith</h4>
+                            <p>Senior Lecturer</p>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Dynamic Body Sections -->
+            <div class="content-body">
+
+                <!-- 1. HOME DASHBOARD SECTION -->
+                <section id="home-section" class="view-section active">
+                    <div id="home-main-view">
+                        <div class="grid-4">
+                            <!-- Card 1: Total Classes -->
+                            <div class="card stat-card" onclick="openClassesModal()">
+                                <div class="stat-header">
+                                    <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+                                </div>
+                                <div class="stat-value" id="stat-total-classes">0</div>
+                                <div class="stat-label">Total Classes & Groups</div>
+                            </div>
+                            <!-- Card 2: Average Attendance -->
+                            <div class="card stat-card success" onclick="openAttendanceAnalysisModal()">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: var(--success-light); color: var(--success);"><i class="fa-solid fa-chart-pie"></i></div>
+                                </div>
+                                <div class="stat-value" id="stat-avg-attendance">0%</div>
+                                <div class="stat-label">Average Attendance</div>
+                            </div>
+                            <!-- Card 3: Average Marks -->
+                            <div class="card stat-card" onclick="openMarksAnalysisModal()">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: var(--primary-light); color: var(--primary);"><i class="fa-solid fa-award"></i></div>
+                                </div>
+                                <div class="stat-value" id="stat-avg-marks">0%</div>
+                                <div class="stat-label">Average Marks</div>
+                            </div>
+                            <!-- Card 4: Red Zone Groups -->
+                            <div class="card stat-card danger" onclick="openRedZoneModal()">
+                                <div class="stat-header">
+                                    <div class="stat-icon" style="background-color: var(--danger-light); color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                </div>
+                                <div class="stat-value" id="stat-red-zones">0</div>
+                                <div class="stat-label">Red Zone Groups (&lt;75%)</div>
+                            </div>
+                        </div>
+
+                        <!-- Today's Classes Card Section -->
+                        <div class="card" style="margin-bottom: 24px;">
+                            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;"><i class="fa-solid fa-calendar-day" style="color: var(--primary); margin-right: 8px;"></i> Today's Active Classes</h3>
+                            <div class="table-responsive">
+                                <table id="todays-classes-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Class & Group</th>
+                                            <th>Subject</th>
+                                            <th>Schedule Time</th>
+                                            <th>Total Students</th>
+                                            <th>Present</th>
+                                            <th>Absent</th>
+                                            <th>Attendance %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="todays-classes-tbody">
+                                        <!-- Dynamically Populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="home-detail-view" class="detail-view">
+                        <button class="back-btn" onclick="closeHomeDetailView()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+                        <div id="home-detail-content" class="card">
+                            <!-- Injected drill-down analysis content -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. ATTENDANCE SECTION -->
+                <section id="attendance-section" class="view-section">
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <div class="attendance-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h3 style="font-size: 18px; font-weight: 600;">Attendance Management & Session Security</h3>
+                            <button class="btn btn-outline" onclick="openManualAttendanceModal()"><i class="fa-solid fa-user-check"></i> Manual Attendance</button>
+                        </div>
+                        
+                        <div id="session-setup-form">
+                            <div class="grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Class</label>
+                                    <input type="text" id="att-class" class="form-control" placeholder="e.g. B.Com">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Group</label>
+                                    <input type="text" id="att-group" class="form-control" placeholder="e.g. A">
+                                </div>
+                            </div>
+                            <div class="grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Semester</label>
+                                    <input type="text" id="att-semester" class="form-control" placeholder="e.g. 3">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Year</label>
+                                    <input type="text" id="att-year" class="form-control" placeholder="e.g. 2026">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Subject</label>
+                                <input type="text" id="att-subject" class="form-control" placeholder="e.g. Mathematics">
+                            </div>
+                            <div class="grid-2" style="margin-bottom: 16px;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Class Start Time</label>
+                                    <input type="time" id="att-start-time" class="form-control">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Class End Time</label>
+                                    <input type="time" id="att-end-time" class="form-control">
+                                </div>
+                            </div>
+                            <div class="grid-2" style="margin-bottom: 24px;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Attendance Window Start</label>
+                                    <input type="time" id="att-window-start" class="form-control">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label class="form-label">Attendance Window End</label>
+                                    <input type="time" id="att-window-end" class="form-control">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" style="width: 100%;" onclick="startAttendanceSession()"><i class="fa-solid fa-location-crosshairs"></i> Turn ON Location & Start Attendance Session</button>
+                        </div>
+
+                        <!-- Active Session Panel -->
+                        <div id="active-session-panel" style="display: none; text-align: center; padding: 20px 0;">
+                            <div style="margin-bottom: 16px;"><span class="badge active" style="font-size: 14px; padding: 6px 16px;">ATTENDANCE ACTIVE</span></div>
+                            <h4 id="active-session-details" style="font-size: 16px; margin-bottom: 8px; color: var(--gray-dark);"></h4>
+                            <p style="font-size: 13px; color: var(--gray); margin-bottom: 20px;">Location Geofence Verified & Active. Students can securely submit attendance.</p>
+                            <div style="font-size: 24px; font-weight: 700; color: var(--primary); margin-bottom: 24px;" id="session-timer">Time Remaining: 00:19:45</div>
+                            
+                            <div style="background-color: var(--gray-light); padding: 20px; border-radius: var(--radius); text-align: left; margin-top: 20px;">
+                                <h5 style="margin-bottom: 12px; font-size: 14px; font-weight: 600;"><i class="fa-solid fa-mobile-screen"></i> Student Submission Simulator Portal</h5>
+                                <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+                                    <input type="text" id="sim-roll" class="form-control" placeholder="Enter Roll Number">
+                                    <input type="text" id="sim-name" class="form-control" placeholder="Enter Student Name">
+                                </div>
+                                <button class="btn btn-primary" onclick="simulateStudentCheckIn()"><i class="fa-solid fa-paper-plane"></i> Submit Student Attendance</button>
+                                <div id="sim-result-msg" style="margin-top: 12px; font-weight: 600; font-size: 13px;"></div>
+                            </div>
+
+                            <button class="btn btn-danger" style="margin-top: 24px;" onclick="closeAttendanceSession()"><i class="fa-solid fa-stop"></i> Close Attendance Session</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 3. ADD STUDENTS SECTION -->
+                <section id="students-section" class="view-section">
+                    <div class="card" style="max-width: 800px; margin: 0 auto; margin-bottom: 24px;">
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Register New Students Class Batch</h3>
+                        <div class="grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Class Name</label>
+                                <input type="text" id="reg-class" class="form-control" placeholder="e.g. B.Com">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Group</label>
+                                <input type="text" id="reg-group" class="form-control" placeholder="e.g. A">
+                            </div>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Semester</label>
+                                <input type="text" id="reg-semester" class="form-control" placeholder="e.g. 3">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Year</label>
+                                <input type="text" id="reg-year" class="form-control" placeholder="e.g. 2026">
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label class="form-label">Subject</label>
+                            <input type="text" id="reg-subject" class="form-control" placeholder="e.g. Mathematics">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label class="form-label">How many students do you want to add?</label>
+                            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                                <input type="number" id="reg-count" class="form-control" style="flex: 1; min-width: 150px;" placeholder="e.g. 75" min="1" max="200">
+                                <button class="btn btn-primary" onclick="generateStudentRows()"><i class="fa-solid fa-list-ol"></i> Generate Rows</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="student-rows-card" class="card" style="max-width: 800px; margin: 0 auto; display: none;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Enter Student Details</h3>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                            <table id="dynamic-student-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 80px;">S.No</th>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dynamic-student-tbody">
+                                    <!-- Dynamic Inputs -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="saveBulkStudents()"><i class="fa-solid fa-floppy-disk"></i> Save Students Batch</button>
+                    </div>
+                </section>
+
+                <!-- 4. ADD MARKS SECTION -->
+                <section id="marks-section" class="view-section">
+                    <div class="card" style="max-width: 900px; margin: 0 auto; margin-bottom: 24px;">
+                        <h3 style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Manage & Record Exam Marks</h3>
+                        <div class="grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Class Name</label>
+                                <input type="text" id="marks-class" class="form-control" placeholder="e.g. B.Com">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Group</label>
+                                <input type="text" id="marks-group" class="form-control" placeholder="e.g. A">
+                            </div>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Semester</label>
+                                <input type="text" id="marks-semester" class="form-control" placeholder="e.g. 3">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Year</label>
+                                <input type="text" id="marks-year" class="form-control" placeholder="e.g. 2026">
+                            </div>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 16px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Subject</label>
+                                <input type="text" id="marks-subject" class="form-control" placeholder="e.g. Mathematics">
+                            </div>
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Exam Type</label>
+                                <select id="marks-exam-type" class="form-control">
+                                    <option value="Internal 1">Internal 1</option>
+                                    <option value="Internal 2">Internal 2</option>
+                                    <option value="Mid Exam">Mid Exam</option>
+                                    <option value="Semester Exam">Semester Exam</option>
+                                    <option value="Assignment">Assignment</option>
+                                    <option value="Practical">Practical</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid-2" style="margin-bottom: 20px;">
+                            <div class="form-group" style="margin-bottom:0;">
+                                <label class="form-label">Maximum Marks (Editable)</label>
+                                <input type="number" id="marks-max" class="form-control" value="100">
+                            </div>
+                            <div style="display: flex; align-items: flex-end;">
+                                <button class="btn btn-primary" style="width: 100%;" onclick="loadStudentsForMarks()"><i class="fa-solid fa-users"></i> Load Students</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="marks-entry-card" class="card" style="max-width: 900px; margin: 0 auto; display: none;">
+                        <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Enter Marks Obtained</h3>
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                            <table id="marks-entry-table">
+                                <thead>
+                                    <tr>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                        <th style="width: 200px;">Marks Obtained</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="marks-entry-tbody">
+                                    <!-- Dynamic Marks Input Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-primary" style="width: 100%;" onclick="saveAllMarks()"><i class="fa-solid fa-floppy-disk"></i> Save Permanent Marks Records</button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="manual-att-modal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>Manual Attendance Entry</h3>
+                <button class="modal-close" onclick="closeManualAttendanceModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Group / Class Combo</label>
+                    <input type="text" id="man-group" class="form-control" placeholder="e.g. B.Com - A">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Roll Number</label>
+                    <input type="text" id="man-roll" class="form-control" placeholder="e.g. 101">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Student Name</label>
+                    <input type="text" id="man-name" class="form-control" placeholder="e.g. Ravi Kumar">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Attendance Status</label>
+                    <select id="man-status" class="form-control">
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeManualAttendanceModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="submitManualAttendance()"><i class="fa-solid fa-check"></i> Save Attendance</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal-1" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Security Warning</h3>
+                <button class="modal-close" onclick="closeDeleteModals()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 14px; color: var(--gray-dark);">Are you sure you want to delete this student record?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeDeleteModals()">Cancel</button>
+                <button class="btn btn-danger" onclick="proceedDeleteStep2()">Yes, Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-modal-2" class="modal-overlay">
+        <div class="modal-container" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3 style="color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Final Security Warning</h3>
+                <button class="modal-close" onclick="closeDeleteModals()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 14px; color: var(--gray-dark); font-weight: 600;">Final Warning: Deleting this student will permanently remove the student from the current student database list. Continue?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeDeleteModals()">Abort</button>
+                <button class="btn btn-danger" onclick="executeFinalDelete()">Confirm Permanent Deletion</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let db = {
+            students: JSON.parse(localStorage.getItem('edu_students')) || [],
+            attendance: JSON.parse(localStorage.getItem('edu_attendance')) || [],
+            marks: JSON.parse(localStorage.getItem('edu_marks')) || [],
+            sessions: JSON.parse(localStorage.getItem('edu_sessions')) || []
+        };
+
+        function persistData() {
+            localStorage.setItem('edu_students', JSON.stringify(db.students));
+            localStorage.setItem('edu_attendance', JSON.stringify(db.attendance));
+            localStorage.setItem('edu_marks', JSON.stringify(db.marks));
+            localStorage.setItem('edu_sessions', JSON.stringify(db.sessions));
+        }
+
+        let activeSession = null;
+        let deleteTargetId = null;
+
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.view-section');
+        const pageHeading = document.getElementById('page-heading');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                navItems.forEach(nav => nav.classList.remove('active'));
+                
+                // Sync all nav items with matching target
+                const targetId = item.getAttribute('data-target');
+                if(!targetId) return; // skip logout or non-target items
+                
+                document.querySelectorAll(`.nav-item[data-target="${targetId}"]`).forEach(el => el.classList.add('active'));
+
+                sections.forEach(sec => sec.classList.remove('active'));
+                document.getElementById(targetId).classList.add('active');
+
+                if(targetId === 'home-section') {
+                    pageHeading.innerText = "Dashboard Overview";
+                    renderHomeDashboard();
+                    closeHomeDetailView();
+                } else if(targetId === 'attendance-section') {
+                    pageHeading.innerText = "Attendance Management";
+                } else if(targetId === 'students-section') {
+                    pageHeading.innerText = "Student Batch Registration";
+                } else if(targetId === 'marks-section') {
+                    pageHeading.innerText = "Exam Marks Management";
+                }
+            });
+        });
+
+        function lecturerLogout() {
+            try { localStorage.removeItem('currentLecturerSession'); } catch (e) {}
+            window.location.href = 'index.html';
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            try {
+                const session = JSON.parse(localStorage.getItem('currentLecturerSession') || 'null');
+                if (session && session.role === 'lecturer') {
+                    const nameEl = document.getElementById('lecturer-name');
+                    const avatarEl = document.getElementById('lecturer-avatar');
+                    if (nameEl) nameEl.textContent = session.name || 'Lecturer';
+                    if (avatarEl) {
+                        const parts = (session.name || 'L').trim().split(/\s+/);
+                        avatarEl.textContent = ((parts[0] && parts[0][0]) || 'L') + ((parts[1] && parts[1][0]) || '');
+                    }
+                }
+            } catch (e) {}
+            renderHomeDashboard();
+        });
+
+        function renderHomeDashboard() {
+            const classGroups = getUniqueClassGroups();
+            document.getElementById('stat-total-classes').innerText = classGroups.length;
+
+            let totalPercentage = 0;
+            let groupCount = 0;
+            classGroups.forEach(cg => {
+                let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                if(stats.totalClasses > 0) {
+                    totalPercentage += stats.percentage;
+                    groupCount++;
+                }
+            });
+            let avgAtt = groupCount > 0 ? (totalPercentage / groupCount).toFixed(1) : 0;
+            document.getElementById('stat-avg-attendance').innerText = avgAtt + '%';
+
+            let avgMarks = calculateOverallAverageMarks();
+            document.getElementById('stat-avg-marks').innerText = avgMarks + '%';
+
+            let redZones = classGroups.filter(cg => {
+                let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                return stats.percentage < 75 && stats.totalStudents > 0;
+            });
+            document.getElementById('stat-red-zones').innerText = redZones.length;
+
+            renderTodaysClassesTable(classGroups);
+        }
+
+        function getUniqueClassGroups() {
+            let map = {};
+            db.students.forEach(s => {
+                let key = `${s.className}-${s.groupName}`;
+                if(!map[key]) {
+                    map[key] = { className: s.className, groupName: s.groupName, semester: s.semester, year: s.year };
+                }
+            });
+            return Object.values(map);
+        }
+
+        function calculateAttendanceForGroup(className, groupName) {
+            let students = db.students.filter(s => s.className === className && s.groupName === groupName);
+            if(students.length === 0) return { percentage: 0, totalClasses: 0, totalStudents: 0 };
+
+            let totalPossible = 0;
+            let totalPresent = 0;
+
+            students.forEach(st => {
+                let stRecords = db.attendance.filter(a => a.studentId === st.id);
+                totalPossible += stRecords.length;
+                totalPresent += stRecords.filter(a => a.status === 'Present').length;
+            });
+
+            let percentage = totalPossible > 0 ? Math.round((totalPresent / totalPossible) * 100) : 0;
+            return { percentage, totalClasses: totalPossible, totalStudents: students.length };
+        }
+
+        function calculateOverallAverageMarks() {
+            if(db.marks.length === 0) return 0;
+            let totalObtained = 0;
+            let totalMax = 0;
+            db.marks.forEach(m => {
+                totalObtained += Number(m.marksObtained);
+                totalMax += Number(m.maxMarks);
+            });
+            return totalMax > 0 ? Math.round((totalObtained / totalMax) * 100) : 0;
+        }
+
+        function renderTodaysClassesTable(classGroups) {
+            const tbody = document.getElementById('todays-classes-tbody');
+            tbody.innerHTML = '';
+
+            if(classGroups.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state"><i class="fa-solid fa-folder-open"></i><p>No classes available. Add students or demo data.</p></td></tr>`;
+                return;
+            }
+
+            classGroups.forEach(cg => {
+                let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                let presentCount = Math.round((stats.percentage / 100) * (stats.totalStudents || 0));
+                let absentCount = (stats.totalStudents || 0) - presentCount;
+
+                let tr = document.createElement('tr');
+                tr.style.cursor = 'pointer';
+                tr.onclick = () => openClassDetailAnalysis(cg.className, cg.groupName);
+                tr.innerHTML = `
+                    <td><strong>${cg.className}</strong> – ${cg.groupName}</td>
+                    <td>General / Core</td>
+                    <td>10:00 AM – 11:00 AM</td>
+                    <td>${stats.totalStudents}</td>
+                    <td style="color: var(--success); font-weight:600;">${presentCount}</td>
+                    <td style="color: var(--danger); font-weight:600;">${absentCount}</td>
+                    <td><span class="badge ${stats.percentage >= 75 ? 'good' : 'red-alert'}">${stats.percentage}%</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function showHomeDetailContent(htmlContent) {
+            document.getElementById('home-main-view').style.display = 'none';
+            document.getElementById('home-detail-view').classList.add('active');
+            document.getElementById('home-detail-content').innerHTML = htmlContent;
+        }
+
+        function closeHomeDetailView() {
+            document.getElementById('home-detail-view').classList.remove('active');
+            document.getElementById('home-main-view').style.display = 'block';
+        }
+
+        function openClassesModal() {
+            let classGroups = getUniqueClassGroups();
+            let html = `<h3 style="margin-bottom: 16px; font-size:18px;">All Available Classes & Groups</h3><div class="table-responsive"><table><thead><tr><th>Class</th><th>Group</th><th>Semester</th><th>Year</th><th>Total Students</th><th>Action</th></tr></thead><tbody>`;
+            
+            if(classGroups.length === 0) {
+                html += `<tr><td colspan="6" class="empty-state">No classes found.</td></tr>`;
+            } else {
+                classGroups.forEach(cg => {
+                    let count = db.students.filter(s => s.className === cg.className && s.groupName === cg.groupName).length;
+                    html += `<tr><td>${cg.className}</td><td>${cg.groupName}</td><td>${cg.semester || 'N/A'}</td><td>${cg.year || 'N/A'}</td><td>${count}</td><td><button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openClassDetailAnalysis('${cg.className}', '${cg.groupName}')">View Analysis</button></td></tr>`;
+                });
+            }
+            html += `</tbody></table></div>`;
+            showHomeDetailContent(html);
+        }
+
+        function openAttendanceAnalysisModal() {
+            let classGroups = getUniqueClassGroups();
+            let html = `<h3 style="margin-bottom: 16px; font-size:18px;">Class-wise Attendance Percentage</h3><div class="table-responsive"><table><thead><tr><th>Class & Group</th><th>Total Students</th><th>Attendance %</th><th>Status</th><th>Action</th></tr></thead><tbody>`;
+
+            classGroups.forEach(cg => {
+                let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                let statusBadge = stats.percentage >= 75 ? '<span class="badge good">Good</span>' : '<span class="badge red-alert">Red Alert</span>';
+                html += `<tr><td><strong>${cg.className}</strong> – ${cg.groupName}</td><td>${stats.totalStudents}</td><td>${stats.percentage}%</td><td>${statusBadge}</td><td><button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openClassDetailAnalysis('${cg.className}', '${cg.groupName}')">Detailed View</button></td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+            showHomeDetailContent(html);
+        }
+
+        function openClassDetailAnalysis(className, groupName) {
+            let students = db.students.filter(s => s.className === className && s.groupName === groupName);
+            let above75 = 0;
+            let below75 = 0;
+
+            let studentRows = '';
+            students.forEach(st => {
+                let stRecords = db.attendance.filter(a => a.studentId === st.id);
+                let total = stRecords.length;
+                let present = stRecords.filter(a => a.status === 'Present').length;
+                let pct = total > 0 ? Math.round((present / total) * 100) : 0;
+                
+                if(total === 0) pct = 100;
+
+                if(pct >= 75) above75++; else below75++;
+                let statusText = pct >= 75 ? '<span class="badge good">Good</span>' : '<span class="badge red-alert">Red Alert</span>';
+
+                studentRows += `<tr style="cursor:pointer;" onclick="openStudentHistory('${st.id}')"><td>${st.rollNumber}</td><td>${st.name}</td><td>${pct}%</td><td>${statusText}</td></tr>`;
+            });
+
+            let totalSt = students.length;
+            let avgPct = totalSt > 0 ? Math.round(students.reduce((acc, st) => {
+                let recs = db.attendance.filter(a => a.studentId === st.id);
+                let t = recs.length; let p = recs.filter(a => a.status === 'Present').length;
+                return acc + (t > 0 ? Math.round((p/t)*100) : 100);
+            }, 0) / totalSt) : 0;
+
+            let html = `
+                <h3 style="margin-bottom: 16px; font-size:18px;">Analysis: ${className} – Group ${groupName}</h3>
+                <div class="grid-3" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="card" style="padding: 16px; background: var(--primary-light); color: var(--primary-dark);">
+                        <div style="font-size: 13px; font-weight:600;">Average Attendance</div>
+                        <div style="font-size: 24px; font-weight:700;">${avgPct}%</div>
+                    </div>
+                    <div class="card" style="padding: 16px; background: var(--success-light); color: var(--success);">
+                        <div style="font-size: 13px; font-weight:600;">Above 75%</div>
+                        <div style="font-size: 24px; font-weight:700;">${above75} Students</div>
+                    </div>
+                    <div class="card" style="padding: 16px; background: var(--danger-light); color: var(--danger);">
+                        <div style="font-size: 13px; font-weight:600;">Below 75%</div>
+                        <div style="font-size: 24px; font-weight:700;">${below75} Students</div>
+                    </div>
+                </div>
+                <h4 style="margin-bottom: 12px; font-size: 15px;">Student Roster & Attendance Status</h4>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr><th>Roll Number</th><th>Student Name</th><th>Attendance %</th><th>Status</th></tr>
+                        </thead>
+                        <tbody>${studentRows || '<tr><td colspan="4" class="empty-state">No students found in this group.</td></tr>'}</tbody>
+                    </table>
+                </div>
+            `;
+            showHomeDetailContent(html);
+        }
+
+        function openMarksAnalysisModal() {
+            let classGroups = getUniqueClassGroups();
+            let html = `<h3 style="margin-bottom: 16px; font-size:18px;">Class-wise Average Marks Analysis</h3><div class="table-responsive"><table><thead><tr><th>Class & Group</th><th>Exam Type</th><th>Average Marks Obtained</th><th>Action</th></tr></thead><tbody>`;
+
+            classGroups.forEach(cg => {
+                let groupMarks = db.marks.filter(m => m.className === cg.className && m.groupName === cg.groupName);
+                let avg = groupMarks.length > 0 ? Math.round(groupMarks.reduce((acc, m) => acc + (Number(m.marksObtained)/Number(m.maxMarks))*100, 0) / groupMarks.length) : 0;
+                
+                html += `<tr><td><strong>${cg.className}</strong> – ${cg.groupName}</td><td>All Exams</td><td>${avg}%</td><td><button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openMarksDetailAnalysis('${cg.className}', '${cg.groupName}')">View Marks</button></td></tr>`;
+            });
+            html += `</tbody></table></div>`;
+            showHomeDetailContent(html);
+        }
+
+        function openMarksDetailAnalysis(className, groupName) {
+            let marksList = db.marks.filter(m => m.className === className && m.groupName === groupName);
+            let rows = '';
+            marksList.forEach(m => {
+                let st = db.students.find(s => s.id === m.studentId);
+                let pct = Math.round((Number(m.marksObtained) / Number(m.maxMarks)) * 100);
+                rows += `<tr><td>${st ? st.rollNumber : 'N/A'}</td><td>${st ? st.name : 'Unknown'}</td><td>${m.subject}</td><td>${m.examType}</td><td>${m.marksObtained} / ${m.maxMarks}</td><td>${pct}%</td></tr>`;
+            });
+
+            let html = `
+                <h3 style="margin-bottom: 16px; font-size:18px;">Marks History: ${className} – Group ${groupName}</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Roll Number</th><th>Student Name</th><th>Subject</th><th>Exam Type</th><th>Marks</th><th>Percentage</th></tr></thead>
+                        <tbody>${rows || '<tr><td colspan="6" class="empty-state">No marks recorded yet.</td></tr>'}</tbody>
+                    </table>
+                </div>
+            `;
+            showHomeDetailContent(html);
+        }
+
+        function openRedZoneModal() {
+            let classGroups = getUniqueClassGroups();
+            let redZones = classGroups.filter(cg => {
+                let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                return stats.percentage < 75 && stats.totalStudents > 0;
+            });
+
+            let html = `<h3 style="margin-bottom: 16px; font-size:18px; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i> Red Zone Groups (<75% Attendance)</h3>`;
+            
+            if(redZones.length === 0) {
+                html += `<div class="empty-state"><i class="fa-solid fa-circle-check" style="color:var(--success);"></i><p>No groups in the Red Zone. Excellent attendance across college!</p></div>`;
+            } else {
+                html += `<div class="table-responsive"><table><thead><tr><th>Class & Group</th><th>Total Students</th><th>Attendance %</th><th>Action</th></tr></thead><tbody>`;
+                redZones.forEach(cg => {
+                    let stats = calculateAttendanceForGroup(cg.className, cg.groupName);
+                    html += `<tr><td><strong>${cg.className}</strong> – ${cg.groupName}</td><td>${stats.totalStudents}</td><td><span class="badge red-alert">${stats.percentage}%</span></td><td><button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="openClassDetailAnalysis('${cg.className}', '${cg.groupName}')">Inspect Group</button></td></tr>`;
+                });
+                html += `</tbody></table></div>`;
+            }
+            showHomeDetailContent(html);
+        }
+
+        function openStudentHistory(studentId) {
+            let student = db.students.find(s => s.id === studentId);
+            if(!student) return;
+
+            let stAttendance = db.attendance.filter(a => a.studentId === studentId);
+            let totalClasses = stAttendance.length;
+            let presentCount = stAttendance.filter(a => a.status === 'Present').length;
+            let absentCount = totalClasses - presentCount;
+            let attendancePct = totalClasses > 0 ? Math.round((presentCount / totalClasses) * 100) : 100;
+
+            let historyRows = '';
+            stAttendance.forEach(att => {
+                historyRows += `<tr><td>${att.date}</td><td>${att.subject}</td><td>${att.className} – ${att.groupName}</td><td><span class="badge ${att.status === 'Present' ? 'present' : 'absent'}">${att.status}</span></td><td>${att.time || '10:00 AM'}</td></tr>`;
+            });
+
+            let stMarks = db.marks.filter(m => m.studentId === studentId);
+            let marksRows = '';
+            stMarks.forEach(m => {
+                let pct = Math.round((Number(m.marksObtained)/Number(m.maxMarks))*100);
+                marksRows += `<tr><td>${m.examType}</td><td>${m.subject}</td><td>${m.maxMarks}</td><td>${m.marksObtained}</td><td>${pct}%</td></tr>`;
+            });
+
+            let html = `
+                <button class="back-btn" onclick="renderHomeDashboard()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="font-size: 20px; font-weight: 700;">${student.name}</h3>
+                        <p style="color: var(--gray); font-size: 13px;">Roll Number: <strong>${student.rollNumber}</strong> | Class: ${student.className} – ${student.groupName} | Sem: ${student.semester} (${student.year})</p>
+                    </div>
+                    <button class="btn btn-danger" style="padding: 6px 12px; font-size: 12px;" onclick="confirmDeleteStudent('${student.id}')"><i class="fa-solid fa-trash"></i> Delete Student</button>
+                </div>
+
+                <div class="grid-3" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div class="card" style="padding: 16px;">
+                        <div style="font-size: 13px; color: var(--gray);">Total Attendance Recorded</div>
+                        <div style="font-size: 22px; font-weight: 700;">${attendancePct}%</div>
+                        <div class="progress-bar-container" style="margin-top: 8px;">
+                            <div class="progress-bar" style="width: ${attendancePct}%; background-color: ${attendancePct >= 75 ? 'var(--success)' : 'var(--danger)'};"></div>
+                        </div>
+                    </div>
+                    <div class="card" style="padding: 16px;">
+                        <div style="font-size: 13px; color: var(--gray);">Classes Present / Absent</div>
+                        <div style="font-size: 22px; font-weight: 700; color: var(--success);">${presentCount} <span style="color:var(--gray); font-weight:normal; font-size:14px;">Present</span> / <span style="color:var(--danger);">${absentCount}</span> <span style="color:var(--gray); font-weight:normal; font-size:14px;">Absent</span></div>
+                    </div>
+                    <div class="card" style="padding: 16px;">
+                        <div style="font-size: 13px; color: var(--gray);">Overall Status</div>
+                        <div style="margin-top: 6px;"><span class="badge ${attendancePct >= 75 ? 'good' : 'red-alert'}">${attendancePct >= 75 ? 'Good Standing' : 'Red Alert'}</span></div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Attendance History Log</h4>
+                <div class="table-responsive" style="margin-bottom: 24px;">
+                    <table>
+                        <thead><tr><th>Date</th><th>Subject</th><th>Class & Group</th><th>Status</th><th>Time</th></tr></thead>
+                        <tbody>${historyRows || '<tr><td colspan="5" class="empty-state">No attendance records found for student.</td></tr>'}</tbody>
+                    </table>
+                </div>
+
+                <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Exam Marks History</h4>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Exam Type</th><th>Subject</th><th>Max Marks</th><th>Marks Obtained</th><th>Percentage</th></tr></thead>
+                        <tbody>${marksRows || '<tr><td colspan="5" class="empty-state">No marks recorded for student.</td></tr>'}</tbody>
+                    </table>
+                </div>
+            `;
+            showHomeDetailContent(html);
+        }
+
+        function startAttendanceSession() {
+            let className = document.getElementById('att-class').value.trim();
+            let groupName = document.getElementById('att-group').value.trim();
+            let semester = document.getElementById('att-semester').value.trim();
+            let year = document.getElementById('att-year').value.trim();
+            let subject = document.getElementById('att-subject').value.trim();
+            let startTime = document.getElementById('att-start-time').value;
+            let endTime = document.getElementById('att-end-time').value;
+            let winStart = document.getElementById('att-window-start').value;
+            let winEnd = document.getElementById('att-window-end').value;
+
+            if(!className || !groupName || !subject || !winStart || !winEnd) {
+                alert('Please complete all mandatory session configuration fields.');
+                return;
+            }
+
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                let lecturerLat = position.coords.latitude;
+                let lecturerLng = position.coords.longitude;
+
+                activeSession = {
+                    id: 'sess_' + Date.now(),
+                    className, groupName, semester, year, subject,
+                    startTime, endTime, winStart, winEnd,
+                    lecturerLat, lecturerLng,
+                    active: true
+                };
+
+                db.sessions.push(activeSession);
+                persistData();
+
+                document.getElementById('session-setup-form').style.display = 'none';
+                document.getElementById('active-session-panel').style.display = 'block';
+                document.getElementById('active-session-details').innerText = `${className} – Group ${groupName} | Subject: ${subject} | Window: ${winStart} - ${winEnd}`;
+                
+                startSessionTimer();
+                alert('Location Verified! Attendance session is now ACTIVE.');
+            }, () => {
+                alert('Location permission denied or unavailable. Lecturer location security required to start session.');
+            });
+        }
+
+        function startSessionTimer() {
+            let timerEl = document.getElementById('session-timer');
+            let secondsRemaining = 1200;
+            let interval = setInterval(() => {
+                if(!activeSession || !activeSession.active) {
+                    clearInterval(interval);
+                    return;
+                }
+                let mins = Math.floor(secondsRemaining / 60);
+                let secs = secondsRemaining % 60;
+                timerEl.innerText = `Time Remaining: ${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+                secondsRemaining--;
+                if(secondsRemaining < 0) {
+                    clearInterval(interval);
+                    closeAttendanceSession();
+                }
+            }, 1000);
+        }
+
+        function closeAttendanceSession() {
+            if(activeSession) {
+                activeSession.active = false;
+                persistData();
+            }
+            activeSession = null;
+            document.getElementById('active-session-panel').style.display = 'none';
+            document.getElementById('session-setup-form').style.display = 'block';
+            alert('Attendance Session Closed.');
+        }
+
+        function simulateStudentCheckIn() {
+            if(!activeSession || !activeSession.active) {
+                document.getElementById('sim-result-msg').innerHTML = `<span style="color: var(--danger);">Attendance Window Closed</span>`;
+                return;
+            }
+
+            let roll = document.getElementById('sim-roll').value.trim();
+            let name = document.getElementById('sim-name').value.trim();
+            let msgEl = document.getElementById('sim-result-msg');
+
+            if(!roll || !name) {
+                msgEl.innerHTML = `<span style="color: var(--danger);">Please enter Roll Number and Name</span>`;
+                return;
+            }
+
+            let student = db.students.find(s => s.rollNumber === roll && s.className === activeSession.className && s.groupName === activeSession.groupName);
+
+            if(!student) {
+                msgEl.innerHTML = `<span style="color: var(--danger);">Invalid Roll Number or Student not found in Class/Group</span>`;
+                return;
+            }
+
+            if(student.name.toLowerCase() !== name.toLowerCase()) {
+                msgEl.innerHTML = `<span style="color: var(--danger);">Student Name does not match Roll Number</span>`;
+                return;
+            }
+
+            let alreadySubmitted = db.attendance.find(a => a.studentId === student.id && a.subject === activeSession.subject && a.date === new Date().toISOString().split('T')[0]);
+            if(alreadySubmitted) {
+                msgEl.innerHTML = `<span style="color: var(--warning);">Attendance already submitted for this session</span>`;
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition((pos) => {
+                let dist = calculateGeoDistance(pos.coords.latitude, pos.coords.longitude, activeSession.lecturerLat, activeSession.lecturerLng);
+                if(dist > 2.0) {
+                    msgEl.innerHTML = `<span style="color: var(--danger);">Student is outside allowed location radius</span>`;
+                    return;
+                }
+
+                let record = {
+                    id: 'att_' + Date.now() + '_' + Math.random(),
+                    date: new Date().toISOString().split('T')[0],
+                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                    studentId: student.id,
+                    rollNumber: student.rollNumber,
+                    studentName: student.name,
+                    className: activeSession.className,
+                    groupName: activeSession.groupName,
+                    semester: activeSession.semester,
+                    year: activeSession.year,
+                    subject: activeSession.subject,
+                    status: 'Present',
+                    locationVerified: true
+                };
+
+                db.attendance.push(record);
+                persistData();
+                msgEl.innerHTML = `<span style="color: var(--success);">Attendance Accepted! Recorded successfully.</span>`;
+            }, () => {
+                msgEl.innerHTML = `<span style="color: var(--danger);">Location verification failed. Enable device location.</span>`;
+            });
+        }
+
+        function calculateGeoDistance(lat1, lon1, lat2, lon2) {
+            let R = 6371;
+            let dLat = (lat2 - lat1) * Math.PI / 180;
+            let dLon = (lon2 - lon1) * Math.PI / 180;
+            let a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function openManualAttendanceModal() {
+            document.getElementById('manual-att-modal').classList.add('active');
+        }
+        function closeManualAttendanceModal() {
+            document.getElementById('manual-att-modal').classList.remove('active');
+        }
+        function submitManualAttendance() {
+            let groupCombo = document.getElementById('man-group').value.trim();
+            let roll = document.getElementById('man-roll').value.trim();
+            let name = document.getElementById('man-name').value.trim();
+            let status = document.getElementById('man-status').value;
+
+            if(!groupCombo || !roll || !name) {
+                alert('Please fill out all manual attendance fields.');
+                return;
+            }
+
+            let parts = groupCombo.split('-');
+            let className = parts[0] ? parts[0].trim() : 'B.Com';
+            let groupName = parts[1] ? parts[1].trim() : 'A';
+
+            let student = db.students.find(s => s.rollNumber === roll && s.className === className && s.groupName === groupName);
+            if(!student) {
+                alert('Validation Error: Student Roll Number and Group do not match database records.');
+                return;
+            }
+
+            let record = {
+                id: 'att_man_' + Date.now(),
+                date: new Date().toISOString().split('T')[0],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                studentId: student.id,
+                rollNumber: student.rollNumber,
+                studentName: student.name,
+                className: student.className,
+                groupName: student.groupName,
+                semester: student.semester || '3',
+                year: student.year || '2026',
+                subject: 'Core Subject',
+                status: status,
+                locationVerified: false
+            };
+
+            db.attendance.push(record);
+            persistData();
+            closeManualAttendanceModal();
+            alert('Manual Attendance Saved Successfully.');
+        }
+
+        function generateStudentRows() {
+            let count = parseInt(document.getElementById('reg-count').value);
+            if(!count || count <= 0) {
+                alert('Please enter a valid student count.');
+                return;
+            }
+
+            let tbody = document.getElementById('dynamic-student-tbody');
+            tbody.innerHTML = '';
+
+            for(let i = 1; i <= count; i++) {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${i}</td>
+                    <td><input type="text" class="form-control dyn-roll" value="${100 + i}" placeholder="Roll Number"></td>
+                    <td><input type="text" class="form-control dyn-name" placeholder="Student Name ${i}"></td>
+                `;
+                tbody.appendChild(tr);
+            }
+
+            document.getElementById('student-rows-card').style.display = 'block';
+        }
+
+        function saveBulkStudents() {
+            let className = document.getElementById('reg-class').value.trim();
+            let groupName = document.getElementById('reg-group').value.trim();
+            let semester = document.getElementById('reg-semester').value.trim();
+            let year = document.getElementById('reg-year').value.trim();
+            let subject = document.getElementById('reg-subject').value.trim();
+
+            if(!className || !groupName) {
+                alert('Please enter Class Name and Group.');
+                return;
+            }
+
+            let rows = document.querySelectorAll('#dynamic-student-tbody tr');
+            let addedCount = 0;
+
+            rows.forEach(row => {
+                let roll = row.querySelector('.dyn-roll').value.trim();
+                let name = row.querySelector('.dyn-name').value.trim();
+
+                if(roll && name) {
+                    let exists = db.students.find(s => s.rollNumber === roll && s.className === className && s.groupName === groupName && s.semester === semester && s.year === year);
+                    if(!exists) {
+                        let newStudent = {
+                            id: 'st_' + Date.now() + '_' + Math.random(),
+                            rollNumber: roll,
+                            name: name,
+                            className, groupName, semester, year, subject
+                        };
+                        db.students.push(newStudent);
+                        addedCount++;
+                    }
+                }
+            });
+
+            persistData();
+            alert(`Successfully saved ${addedCount} student records.`);
+            document.getElementById('student-rows-card').style.display = 'none';
+            renderHomeDashboard();
+        }
+
+        function confirmDeleteStudent(studentId) {
+            deleteTargetId = studentId;
+            document.getElementById('delete-modal-1').classList.add('active');
+        }
+
+        function proceedDeleteStep2() {
+            document.getElementById('delete-modal-1').classList.remove('active');
+            document.getElementById('delete-modal-2').classList.add('active');
+        }
+
+        function closeDeleteModals() {
+            document.getElementById('delete-modal-1').classList.remove('active');
+            document.getElementById('delete-modal-2').classList.remove('active');
+            deleteTargetId = null;
+        }
+
+        function executeFinalDelete() {
+            if(!deleteTargetId) return;
+            db.students = db.students.filter(s => s.id !== deleteTargetId);
+            db.attendance = db.attendance.filter(a => a.studentId !== deleteTargetId);
+            db.marks = db.marks.filter(m => m.studentId !== deleteTargetId);
+            persistData();
+            closeDeleteModals();
+            renderHomeDashboard();
+            alert('Student permanently deleted.');
+        }
+
+        function loadStudentsForMarks() {
+            let className = document.getElementById('marks-class').value.trim();
+            let groupName = document.getElementById('marks-group').value.trim();
+
+            let students = db.students.filter(s => s.className === className && s.groupName === groupName);
+            let tbody = document.getElementById('marks-entry-tbody');
+            tbody.innerHTML = '';
+
+            if(students.length === 0) {
+                alert('No students found for this Class + Group combination.');
+                return;
+            }
+
+            students.forEach(st => {
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${st.rollNumber}</td>
+                    <td>${st.name}</td>
+                    <td><input type="number" class="form-control mark-input" data-student-id="${st.id}" placeholder="Marks" min="0"></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('marks-entry-card').style.display = 'block';
+        }
+
+        function saveAllMarks() {
+            let className = document.getElementById('marks-class').value.trim();
+            let groupName = document.getElementById('marks-group').value.trim();
+            let semester = document.getElementById('marks-semester').value.trim();
+            let year = document.getElementById('marks-year').value.trim();
+            let subject = document.getElementById('marks-subject').value.trim();
+            let examType = document.getElementById('marks-exam-type').value;
+            let maxMarks = document.getElementById('marks-max').value;
+
+            if(!subject || !maxMarks) {
+                alert('Please specify Subject and Maximum Marks.');
+                return;
+            }
+
+            let inputs = document.querySelectorAll('.mark-input');
+            let savedCount = 0;
+
+            inputs.forEach(input => {
+                let val = input.value.trim();
+                if(val !== '') {
+                    let studentId = input.getAttribute('data-student-id');
+                    let markRecord = {
+                        id: 'mark_' + Date.now() + '_' + Math.random(),
+                        studentId,
+                        className, groupName, semester, year, subject, examType,
+                        maxMarks: Number(maxMarks),
+                        marksObtained: Number(val),
+                        date: new Date().toISOString().split('T')[0]
+                    };
+                    db.marks.push(markRecord);
+                    savedCount++;
+                }
+            });
+
+            persistData();
+            alert(`Successfully saved ${savedCount} student marks records.`);
+            document.getElementById('marks-entry-card').style.display = 'none';
+            renderHomeDashboard();
+        }
+
+        function loadDemoData() {
+            db.students = [
+                { id: 'st_1', rollNumber: '101', name: 'Ravi Kumar', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics' },
+                { id: 'st_2', rollNumber: '102', name: 'Kiran Sharma', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics' },
+                { id: 'st_3', rollNumber: '103', name: 'Suresh Patel', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics' },
+                { id: 'st_4', rollNumber: '201', name: 'Anita Rao', className: 'BCA', groupName: 'B', semester: '3', year: '2026', subject: 'Computer Science' },
+                { id: 'st_5', rollNumber: '202', name: 'Deepak Verma', className: 'BCA', groupName: 'B', semester: '3', year: '2026', subject: 'Computer Science' }
+            ];
+
+            let today = new Date().toISOString().split('T')[0];
+            db.attendance = [
+                { id: 'att_1', date: today, time: '10:05 AM', studentId: 'st_1', rollNumber: '101', studentName: 'Ravi Kumar', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', status: 'Present' },
+                { id: 'att_2', date: today, time: '10:06 AM', studentId: 'st_2', rollNumber: '102', studentName: 'Kiran Sharma', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', status: 'Present' },
+                { id: 'att_3', date: today, time: '10:07 AM', studentId: 'st_3', rollNumber: '103', studentName: 'Suresh Patel', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', status: 'Absent' },
+                { id: 'att_4', date: today, time: '10:10 AM', studentId: 'st_4', rollNumber: '201', studentName: 'Anita Rao', className: 'BCA', groupName: 'B', semester: '3', year: '2026', subject: 'Computer Science', status: 'Present' },
+                { id: 'att_5', date: today, time: '10:12 AM', studentId: 'st_5', rollNumber: '202', studentName: 'Deepak Verma', className: 'BCA', groupName: 'B', semester: '3', year: '2026', subject: 'Computer Science', status: 'Absent' }
+            ];
+
+            db.marks = [
+                { id: 'm_1', studentId: 'st_1', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', examType: 'Mid Exam', maxMarks: 100, marksObtained: 85, date: today },
+                { id: 'm_2', studentId: 'st_2', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', examType: 'Mid Exam', maxMarks: 100, marksObtained: 68, date: today },
+                { id: 'm_3', studentId: 'st_3', className: 'B.Com', groupName: 'A', semester: '3', year: '2026', subject: 'Mathematics', examType: 'Mid Exam', maxMarks: 100, marksObtained: 92, date: today },
+                { id: 'm_4', studentId: 'st_4', className: 'BCA', groupName: 'B', semester: '3', year: '2026', subject: 'Computer Science', examType: 'Internal 1', maxMarks: 50, marksObtained: 42, date: today }
+            ];
+
+            persistData();
+            renderHomeDashboard();
+            alert('Demo Data Successfully Loaded into Application Database!');
+        }
+    </script>
+</body>
+</html>
