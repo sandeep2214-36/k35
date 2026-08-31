@@ -555,6 +555,53 @@ padding:16px 0;
 border-bottom:1px solid rgba(255, 255, 255, 0.08);
 }
 
+.principal-box-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+gap:16px;
+}
+
+.principal-box{
+background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+border: 1px solid rgba(255, 255, 255, 0.12);
+border-radius: 20px;
+padding: 18px;
+cursor: pointer;
+transition: transform 0.25s ease, box-shadow 0.25s ease;
+box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+min-height: 140px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+}
+
+.principal-box:hover{
+transform: translateY(-4px);
+box-shadow: 0 18px 30px rgba(0,0,0,0.35);
+border-color: rgba(79, 172, 254, 0.5);
+}
+
+.principal-box h4{
+font-size: 16px;
+font-weight: 800;
+color: #fff;
+margin-bottom: 8px;
+}
+
+.principal-box p{
+font-size: 12px;
+color: #94a3b8;
+margin: 3px 0;
+line-height: 1.4;
+}
+
+.principal-box .box-footer{
+margin-top: 12px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
 .progress{
 height:10px;
 background: rgba(255, 255, 255, 0.1);
@@ -1425,17 +1472,6 @@ Student <span>Pro</span>
 <small>Students</small>
 <h2 id="studentCount">0</h2>
 </div>
-<div class="stat">
-<small>Overall Attendance</small>
-<h2 id="overallAttendance">0%</h2>
-</div>
-</div>
-
-<div class="section">
-<div class="section-title">
-<h3>Group-wise Attendance</h3>
-</div>
-<div id="groups"></div>
 </div>
 
 <div class="section">
@@ -2546,49 +2582,7 @@ const students=getData("students").filter(x=>x.principalId===currentUser.id);
 document.getElementById("groupCount").innerText=hods.length;
 document.getElementById("hodCount").innerText=hods.length;
 document.getElementById("studentCount").innerText=students.length;
-
-let avg=0;
-if(students.length){
-let sum=students.reduce((a,b)=>a+(b.attendancePercentage||0),0);
-avg=Math.round(sum/students.length);
-}
-
-document.getElementById("overallAttendance").innerText=avg+"%";
 document.getElementById("principalHodCode").innerText=currentUser.hodInviteCode;
-
-const groupsEl=document.getElementById("groups");
-groupsEl.innerHTML="";
-
-hods.forEach(h=>{
-const deptStudents=students.filter(s=>s.hodId===h.id);
-let deptAvg=0;
-
-if(deptStudents.length){
-let sum=deptStudents.reduce((a,b)=>a+(b.attendancePercentage||0),0);
-deptAvg=Math.round(sum/deptStudents.length);
-}
-
-let badgeClass="good";
-if(deptAvg<75) badgeClass="low";
-else if(deptAvg<85) badgeClass="medium";
-
-groupsEl.innerHTML+=`
-<div class="group" onclick="openPrincipalGroupSubjectsPage('${h.id}')" style="cursor:pointer">
-<div>
-<strong>${h.department} Department</strong><br>
-<small style="color:#94a3b8">HOD: ${h.name} | ${deptStudents.length} Students</small>
-</div>
-
-<div class="progress">
-<div style="width:${deptAvg}%"></div>
-</div>
-
-<div>
-<span class="badge ${badgeClass}">${deptAvg}%</span>
-</div>
-</div>
-`;
-});
 }
 
 function openPrincipalGroupsPage(){
@@ -2602,6 +2596,8 @@ if(!hods.length){
 list.innerHTML=`<div class="today-empty">No groups found.</div>`;
 return;
 }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
 hods.forEach(h=>{
 const deptStudents=students.filter(s=>s.hodId===h.id);
 let deptAvg=0;
@@ -2611,14 +2607,15 @@ deptAvg=Math.round(deptStudents.reduce((a,b)=>a+(b.attendancePercentage||0),0)/d
 let badgeClass="good";
 if(deptAvg<50) badgeClass="low";
 else if(deptAvg<75) badgeClass="medium";
-list.innerHTML+=`
-<div class="group" onclick="openPrincipalGroupSubjectsPage('${h.id}')" style="cursor:pointer">
+grid.innerHTML+=`
+<div class="principal-box" onclick="openPrincipalGroupSubjectsPage('${h.id}')">
 <div>
-<strong>${h.department || "Group"}</strong><br>
-<small style="color:#94a3b8">HOD: ${h.name || "—"}</small><br>
-<small style="color:#94a3b8">Mobile: ${h.mobile || "—"} | Students: ${deptStudents.length}</small>
+<h4>${h.department || "Group"}</h4>
+<p>HOD: ${h.name || "—"}</p>
+<p>Mobile: ${h.mobile || "—"}</p>
+<p>Students: ${deptStudents.length}</p>
 </div>
-<div>
+<div class="box-footer">
 <span class="badge ${badgeClass}">AVG ${deptAvg}%</span>
 </div>
 </div>`;
@@ -2636,15 +2633,17 @@ if(!hods.length){
 list.innerHTML=`<div class="today-empty">No HODs found.</div>`;
 return;
 }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
 hods.forEach(h=>{
 const count=students.filter(s=>s.hodId===h.id).length;
-list.innerHTML+=`
-<div class="group">
+grid.innerHTML+=`
+<div class="principal-box">
 <div>
-<strong>${h.name || "HOD"}</strong><br>
-<small style="color:#94a3b8">Department: ${h.department || "—"}</small><br>
-<small style="color:#94a3b8">Mobile: ${h.mobile || "—"}</small><br>
-<small style="color:#94a3b8">Students: ${count}</small>
+<h4>${h.name || "HOD"}</h4>
+<p>Department: ${h.department || "—"}</p>
+<p>Mobile: ${h.mobile || "—"}</p>
+<p>Students: ${count}</p>
 </div>
 </div>`;
 });
@@ -2659,7 +2658,8 @@ document.getElementById("principalGroupSubjectsTitle").innerText=`${hod ? (hod.d
 const subjects=principalGroupSubjects(hodId);
 const students=getData("students").filter(s=>s.hodId===hodId);
 const list=document.getElementById("principalGroupSubjectsList");
-list.innerHTML="";
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
 subjects.forEach(subj=>{
 let sum=0,cnt=0;
 students.forEach(st=>{
@@ -2670,13 +2670,16 @@ const avg=cnt?Math.round(sum/cnt):0;
 let badgeClass="good";
 if(avg<50) badgeClass="low";
 else if(avg<75) badgeClass="medium";
-list.innerHTML+=`
-<div class="group" onclick="openPrincipalSubjectCatsPage('${hodId}', '${subj.replace(/'/g,"\\'")}')" style="cursor:pointer">
+const safeSubj=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`
+<div class="principal-box" onclick="openPrincipalSubjectCatsPage('${hodId}', '${safeSubj}')">
 <div>
-<strong>${subj}</strong><br>
-<small style="color:#94a3b8">${students.length} students</small>
+<h4>${subj}</h4>
+<p>${students.length} students in this group</p>
 </div>
+<div class="box-footer">
 <span class="badge ${badgeClass}">${avg}%</span>
+</div>
 </div>`;
 });
 }
@@ -2719,18 +2722,23 @@ if(!filtered.length){
 list.innerHTML=`<div class="today-empty">No students in this category.</div>`;
 return;
 }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
 filtered.forEach(st=>{
 const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName === "General" ? null : principalDrillState.subjectName);
 let badgeClass="good";
 if(pct<50) badgeClass="low";
 else if(pct<75) badgeClass="medium";
-list.innerHTML+=`
-<div class="group" onclick="openPrincipalStudentHistory('${st.id}')" style="cursor:pointer">
+grid.innerHTML+=`
+<div class="principal-box" onclick="openPrincipalStudentHistory('${st.id}')">
 <div>
-<strong>${st.name}</strong><br>
-<small style="color:#94a3b8">Roll: ${st.roll || "—"} | Mobile: ${st.mobile || "—"}</small>
+<h4>${st.name}</h4>
+<p>Roll: ${st.roll || "—"}</p>
+<p>Mobile: ${st.mobile || "—"}</p>
 </div>
+<div class="box-footer">
 <span class="badge ${badgeClass}">${pct}%</span>
+</div>
 </div>`;
 });
 }
