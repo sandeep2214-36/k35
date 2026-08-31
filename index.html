@@ -1008,6 +1008,9 @@ grid-template-columns:1fr;
 <button class="sidebar-item" onclick="navigateSidebar('home')">
 <i class="fa-solid fa-house"></i> Home Dashboard
 </button>
+<button id="sidebarStudentsBtn" class="sidebar-item hidden" onclick="navigateSidebar('students')">
+<i class="fa-solid fa-user-graduate"></i> Students
+</button>
 <button id="sidebarClassesBtn" class="sidebar-item hidden" onclick="navigateSidebar('classes')">
 <i class="fa-solid fa-calendar-days"></i> Classes Schedule
 </button>
@@ -1436,6 +1439,10 @@ Student <span>Pro</span>
 <i class="fa-solid fa-house"></i> Home
 </button>
 
+<button id="studentsNavButton" class="nav-btn hidden" onclick="openPrincipalStudentsSearch()">
+<i class="fa-solid fa-user-graduate"></i> Students
+</button>
+
 <button id="classesNavButton" class="nav-btn hidden" onclick="showClasses()">
 <i class="fa-solid fa-calendar-days"></i> Classes
 </button>
@@ -1545,6 +1552,26 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3 id="principalStudentHistoryTitle">Attendance History</h3></div>
 <div id="principalStudentHistoryList"></div>
+</div>
+</div>
+
+<div id="principalStudentsSearchPage" class="hidden">
+<button class="back" onclick="closePrincipalDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Search Student</h3></div>
+<p style="color:#94a3b8; font-size:13px; margin-bottom:16px;">Enter Roll Number or Mobile Number to view full student account details.</p>
+<div class="input-group">
+<label>Roll Number / Mobile Number</label>
+<input id="principalStudentSearchInput" placeholder="Enter roll number or mobile">
+</div>
+<button class="primary" onclick="searchPrincipalStudent()" style="margin-top:8px;">
+<i class="fa-solid fa-magnifying-glass"></i> Search Student
+</button>
+<div id="principalStudentSearchMsg" class="msg error" style="margin-top:12px;"></div>
+</div>
+<div id="principalStudentSearchResult" class="section hidden" style="margin-top:16px;">
+<div class="section-title"><h3>Student Account Details</h3></div>
+<div id="principalStudentSearchDetails"></div>
 </div>
 </div>
 
@@ -1988,6 +2015,7 @@ toggleSidebar();
 if(view === 'home') showMainDashboardView();
 if(view === 'classes') showClasses();
 if(view === 'profile') openProfile();
+if(view === 'students') openPrincipalStudentsSearch();
 }
 
 function hideAll(){
@@ -2506,6 +2534,8 @@ document.getElementById("lecturerDash").classList.add("hidden");
 
 const classesBtn=document.getElementById("classesNavButton");
 const sidebarClassesBtn=document.getElementById("sidebarClassesBtn");
+const studentsBtn=document.getElementById("studentsNavButton");
+const sidebarStudentsBtn=document.getElementById("sidebarStudentsBtn");
 
 if(currentUser.role==="student"||currentUser.role==="lecturer"){
 classesBtn.classList.remove("hidden");
@@ -2513,6 +2543,14 @@ sidebarClassesBtn.classList.remove("hidden");
 }else{
 classesBtn.classList.add("hidden");
 sidebarClassesBtn.classList.add("hidden");
+}
+
+if(currentUser.role==="principal"){
+if(studentsBtn) studentsBtn.classList.remove("hidden");
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
+}else{
+if(studentsBtn) studentsBtn.classList.add("hidden");
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
 }
 
 if(currentUser.role==="principal"){
@@ -2529,10 +2567,83 @@ loadLecturerDash();
 let principalDrillState = { hodId: null, subjectName: null, category: null, studentId: null };
 
 function hideAllPrincipalDrillPages(){
-["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryStudentsPage","principalStudentHistoryPage"].forEach(id=>{
+["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage"].forEach(id=>{
 const el=document.getElementById(id);
 if(el) el.classList.add("hidden");
 });
+}
+
+function openPrincipalStudentsSearch(){
+if(!currentUser || currentUser.role !== "principal") return;
+hideAllPrincipalDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("principalStudentsSearchPage").classList.remove("hidden");
+const input=document.getElementById("principalStudentSearchInput");
+const msg=document.getElementById("principalStudentSearchMsg");
+const result=document.getElementById("principalStudentSearchResult");
+if(input) input.value="";
+if(msg){ msg.style.display="none"; msg.innerText=""; }
+if(result) result.classList.add("hidden");
+}
+
+function searchPrincipalStudent(){
+const msg=document.getElementById("principalStudentSearchMsg");
+const result=document.getElementById("principalStudentSearchResult");
+const details=document.getElementById("principalStudentSearchDetails");
+const q=(document.getElementById("principalStudentSearchInput").value||"").trim().toLowerCase();
+msg.style.display="none";
+result.classList.add("hidden");
+details.innerHTML="";
+
+if(!q){
+msg.innerText="Please enter roll number or mobile number.";
+msg.style.display="block";
+return;
+}
+
+const students=getData("students").filter(x=>x.principalId===currentUser.id);
+const student=students.find(s=>
+(s.roll && String(s.roll).toLowerCase()===q) ||
+(s.mobile && String(s.mobile).toLowerCase()===q) ||
+(s.id && String(s.id).toLowerCase()===q)
+);
+
+if(!student){
+msg.innerText="No student found with this roll number or mobile.";
+msg.style.display="block";
+return;
+}
+
+const hod=getData("hods").find(h=>h.id===student.hodId);
+const att=student.attendancePercentage||0;
+let badgeClass="good";
+if(att<50) badgeClass="low";
+else if(att<75) badgeClass="medium";
+
+details.innerHTML=`
+<div class="principal-box-grid">
+<div class="principal-box" style="cursor:default; grid-column:1 / -1;">
+<div>
+<h4>${student.name || "—"}</h4>
+<p>Student ID: ${student.id || "—"}</p>
+<p>Roll Number: ${student.roll || "—"}</p>
+<p>Mobile: ${student.mobile || "—"}</p>
+<p>College: ${student.college || "—"}</p>
+<p>Department / Group: ${student.department || "—"}</p>
+<p>HOD: ${student.hodName || (hod && hod.name) || "—"}</p>
+<p>Principal: ${student.principalName || currentUser.name || "—"}</p>
+<p>Parent Name: ${student.parentName || "—"}</p>
+<p>Parent Mobile: ${student.parentMobile || "—"}</p>
+<p>Created: ${student.createdAt ? new Date(student.createdAt).toLocaleString() : "—"}</p>
+</div>
+<div class="box-footer">
+<span class="badge ${badgeClass}">Attendance ${att}%</span>
+</div>
+</div>
+</div>`;
+result.classList.remove("hidden");
 }
 
 function closePrincipalDrillDown(){
