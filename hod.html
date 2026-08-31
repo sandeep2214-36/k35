@@ -112,13 +112,9 @@
                     </div>
 
                     <div class="flex items-center space-x-4">
-                        <div class="hidden md:flex items-center gap-2 text-xs">
-                            <span class="px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 border border-blue-200 font-semibold">STU: <span id="hod-student-invite-code">—</span></span>
-                            <span class="px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">LEC: <span id="hod-lecturer-invite-code">—</span></span>
-                        </div>
                         <div class="text-right hidden sm:block">
                             <span class="block text-sm font-medium text-slate-900" id="current-user-name">Prof. Robert Fox</span>
-                            <span class="block text-xs text-slate-500" id="current-user-dept">Department of Computer Science</span>
+                            <span class="block text-xs text-slate-500">Department of Computer Science</span>
                         </div>
                         <button onclick="handleLogout()" title="Logout"
                             class="p-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all">
@@ -137,28 +133,6 @@
                 <!-- 2. & 8. DASHBOARD VIEW                 -->
                 <!-- ====================================== -->
                 <section id="view-dashboard" class="space-y-6">
-                    <!-- Invite Codes Panel -->
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
-                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
-                            <div>
-                                <h3 class="text-lg font-bold text-slate-900">Invite Codes</h3>
-                                <p class="text-sm text-slate-500">Share these codes so students and lecturers can register under your department.</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
-                                <div class="text-xs font-semibold uppercase tracking-wider text-blue-600 mb-1">Student Invite Code</div>
-                                <div class="text-xl font-bold text-slate-900 font-mono" id="panel-student-invite">—</div>
-                                <p class="text-xs text-slate-500 mt-1">Give this code to students during registration</p>
-                            </div>
-                            <div class="rounded-lg border border-emerald-200 bg-emerald-50 p-4">
-                                <div class="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">Lecturer Invite Code</div>
-                                <div class="text-xl font-bold text-slate-900 font-mono" id="panel-lecturer-invite">—</div>
-                                <p class="text-xs text-slate-500 mt-1">Give this code to lecturers during registration</p>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Filters Toolbar -->
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
@@ -450,42 +424,20 @@
         };
 
         // --- AUTHENTICATION LOGIC ---
-        function applyHodSessionUI(session) {
-            const name = (session && session.name) ? session.name : 'HOD';
-            const dept = (session && (session.department || session.college)) ? (session.department || session.college) : 'Department';
-            const stuCode = (session && session.studentInviteCode) ? session.studentInviteCode : '—';
-            const lecCode = (session && session.lecturerInviteCode) ? session.lecturerInviteCode : '—';
-
-            const nameEl = document.getElementById('current-user-name');
-            const deptEl = document.getElementById('current-user-dept');
-            if (nameEl) nameEl.innerText = name;
-            if (deptEl) deptEl.innerText = dept;
-
-            const headerStu = document.getElementById('hod-student-invite-code');
-            const headerLec = document.getElementById('hod-lecturer-invite-code');
-            const panelStu = document.getElementById('panel-student-invite');
-            const panelLec = document.getElementById('panel-lecturer-invite');
-            if (headerStu) headerStu.innerText = stuCode;
-            if (headerLec) headerLec.innerText = lecCode;
-            if (panelStu) panelStu.innerText = stuCode;
-            if (panelLec) panelLec.innerText = lecCode;
-        }
-
-        function enterHodApp(session) {
+        function enterHodDashboard(displayName) {
             state.isLoggedIn = true;
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('app-container').classList.remove('hidden');
-            applyHodSessionUI(session || null);
+            if (displayName) document.getElementById('current-user-name').innerText = displayName;
             initDashboard();
         }
 
         function handleLogin(e) {
             e.preventDefault();
-            // Prefer main portal session if present
             try {
                 const session = JSON.parse(localStorage.getItem('currentHodSession') || 'null');
                 if (session && session.role === 'hod') {
-                    enterHodApp(session);
+                    enterHodDashboard(session.name || 'HOD');
                     return;
                 }
             } catch (err) {}
@@ -496,7 +448,7 @@
 
             if (user && pass) {
                 errBox.classList.add('hidden');
-                enterHodApp({ name: user === 'admin' ? 'Prof. Robert Fox' : user, department: 'Department of Computer Science', studentInviteCode: '—', lecturerInviteCode: '—' });
+                enterHodDashboard(user === 'admin' ? 'Prof. Robert Fox' : user);
             } else {
                 errBox.classList.remove('hidden');
                 document.getElementById('login-error-text').innerText = 'Please provide valid credentials.';
@@ -510,13 +462,13 @@
             window.location.href = 'index.html';
         }
 
-        // Auto-enter dashboard when arriving from main Student Pro login
-        (function bootstrapHodSession() {
+        // Auto-open dashboard when arriving from main portal HOD login
+        (function () {
             try {
                 const session = JSON.parse(localStorage.getItem('currentHodSession') || 'null');
                 if (session && session.role === 'hod') {
                     document.addEventListener('DOMContentLoaded', function () {
-                        enterHodApp(session);
+                        enterHodDashboard(session.name || 'HOD');
                     });
                 }
             } catch (e) {}
