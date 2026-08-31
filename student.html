@@ -1031,9 +1031,9 @@
         /* ==========================================================================
            DATA LAYER (Modular design structured for ready integration with API backend)
            ========================================================================== */
-        
-        // Active Logged-in Student Info Model
-        let studentProfileData = {
+
+        // Default seed data (used only when localStorage has no saved student portal data)
+        const DEFAULT_STUDENT_PROFILE = {
             id: "STU0001",
             name: "Kesava Reddy",
             rollNumber: "23A001",
@@ -1042,8 +1042,7 @@
             year: "2nd Year"
         };
 
-        // Course Subject Cards Data
-        let subjectsData = [
+        const DEFAULT_SUBJECTS = [
             { id: "python", name: "Python Programming", totalClasses: 50, present: 41, absent: 9 },
             { id: "dbms", name: "Database Management", totalClasses: 45, present: 34, absent: 11 },
             { id: "java", name: "Java Programming", totalClasses: 44, present: 40, absent: 4 },
@@ -1051,8 +1050,7 @@
             { id: "english", name: "English Communication", totalClasses: 33, present: 29, absent: 4 }
         ];
 
-        // Overall Attendance Historical Records Data
-        let attendanceHistoryData = [
+        const DEFAULT_ATTENDANCE_HISTORY = [
             { id: "101", date: "01 Aug 2026", day: "Saturday", subject: "Python Programming", status: "Present", time: "10:04 AM" },
             { id: "102", date: "02 Aug 2026", day: "Sunday", subject: "Database Management", status: "Present", time: "11:02 AM" },
             { id: "103", date: "03 Aug 2026", day: "Monday", subject: "Mathematics", status: "Absent", time: "09:00 AM" },
@@ -1062,14 +1060,19 @@
             { id: "107", date: "07 Aug 2026", day: "Friday", subject: "Database Management", status: "Absent", time: "11:00 AM" }
         ];
 
-        // Student Marks Academic Data
-        let studentMarksData = [
+        const DEFAULT_MARKS = [
             { subject: "Python Programming", internal: 38, max: 40, grade: "A+" },
             { subject: "Database Management", internal: 35, max: 40, grade: "A" },
             { subject: "Java Programming", internal: 37, max: 40, grade: "A+" },
             { subject: "Mathematics", internal: 32, max: 40, grade: "B+" },
             { subject: "English Communication", internal: 36, max: 40, grade: "A" }
         ];
+
+        // Active runtime data (loaded from / saved to localStorage)
+        let studentProfileData = { ...DEFAULT_STUDENT_PROFILE };
+        let subjectsData = JSON.parse(JSON.stringify(DEFAULT_SUBJECTS));
+        let attendanceHistoryData = JSON.parse(JSON.stringify(DEFAULT_ATTENDANCE_HISTORY));
+        let studentMarksData = JSON.parse(JSON.stringify(DEFAULT_MARKS));
 
         // Dynamic Active Attendance Session Object (Controlled by simulated lecturer state)
         // Window configured dynamically around current time for prototype testing
@@ -1087,6 +1090,66 @@
         // Geolocation Simulation & Tracking Variables
         let simulatedDistanceMeters = 32; // Default inside range (50m radius)
         let timerInterval = null;
+
+        /* ==========================================================================
+           LOCAL STORAGE HELPERS (all portal data persisted here)
+           ========================================================================== */
+
+        function portalStorageKey(studentId, suffix) {
+            return `student_portal_${studentId || "guest"}_${suffix}`;
+        }
+
+        function loadFromLocalStorage(key, fallback) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (raw === null || raw === undefined) return fallback;
+                return JSON.parse(raw);
+            } catch (e) {
+                return fallback;
+            }
+        }
+
+        function saveToLocalStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {}
+        }
+
+        function getActiveStudentId() {
+            return (studentProfileData && studentProfileData.id) ? studentProfileData.id : "guest";
+        }
+
+        /** Save all student portal datasets for the current student into localStorage */
+        function persistAllStudentData() {
+            const sid = getActiveStudentId();
+            saveToLocalStorage(portalStorageKey(sid, "profile"), studentProfileData);
+            saveToLocalStorage(portalStorageKey(sid, "subjects"), subjectsData);
+            saveToLocalStorage(portalStorageKey(sid, "attendance"), attendanceHistoryData);
+            saveToLocalStorage(portalStorageKey(sid, "marks"), studentMarksData);
+            saveToLocalStorage(portalStorageKey(sid, "session"), {
+                sessionId: activeAttendanceSession.sessionId,
+                lecturer: activeAttendanceSession.lecturer,
+                subject: activeAttendanceSession.subject,
+                group: activeAttendanceSession.group,
+                allowedRadius: activeAttendanceSession.allowedRadius,
+                active: activeAttendanceSession.active
+            });
+        }
+
+        /** Load all student portal datasets from localStorage (seed defaults if empty) */
+        function loadAllStudentData(studentId) {
+            const sid = studentId || getActiveStudentId();
+            studentProfileData = loadFromLocalStorage(portalStorageKey(sid, "profile"), { ...DEFAULT_STUDENT_PROFILE, id: sid });
+            subjectsData = loadFromLocalStorage(portalStorageKey(sid, "subjects"), JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)));
+            attendanceHistoryData = loadFromLocalStorage(portalStorageKey(sid, "attendance"), JSON.parse(JSON.stringify(DEFAULT_ATTENDANCE_HISTORY)));
+            studentMarksData = loadFromLocalStorage(portalStorageKey(sid, "marks"), JSON.parse(JSON.stringify(DEFAULT_MARKS)));
+
+            // Ensure profile id stays aligned
+            if (!studentProfileData.id) studentProfileData.id = sid;
+
+            // Persist seed data the first time so storage is always populated
+            persistAllStudentData();
+        }
 
         /* ==========================================================================
            SERVICES & API CONTROLLER LAYER (Ready to swap with Python Backend API)
@@ -1119,11 +1182,13 @@
             // Append record to local history store
             const now = new Date();
             const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateStr = now.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+            const dayStr = now.toLocaleDateString("en-US", { weekday: "long" });
             
             attendanceHistoryData.unshift({
                 id: String(Date.now()),
-                date: "11 Aug 2026",
-                day: "Tuesday",
+                date: dateStr,
+                day: dayStr,
                 subject: activeAttendanceSession.subject,
                 status: "Present",
                 time: timeStr
@@ -1135,6 +1200,9 @@
                 pySub.present += 1;
                 pySub.totalClasses += 1;
             }
+
+            // Persist all portal data to localStorage
+            persistAllStudentData();
         }
 
         /* ==========================================================================
@@ -1580,9 +1648,12 @@
            APPLICATION INITIALIZATION ENTRY POINT
            ========================================================================== */
         document.addEventListener('DOMContentLoaded', () => {
+            let sessionStudentId = DEFAULT_STUDENT_PROFILE.id;
             try {
                 const session = JSON.parse(localStorage.getItem("currentStudentSession") || "null");
                 if (session && session.role === "student") {
+                    sessionStudentId = session.id || sessionStudentId;
+                    // Merge login session identity into profile before loading portal store
                     studentProfileData = {
                         id: session.id || studentProfileData.id,
                         name: session.name || studentProfileData.name,
@@ -1591,8 +1662,13 @@
                         group: session.department || session.group || studentProfileData.group,
                         year: session.year || studentProfileData.year
                     };
+                    // Save identity into localStorage profile key immediately
+                    saveToLocalStorage(portalStorageKey(sessionStudentId, "profile"), studentProfileData);
                 }
             } catch (e) {}
+
+            // Load subjects / attendance / marks (and profile) from localStorage for this student
+            loadAllStudentData(sessionStudentId);
             renderDashboard();
         });
     </script>
