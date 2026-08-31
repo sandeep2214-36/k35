@@ -1413,11 +1413,11 @@ Student <span>Pro</span>
 <!-- PRINCIPAL DASHBOARD -->
 <div id="principalDash">
 <div class="stats">
-<div class="stat">
+<div class="stat" onclick="openPrincipalGroupsPage()" style="cursor:pointer">
 <small>Groups</small>
 <h2 id="groupCount">0</h2>
 </div>
-<div class="stat">
+<div class="stat" onclick="openPrincipalHodsPage()" style="cursor:pointer">
 <small>HODs</small>
 <h2 id="hodCount">0</h2>
 </div>
@@ -1447,6 +1447,68 @@ Student <span>Pro</span>
 <div class="code" id="principalHodCode"></div>
 <small style="color:#94a3b8">Give this code to your HOD</small>
 </div>
+</div>
+</div>
+
+<!-- PRINCIPAL DRILL-DOWN PAGES -->
+<div id="principalGroupsPage" class="hidden">
+<button class="back" onclick="closePrincipalDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>All Groups</h3></div>
+<div id="principalGroupsList"></div>
+</div>
+</div>
+
+<div id="principalHodsPage" class="hidden">
+<button class="back" onclick="closePrincipalDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>All HODs</h3></div>
+<div id="principalHodsList"></div>
+</div>
+</div>
+
+<div id="principalGroupSubjectsPage" class="hidden">
+<button class="back" onclick="openPrincipalGroupsPage()"><i class="fa-solid fa-arrow-left"></i> Back to Groups</button>
+<div class="section">
+<div class="section-title"><h3 id="principalGroupSubjectsTitle">Group Subjects</h3></div>
+<div id="principalGroupSubjectsList"></div>
+</div>
+</div>
+
+<div id="principalSubjectCatsPage" class="hidden">
+<button class="back" onclick="openPrincipalGroupSubjectsPage(principalDrillState.hodId)"><i class="fa-solid fa-arrow-left"></i> Back to Subjects</button>
+<div class="section">
+<div class="section-title"><h3 id="principalSubjectCatsTitle">Attendance Categories</h3></div>
+<div class="attendance-boxes">
+<div class="att-box high" onclick="openPrincipalCategoryStudents('high')">
+<h3 id="principalCatHigh">0</h3>
+<span>Above 75%</span>
+</div>
+<div class="att-box mid" onclick="openPrincipalCategoryStudents('mid')">
+<h3 id="principalCatMid">0</h3>
+<span>50% – 74%</span>
+</div>
+<div class="att-box low" onclick="openPrincipalCategoryStudents('low')">
+<h3 id="principalCatLow">0</h3>
+<span>Below 49%</span>
+</div>
+</div>
+</div>
+</div>
+
+<div id="principalCategoryStudentsPage" class="hidden">
+<button class="back" onclick="openPrincipalSubjectCatsPage(principalDrillState.hodId, principalDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section">
+<div class="section-title"><h3 id="principalCategoryStudentsTitle">Students</h3></div>
+<div id="principalCategoryStudentsList"></div>
+</div>
+</div>
+
+<div id="principalStudentHistoryPage" class="hidden">
+<button class="back" onclick="openPrincipalCategoryStudents(principalDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<div class="section">
+<div class="section-title"><h3 id="principalStudentHistoryTitle">Attendance History</h3></div>
+<div id="principalStudentHistoryList"></div>
 </div>
 </div>
 
@@ -2428,7 +2490,54 @@ loadLecturerDash();
 }
 }
 
+let principalDrillState = { hodId: null, subjectName: null, category: null, studentId: null };
+
+function hideAllPrincipalDrillPages(){
+["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryStudentsPage","principalStudentHistoryPage"].forEach(id=>{
+const el=document.getElementById(id);
+if(el) el.classList.add("hidden");
+});
+}
+
+function closePrincipalDrillDown(){
+hideAllPrincipalDrillPages();
+document.getElementById("principalDash").classList.remove("hidden");
+loadPrincipalDash();
+}
+
+function principalStudentSubjectPct(studentId, subjectName){
+const records = getData("attendanceRecords").filter(r => r.studentId === studentId && (!subjectName || r.subjectName === subjectName));
+if(!records.length){
+const st = getData("students").find(s => s.id === studentId);
+return st ? (st.attendancePercentage || 0) : 0;
+}
+const present = records.filter(r => r.status === "Present" || r.status === "Late").length;
+return Math.round((present / records.length) * 100);
+}
+
+function principalGroupSubjects(hodId){
+const lecturers = getData("lecturers").filter(l => l.hodId === hodId);
+const subjects = [];
+lecturers.forEach(l => {
+if(Array.isArray(l.subjects)){
+l.subjects.forEach(s => {
+if(s && s.name && !subjects.includes(s.name)) subjects.push(s.name);
+});
+}
+});
+const records = getData("attendanceRecords").filter(r => {
+const st = getData("students").find(s => s.id === r.studentId);
+return st && st.hodId === hodId && r.subjectName;
+});
+records.forEach(r => {
+if(r.subjectName && !subjects.includes(r.subjectName)) subjects.push(r.subjectName);
+});
+if(!subjects.length) subjects.push("General");
+return subjects;
+}
+
 function loadPrincipalDash(){
+hideAllPrincipalDrillPages();
 document.getElementById("principalDash").classList.remove("hidden");
 
 const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
@@ -2464,7 +2573,7 @@ if(deptAvg<75) badgeClass="low";
 else if(deptAvg<85) badgeClass="medium";
 
 groupsEl.innerHTML+=`
-<div class="group">
+<div class="group" onclick="openPrincipalGroupSubjectsPage('${h.id}')" style="cursor:pointer">
 <div>
 <strong>${h.department} Department</strong><br>
 <small style="color:#94a3b8">HOD: ${h.name} | ${deptStudents.length} Students</small>
@@ -2479,6 +2588,180 @@ groupsEl.innerHTML+=`
 </div>
 </div>
 `;
+});
+}
+
+function openPrincipalGroupsPage(){
+hideAllPrincipalDrillPages();
+document.getElementById("principalGroupsPage").classList.remove("hidden");
+const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
+const students=getData("students").filter(x=>x.principalId===currentUser.id);
+const list=document.getElementById("principalGroupsList");
+list.innerHTML="";
+if(!hods.length){
+list.innerHTML=`<div class="today-empty">No groups found.</div>`;
+return;
+}
+hods.forEach(h=>{
+const deptStudents=students.filter(s=>s.hodId===h.id);
+let deptAvg=0;
+if(deptStudents.length){
+deptAvg=Math.round(deptStudents.reduce((a,b)=>a+(b.attendancePercentage||0),0)/deptStudents.length);
+}
+let badgeClass="good";
+if(deptAvg<50) badgeClass="low";
+else if(deptAvg<75) badgeClass="medium";
+list.innerHTML+=`
+<div class="group" onclick="openPrincipalGroupSubjectsPage('${h.id}')" style="cursor:pointer">
+<div>
+<strong>${h.department || "Group"}</strong><br>
+<small style="color:#94a3b8">HOD: ${h.name || "—"}</small><br>
+<small style="color:#94a3b8">Mobile: ${h.mobile || "—"} | Students: ${deptStudents.length}</small>
+</div>
+<div>
+<span class="badge ${badgeClass}">AVG ${deptAvg}%</span>
+</div>
+</div>`;
+});
+}
+
+function openPrincipalHodsPage(){
+hideAllPrincipalDrillPages();
+document.getElementById("principalHodsPage").classList.remove("hidden");
+const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
+const students=getData("students").filter(x=>x.principalId===currentUser.id);
+const list=document.getElementById("principalHodsList");
+list.innerHTML="";
+if(!hods.length){
+list.innerHTML=`<div class="today-empty">No HODs found.</div>`;
+return;
+}
+hods.forEach(h=>{
+const count=students.filter(s=>s.hodId===h.id).length;
+list.innerHTML+=`
+<div class="group">
+<div>
+<strong>${h.name || "HOD"}</strong><br>
+<small style="color:#94a3b8">Department: ${h.department || "—"}</small><br>
+<small style="color:#94a3b8">Mobile: ${h.mobile || "—"}</small><br>
+<small style="color:#94a3b8">Students: ${count}</small>
+</div>
+</div>`;
+});
+}
+
+function openPrincipalGroupSubjectsPage(hodId){
+principalDrillState.hodId=hodId;
+hideAllPrincipalDrillPages();
+document.getElementById("principalGroupSubjectsPage").classList.remove("hidden");
+const hod=getData("hods").find(h=>h.id===hodId);
+document.getElementById("principalGroupSubjectsTitle").innerText=`${hod ? (hod.department || "Group") : "Group"} – Subject Attendance`;
+const subjects=principalGroupSubjects(hodId);
+const students=getData("students").filter(s=>s.hodId===hodId);
+const list=document.getElementById("principalGroupSubjectsList");
+list.innerHTML="";
+subjects.forEach(subj=>{
+let sum=0,cnt=0;
+students.forEach(st=>{
+const pct=principalStudentSubjectPct(st.id, subj === "General" ? null : subj);
+sum+=pct; cnt++;
+});
+const avg=cnt?Math.round(sum/cnt):0;
+let badgeClass="good";
+if(avg<50) badgeClass="low";
+else if(avg<75) badgeClass="medium";
+list.innerHTML+=`
+<div class="group" onclick="openPrincipalSubjectCatsPage('${hodId}', '${subj.replace(/'/g,"\\'")}')" style="cursor:pointer">
+<div>
+<strong>${subj}</strong><br>
+<small style="color:#94a3b8">${students.length} students</small>
+</div>
+<span class="badge ${badgeClass}">${avg}%</span>
+</div>`;
+});
+}
+
+function openPrincipalSubjectCatsPage(hodId, subjectName){
+principalDrillState.hodId=hodId;
+principalDrillState.subjectName=subjectName;
+hideAllPrincipalDrillPages();
+document.getElementById("principalSubjectCatsPage").classList.remove("hidden");
+document.getElementById("principalSubjectCatsTitle").innerText=`${subjectName} – Categories`;
+const students=getData("students").filter(s=>s.hodId===hodId);
+let high=0,mid=0,low=0;
+students.forEach(st=>{
+const pct=principalStudentSubjectPct(st.id, subjectName === "General" ? null : subjectName);
+if(pct>=75) high++;
+else if(pct>=50) mid++;
+else low++;
+});
+document.getElementById("principalCatHigh").innerText=high;
+document.getElementById("principalCatMid").innerText=mid;
+document.getElementById("principalCatLow").innerText=low;
+}
+
+function openPrincipalCategoryStudents(category){
+principalDrillState.category=category;
+hideAllPrincipalDrillPages();
+document.getElementById("principalCategoryStudentsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+document.getElementById("principalCategoryStudentsTitle").innerText=`${principalDrillState.subjectName || "Subject"} – ${titleMap[category]||category}`;
+const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId);
+const list=document.getElementById("principalCategoryStudentsList");
+list.innerHTML="";
+const filtered=students.filter(st=>{
+const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName === "General" ? null : principalDrillState.subjectName);
+if(category==="high") return pct>=75;
+if(category==="mid") return pct>=50 && pct<75;
+return pct<50;
+});
+if(!filtered.length){
+list.innerHTML=`<div class="today-empty">No students in this category.</div>`;
+return;
+}
+filtered.forEach(st=>{
+const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName === "General" ? null : principalDrillState.subjectName);
+let badgeClass="good";
+if(pct<50) badgeClass="low";
+else if(pct<75) badgeClass="medium";
+list.innerHTML+=`
+<div class="group" onclick="openPrincipalStudentHistory('${st.id}')" style="cursor:pointer">
+<div>
+<strong>${st.name}</strong><br>
+<small style="color:#94a3b8">Roll: ${st.roll || "—"} | Mobile: ${st.mobile || "—"}</small>
+</div>
+<span class="badge ${badgeClass}">${pct}%</span>
+</div>`;
+});
+}
+
+function openPrincipalStudentHistory(studentId){
+principalDrillState.studentId=studentId;
+hideAllPrincipalDrillPages();
+document.getElementById("principalStudentHistoryPage").classList.remove("hidden");
+const st=getData("students").find(s=>s.id===studentId);
+document.getElementById("principalStudentHistoryTitle").innerText=`${st ? st.name : "Student"} – Attendance History`;
+const subjectName=principalDrillState.subjectName === "General" ? null : principalDrillState.subjectName;
+let records=getData("attendanceRecords").filter(r=>r.studentId===studentId && (!subjectName || r.subjectName===subjectName));
+records.sort((a,b)=>new Date(b.date)-new Date(a.date));
+const list=document.getElementById("principalStudentHistoryList");
+list.innerHTML="";
+if(!records.length){
+list.innerHTML=`<div class="today-empty">No attendance history available for this student.</div>`;
+return;
+}
+records.forEach(r=>{
+let badgeClass="good";
+if(r.status==="Absent") badgeClass="low";
+if(r.status==="Late") badgeClass="medium";
+list.innerHTML+=`
+<div class="group">
+<div>
+<strong>${r.date || "—"}</strong><br>
+<small style="color:#94a3b8">${r.subjectName || "Subject"} ${r.time ? "• "+r.time : ""}</small>
+</div>
+<span class="badge ${badgeClass}">${r.status || "—"}</span>
+</div>`;
 });
 }
 
