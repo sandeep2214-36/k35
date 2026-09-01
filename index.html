@@ -1925,10 +1925,15 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3>Add Subject / Class</h3></div>
 <div id="lecAddSubMsg" class="msg error"></div>
+<div id="lecAddCodeStep">
 <div class="input-group"><label>HOD Lecturer Invite Code</label><input id="lecAddSubCode" placeholder="Enter HOD lecturer invite code"></div>
+<button class="primary" onclick="verifyLecAddCode()">Verify Code</button>
+</div>
+<div id="lecAddFormStep" class="hidden">
 <div class="input-group"><label>Your Name</label><input id="lecAddSubName" readonly></div>
 <div class="input-group"><label>Mobile</label><input id="lecAddSubMobile" readonly></div>
-<div class="input-group"><label>Department</label><input id="lecAddSubDept" readonly></div>
+<div class="input-group"><label>Department (auto)</label><input id="lecAddSubDept" readonly></div>
+<div class="input-group"><label>HOD Name (auto)</label><input id="lecAddSubHodName" readonly></div>
 <div class="input-group"><label>Subject Name</label><input id="lecAddSubNameField" placeholder="Enter subject name"></div>
 <div class="input-group"><label>From Time</label><input id="lecAddSubStart" type="time"></div>
 <div class="input-group"><label>To Time</label><input id="lecAddSubEnd" type="time"></div>
@@ -1941,11 +1946,11 @@ Student <span>Pro</span>
 <label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Thursday"> Thursday</label>
 <label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Friday"> Friday</label>
 <label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Saturday"> Saturday</label>
-<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Sunday"> Sunday</label>
 </div>
 </div>
 <button class="primary" onclick="submitLecAddSubject()">Submit Subject</button>
-<p style="color:#94a3b8;font-size:12px;margin-top:12px;">You can add multiple subjects one by one. Same workflow as lecturer registration.</p>
+<p style="color:#94a3b8;font-size:12px;margin-top:12px;">Old groups remain. New subject is added under verified HOD department.</p>
+</div>
 </div>
 </div>
 
@@ -3523,7 +3528,7 @@ function closeSubjectHistory(){
 document.getElementById("subjectHistorySection").classList.add("hidden");
 }
 
-let lecDrillState = { subjectName: null, category: null, studentId: null, marksSubject: null };
+let lecDrillState = { subjectName: null, category: null, studentId: null, marksSubject: null, groupDept: null, verifiedHod: null };
 let lecActiveSession = null;
 
 function lecPageIds(){
@@ -3566,38 +3571,50 @@ marks.forEach(m=>{ obt+=Number(m.marksObtained||0); max+=Number(m.maxMarks||0); 
 return max>0 ? Math.round((obt/max)*100) : 0;
 }
 
+function lecLecturerGroups(){
+const depts=new Set();
+if(currentUser.department) depts.add(currentUser.department);
+(currentUser.subjects||[]).forEach(s=>{ if(s.department) depts.add(s.department); });
+return Array.from(depts);
+}
+
 function loadLecturerDash(){
 hideAllLecDrillPages();
 document.getElementById("lecturerDash").classList.remove("hidden");
-const dept = currentUser.department || "Group";
+const groups=lecLecturerGroups();
 const gEl=document.getElementById("lecHomeGroupCount");
 const dEl=document.getElementById("lecHomeDeptLine");
-if(gEl) gEl.innerText = dept ? "1" : "0";
-if(dEl) dEl.innerText = `${dept} • ${currentUser.name || "Lecturer"} • Subjects: ${(currentUser.subjects||[]).length}`;
+if(gEl) gEl.innerText = String(groups.length);
+if(dEl) dEl.innerText = `${groups.join(", ") || "—"} • ${currentUser.name || "Lecturer"} • Subjects: ${(currentUser.subjects||[]).length}`;
 }
 
 function openLecGroupsPage(){
 hideAllLecDrillPages();
 document.getElementById("lecGroupsPage").classList.remove("hidden");
 const list=document.getElementById("lecGroupsList");
-const dept=currentUser.department||"Group";
-const students=lecDeptStudents();
-list.innerHTML=`<div class="principal-box-grid">
-<div class="principal-box" onclick="openLecGroupSubjectsPage()">
-<div><h4>${dept}</h4><p>Students: ${students.length}</p><p>Your teaching group</p></div>
-</div></div>`;
-}
-
-function openLecGroupSubjectsPage(){
-hideAllLecDrillPages();
-document.getElementById("lecGroupSubjectsPage").classList.remove("hidden");
-document.getElementById("lecGroupSubjectsTitle").innerText=`${currentUser.department||"Group"} – Subjects`;
-const list=document.getElementById("lecGroupSubjectsList");
-const subjects=currentUser.subjects||[];
-if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects added yet. Use Add in sidebar.</div>`; return; }
+const groups=lecLecturerGroups();
+if(!groups.length){ list.innerHTML=`<div class="today-empty">No groups found.</div>`; return; }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
-const students=lecDeptStudents();
+groups.forEach(dept=>{
+const students=getData("students").filter(s=>s.department===dept);
+const safe=String(dept).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box" onclick="openLecGroupSubjectsPage('${safe}')"><div><h4>${dept}</h4><p>Students: ${students.length}</p><p>Your teaching group</p></div></div>`;
+});
+}
+
+function openLecGroupSubjectsPage(deptName){
+if(deptName) lecDrillState.groupDept=deptName;
+const dept=lecDrillState.groupDept||currentUser.department||"Group";
+hideAllLecDrillPages();
+document.getElementById("lecGroupSubjectsPage").classList.remove("hidden");
+document.getElementById("lecGroupSubjectsTitle").innerText=`${dept} – Subjects`;
+const list=document.getElementById("lecGroupSubjectsList");
+const subjects=(currentUser.subjects||[]).filter(s=>!s.department || s.department===dept || (!s.department && dept===(currentUser.department||"")));
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects in this group yet. Use Add in sidebar.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+const students=getData("students").filter(s=>s.department===dept);
 subjects.forEach(s=>{
 let sum=0; students.forEach(st=>{ sum+=lecStudentSubjectPct(st.id,s.name); });
 const avg=students.length?Math.round(sum/students.length):0;
@@ -3905,50 +3922,74 @@ document.getElementById("mainDashboard").classList.remove("hidden");
 const classesPage=document.getElementById("classesPage");
 if(classesPage) classesPage.classList.add("hidden");
 document.getElementById("lecAddSubjectPage").classList.remove("hidden");
+lecDrillState.verifiedHod=null;
+document.getElementById("lecAddCodeStep").classList.remove("hidden");
+document.getElementById("lecAddFormStep").classList.add("hidden");
+document.getElementById("lecAddSubCode").value="";
+document.getElementById("lecAddSubMsg").style.display="none";
+document.getElementById("lecAddSubMsg").innerText="";
+}
+
+function verifyLecAddCode(){
+const msg=document.getElementById("lecAddSubMsg");
+const code=(document.getElementById("lecAddSubCode").value||"").trim().toUpperCase();
+if(!code){ msg.className="msg error"; msg.innerText="Enter HOD lecturer invite code."; msg.style.display="block"; return; }
+const hod=getData("hods").find(h=>String(h.lecturerInviteCode||"").toUpperCase()===code);
+if(!hod){ msg.className="msg error"; msg.innerText="Invalid HOD lecturer code."; msg.style.display="block"; return; }
+lecDrillState.verifiedHod=hod;
+document.getElementById("lecAddCodeStep").classList.add("hidden");
+document.getElementById("lecAddFormStep").classList.remove("hidden");
 document.getElementById("lecAddSubName").value=currentUser.name||"";
 document.getElementById("lecAddSubMobile").value=currentUser.mobile||"";
-document.getElementById("lecAddSubDept").value=currentUser.department||"";
-document.getElementById("lecAddSubMsg").style.display="none";
+document.getElementById("lecAddSubDept").value=hod.department||"";
+document.getElementById("lecAddSubHodName").value=hod.name||"";
+document.getElementById("lecAddSubNameField").value="";
+document.getElementById("lecAddSubStart").value="";
+document.getElementById("lecAddSubEnd").value="";
+document.querySelectorAll("#lecAddSubDays input").forEach(c=>{ c.checked=false; });
+document.querySelectorAll("#lecAddSubDays .day").forEach(d=>d.classList.remove("active"));
+msg.style.display="none";
+msg.innerText="";
 }
 
 function submitLecAddSubject(){
 const msg=document.getElementById("lecAddSubMsg");
-const code=(document.getElementById("lecAddSubCode").value||"").trim().toUpperCase();
+const hod=lecDrillState.verifiedHod;
+if(!hod){ msg.className="msg error"; msg.innerText="Verify HOD code first."; msg.style.display="block"; return; }
 const subj=(document.getElementById("lecAddSubNameField").value||"").trim();
 const start=document.getElementById("lecAddSubStart").value;
 const end=document.getElementById("lecAddSubEnd").value;
 const days=[];
 document.querySelectorAll("#lecAddSubDays input:checked").forEach(c=>days.push(c.value));
-if(!code||!subj||!start||!end||!days.length){
+if(!subj||!start||!end||!days.length){
 msg.className="msg error";
-msg.innerText="Fill HOD code, subject, timings and select at least one day.";
+msg.innerText="Fill subject, timings and select at least one day.";
 msg.style.display="block";
 return;
 }
-// Same workflow as lecturer registration: valid HOD lecturer invite code is enough
-const hods=getData("hods");
-const hod=hods.find(h=>String(h.lecturerInviteCode||"").toUpperCase()===code);
-if(!hod){ msg.className="msg error"; msg.innerText="Invalid HOD lecturer code."; msg.style.display="block"; return; }
-
 const lecturers=getData("lecturers");
 const idx=lecturers.findIndex(l=>l.id===currentUser.id);
 if(idx<0){ msg.className="msg error"; msg.innerText="Lecturer account not found."; msg.style.display="block"; return; }
 if(!Array.isArray(lecturers[idx].subjects)) lecturers[idx].subjects=[];
-lecturers[idx].subjects.push({ name:subj, startTime:start, endTime:end, days:days });
-// Align department to HOD code department if present
-if(hod.department) lecturers[idx].department=hod.department;
-if(hod.id) lecturers[idx].hodId=hod.id;
+// Keep original lecturer department. Only tag subject with HOD department.
+lecturers[idx].subjects.push({
+name:subj,
+startTime:start,
+endTime:end,
+days:days,
+department:hod.department||"",
+hodId:hod.id||null
+});
 saveData("lecturers",lecturers);
 currentUser=lecturers[idx];
 msg.className="msg success";
-msg.innerText="Subject added successfully. You can add another subject.";
+msg.innerText="Subject added. Old groups remain. You can add another.";
 msg.style.display="block";
 document.getElementById("lecAddSubNameField").value="";
 document.getElementById("lecAddSubStart").value="";
 document.getElementById("lecAddSubEnd").value="";
 document.querySelectorAll("#lecAddSubDays input").forEach(c=>{ c.checked=false; });
 document.querySelectorAll("#lecAddSubDays .day").forEach(d=>d.classList.remove("active"));
-document.getElementById("lecAddSubDept").value=currentUser.department||"";
 }
 
 function openLecNotifications(){
