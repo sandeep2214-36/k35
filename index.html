@@ -2898,14 +2898,23 @@ return Math.round((present / records.length) * 100);
 }
 
 function principalGroupSubjects(hodId){
-const lecturers = getData("lecturers").filter(l => l.hodId === hodId);
+const hod=getData("hods").find(h=>h.id===hodId);
+const hodDept=hod ? (hod.department||"") : "";
 const subjects = [];
-lecturers.forEach(l => {
-if(Array.isArray(l.subjects)){
+// All lecturers may teach extra groups via Add Subject — filter by subject.hodId / subject.department
+getData("lecturers").forEach(l => {
+if(!Array.isArray(l.subjects)) return;
 l.subjects.forEach(s => {
-if(s && s.name && !subjects.includes(s.name)) subjects.push(s.name);
+if(!s || !s.name) return;
+const taggedHod=s.hodId;
+const taggedDept=s.department||"";
+const belongs =
+(taggedHod && taggedHod===hodId) ||
+(taggedDept && hodDept && taggedDept===hodDept) ||
+// legacy subjects (no tag) only under lecturer's primary HOD
+(!taggedHod && !taggedDept && l.hodId===hodId);
+if(belongs && !subjects.includes(s.name)) subjects.push(s.name);
 });
-}
 });
 const records = getData("attendanceRecords").filter(r => {
 const st = getData("students").find(s => s.id === r.studentId);
@@ -3149,18 +3158,26 @@ return Math.round((present / records.length) * 100);
 }
 
 function hodDepartmentSubjects(){
-const lecturers = getData("lecturers").filter(l => l.hodId === currentUser.id);
+const hodId=currentUser.id;
+const hodDept=currentUser.department||"";
 const subjects = [];
-lecturers.forEach(l => {
-if(Array.isArray(l.subjects)){
+// Include subjects tagged to this HOD/department from any lecturer (extra groups)
+getData("lecturers").forEach(l => {
+if(!Array.isArray(l.subjects)) return;
 l.subjects.forEach(s => {
-if(s && s.name && !subjects.includes(s.name)) subjects.push(s.name);
+if(!s || !s.name) return;
+const taggedHod=s.hodId;
+const taggedDept=s.department||"";
+const belongs =
+(taggedHod && taggedHod===hodId) ||
+(taggedDept && hodDept && taggedDept===hodDept) ||
+(!taggedHod && !taggedDept && l.hodId===hodId);
+if(belongs && !subjects.includes(s.name)) subjects.push(s.name);
 });
-}
 });
 const records = getData("attendanceRecords").filter(r => {
 const st = getData("students").find(s => s.id === r.studentId);
-return st && st.hodId === currentUser.id && r.subjectName;
+return st && st.hodId === hodId && r.subjectName;
 });
 records.forEach(r => {
 if(r.subjectName && !subjects.includes(r.subjectName)) subjects.push(r.subjectName);
