@@ -1925,17 +1925,27 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3>Add Subject / Class</h3></div>
 <div id="lecAddSubMsg" class="msg error"></div>
-<div class="input-group"><label>HOD / Department Code</label><input id="lecAddSubCode" placeholder="Enter HOD lecturer invite code"></div>
+<div class="input-group"><label>HOD Lecturer Invite Code</label><input id="lecAddSubCode" placeholder="Enter HOD lecturer invite code"></div>
 <div class="input-group"><label>Your Name</label><input id="lecAddSubName" readonly></div>
 <div class="input-group"><label>Mobile</label><input id="lecAddSubMobile" readonly></div>
 <div class="input-group"><label>Department</label><input id="lecAddSubDept" readonly></div>
-<div class="input-group"><label>Subject Name</label><input id="lecAddSubNameField" placeholder="Subject name"></div>
+<div class="input-group"><label>Subject Name</label><input id="lecAddSubNameField" placeholder="Enter subject name"></div>
 <div class="input-group"><label>From Time</label><input id="lecAddSubStart" type="time"></div>
 <div class="input-group"><label>To Time</label><input id="lecAddSubEnd" type="time"></div>
-<div class="input-group"><label>Date / Day</label><select id="lecAddSubDay">
-<option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-</select></div>
+<div class="input-group">
+<label>Select Days</label>
+<div class="days" id="lecAddSubDays" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Monday"> Monday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Tuesday"> Tuesday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Wednesday"> Wednesday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Thursday"> Thursday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Friday"> Friday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Saturday"> Saturday</label>
+<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Sunday"> Sunday</label>
+</div>
+</div>
 <button class="primary" onclick="submitLecAddSubject()">Submit Subject</button>
+<p style="color:#94a3b8;font-size:12px;margin-top:12px;">You can add multiple subjects one by one. Same workflow as lecturer registration.</p>
 </div>
 </div>
 
@@ -3770,10 +3780,14 @@ document.getElementById("lecActiveSessionPanel").classList.add("hidden");
 }
 
 function openLecManualAttendance(){
+if(!currentUser||currentUser.role!=="lecturer") return;
 hideAllLecDrillPages();
 document.getElementById("lecManualAttendancePage").classList.remove("hidden");
 document.getElementById("lecManGroup").value=currentUser.department||"";
+document.getElementById("lecManRoll").value="";
+document.getElementById("lecManStatus").value="Present";
 document.getElementById("lecManAttMsg").style.display="none";
+document.getElementById("lecManAttMsg").innerText="";
 const sel=document.getElementById("lecManSubject");
 sel.innerHTML="";
 (currentUser.subjects||[]).forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
@@ -3784,9 +3798,9 @@ const msg=document.getElementById("lecManAttMsg");
 const roll=(document.getElementById("lecManRoll").value||"").trim();
 const subject=document.getElementById("lecManSubject").value;
 const status=document.getElementById("lecManStatus").value;
-if(!roll||!subject){ msg.innerText="Enter roll number and subject."; msg.style.display="block"; return; }
+if(!roll||!subject){ msg.className="msg error"; msg.innerText="Enter roll number and subject."; msg.style.display="block"; return; }
 const student=lecDeptStudents().find(s=>String(s.roll).toLowerCase()===roll.toLowerCase());
-if(!student){ msg.innerText="Student not found in your department."; msg.style.display="block"; return; }
+if(!student){ msg.className="msg error"; msg.innerText="Student not found in your department."; msg.style.display="block"; return; }
 const records=getData("attendanceRecords");
 records.push({
 id:"att_"+Date.now(),
@@ -3799,9 +3813,13 @@ department:currentUser.department,
 lecturerId:currentUser.id
 });
 saveData("attendanceRecords",records);
+// Save only – clear form, do not keep submitted details visible
+document.getElementById("lecManRoll").value="";
+document.getElementById("lecManStatus").value="Present";
 msg.className="msg success";
-msg.innerText="Attendance saved for "+student.name;
+msg.innerText="Saved successfully.";
 msg.style.display="block";
+setTimeout(()=>{ msg.style.display="none"; msg.innerText=""; }, 1500);
 }
 
 function openLecAddMarksPage(){
@@ -3879,25 +3897,37 @@ const code=(document.getElementById("lecAddSubCode").value||"").trim().toUpperCa
 const subj=(document.getElementById("lecAddSubNameField").value||"").trim();
 const start=document.getElementById("lecAddSubStart").value;
 const end=document.getElementById("lecAddSubEnd").value;
-const day=document.getElementById("lecAddSubDay").value;
-if(!code||!subj||!start||!end){ msg.className="msg error"; msg.innerText="Fill code, subject name and timings."; msg.style.display="block"; return; }
-const hods=getData("hods");
-const hod=hods.find(h=>h.lecturerInviteCode===code);
-if(!hod){ msg.className="msg error"; msg.innerText="Invalid HOD lecturer code."; msg.style.display="block"; return; }
-if(hod.department && currentUser.department && hod.department!==currentUser.department){
-msg.className="msg error"; msg.innerText="Code department does not match your department."; msg.style.display="block"; return;
+const days=[];
+document.querySelectorAll("#lecAddSubDays input:checked").forEach(c=>days.push(c.value));
+if(!code||!subj||!start||!end||!days.length){
+msg.className="msg error";
+msg.innerText="Fill HOD code, subject, timings and select at least one day.";
+msg.style.display="block";
+return;
 }
+// Same workflow as lecturer registration: valid HOD lecturer invite code is enough
+const hods=getData("hods");
+const hod=hods.find(h=>String(h.lecturerInviteCode||"").toUpperCase()===code);
+if(!hod){ msg.className="msg error"; msg.innerText="Invalid HOD lecturer code."; msg.style.display="block"; return; }
+
 const lecturers=getData("lecturers");
 const idx=lecturers.findIndex(l=>l.id===currentUser.id);
 if(idx<0){ msg.className="msg error"; msg.innerText="Lecturer account not found."; msg.style.display="block"; return; }
 if(!Array.isArray(lecturers[idx].subjects)) lecturers[idx].subjects=[];
-lecturers[idx].subjects.push({ name:subj, startTime:start, endTime:end, days:[day] });
+lecturers[idx].subjects.push({ name:subj, startTime:start, endTime:end, days:days });
+// Align department to HOD code department if present
+if(hod.department) lecturers[idx].department=hod.department;
+if(hod.id) lecturers[idx].hodId=hod.id;
 saveData("lecturers",lecturers);
 currentUser=lecturers[idx];
 msg.className="msg success";
-msg.innerText="Subject added successfully to your group.";
+msg.innerText="Subject added successfully. You can add another subject.";
 msg.style.display="block";
 document.getElementById("lecAddSubNameField").value="";
+document.getElementById("lecAddSubStart").value="";
+document.getElementById("lecAddSubEnd").value="";
+document.querySelectorAll("#lecAddSubDays input").forEach(c=>{ c.checked=false; });
+document.getElementById("lecAddSubDept").value=currentUser.department||"";
 }
 
 function openLecNotifications(){
