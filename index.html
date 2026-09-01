@@ -2582,10 +2582,9 @@ localStorage.setItem("currentStudentSession",JSON.stringify(user));
 window.location.href="student.html";
 return;
 }
+// Lecturer uses same dashboard page style as Principal
 if(user.role==="lecturer"){
 localStorage.setItem("currentLecturerSession",JSON.stringify(user));
-window.location.href="lecturer.html";
-return;
 }
 openDashboard();
 }
