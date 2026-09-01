@@ -33,24 +33,18 @@ document.getElementById("stuWorkDays").innerText=total;
 document.getElementById("stuPresentDays").innerText=present;
 document.getElementById("stuPercentage").innerText=pct+"%";
 
+// Only real attendance subjects for THIS student (no dummy / empty lecturer subjects)
 const map={};
 records.forEach(r=>{
-const n=r.subjectName||"General";
+const n=(r.subjectName||"").trim();
+if(!n) return;
 if(!map[n]) map[n]=[];
 map[n].push(r);
-});
-// also subjects from department lecturers
-getData("lecturers").forEach(l=>{
-(l.subjects||[]).forEach(s=>{
-if(!s||!s.name) return;
-const ok=!s.department||s.department===currentUser.department||l.department===currentUser.department;
-if(ok && !map[s.name]) map[s.name]=[];
-});
 });
 const grid=document.getElementById("stuSubjectsGrid");
 grid.innerHTML="";
 const names=Object.keys(map);
-if(!names.length){ grid.innerHTML=`<div class="today-empty">No subjects yet.</div>`; return; }
+if(!names.length){ grid.innerHTML=`<div class="today-empty">No attendance subjects yet.</div>`; return; }
 names.forEach(n=>{
 const rec=map[n];
 const t=rec.length;
@@ -83,11 +77,20 @@ hideAllStuPages();
 document.getElementById("mainDashboard").classList.remove("hidden");
 document.getElementById("stuMarksPage").classList.remove("hidden");
 const list=document.getElementById("stuMarksSubjectsList");
-const marks=getData("marksRecords").filter(m=>m.studentId===currentUser.id);
+// Only marks entered by lecturer for THIS student id (no dummy subjects)
+const marks=getData("marksRecords").filter(m=>
+m && m.studentId===currentUser.id &&
+String(m.subject||"").trim()!=="" &&
+(m.marksObtained!==undefined && m.marksObtained!==null && m.marksObtained!=="")
+);
 const bySub={};
-marks.forEach(m=>{ const n=m.subject||"General"; if(!bySub[n]) bySub[n]=[]; bySub[n].push(m); });
+marks.forEach(m=>{
+const n=String(m.subject).trim();
+if(!bySub[n]) bySub[n]=[];
+bySub[n].push(m);
+});
 const names=Object.keys(bySub);
-if(!names.length){ list.innerHTML=`<div class="today-empty">No marks added yet.</div>`; return; }
+if(!names.length){ list.innerHTML=`<div class="today-empty">No marks added yet for you.</div>`; return; }
 list.innerHTML="";
 names.forEach(n=>{
 const safe=n.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
@@ -100,14 +103,19 @@ hideAllStuPages();
 document.getElementById("stuMarksDetailPage").classList.remove("hidden");
 document.getElementById("stuMarksDetailTitle").innerText=`${subjectName} – Marks`;
 const list=document.getElementById("stuMarksDetailList");
-const marks=getData("marksRecords").filter(m=>m.studentId===currentUser.id && m.subject===subjectName);
+const marks=getData("marksRecords").filter(m=>
+m && m.studentId===currentUser.id &&
+String(m.subject||"").trim()===String(subjectName).trim() &&
+(m.marksObtained!==undefined && m.marksObtained!==null && m.marksObtained!=="")
+);
 if(!marks.length){ list.innerHTML=`<div class="today-empty">No marks for this subject.</div>`; return; }
 list.innerHTML="";
 marks.forEach(m=>{
 const max=Number(m.maxMarks||0);
 const obt=Number(m.marksObtained||0);
 const pct=max?Math.round((obt/max)*100):0;
-list.innerHTML+=`<div class="group"><div><strong>${m.examType||"Exam"}</strong><br><small style="color:#94a3b8">Marks: ${obt} / ${max}</small></div><span class="badge ${pct>=40?"good":"low"}">${pct}%</span></div>`;
+const exam=String(m.examType||"").trim()||"Exam";
+list.innerHTML+=`<div class="group"><div><strong>${exam}</strong><br><small style="color:#94a3b8">Marks: ${obt} / ${max}</small></div><span class="badge ${pct>=40?"good":"low"}">${pct}%</span></div>`;
 });
 }
 
