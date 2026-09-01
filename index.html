@@ -2205,10 +2205,12 @@ if(currentUser && currentUser.role==="hod") openHodStudentsSearch();
 if(view === 'timetable'){
 if(currentUser && currentUser.role==="hod") openHodTimetable();
 if(currentUser && currentUser.role==="lecturer") openLecTimetable();
+if(currentUser && currentUser.role==="student") openStuTimetablePage();
 }
 if(view === 'notifications'){
 if(currentUser && currentUser.role==="hod") openHodNotifications();
 if(currentUser && currentUser.role==="lecturer") openLecNotifications();
+if(currentUser && currentUser.role==="student") openStuNotificationsPage();
 }
 if(view === 'attendance'){
 if(currentUser && currentUser.role==="lecturer") openLecAttendancePage();
@@ -2219,12 +2221,6 @@ if(currentUser && currentUser.role==="lecturer") openLecAddSubjectPage();
 }
 if(view === 'marks'){
 if(currentUser && currentUser.role==="student") openStuMarksPage();
-}
-if(view === 'timetable'){
-if(currentUser && currentUser.role==="student") openStuTimetablePage();
-}
-if(view === 'notifications'){
-if(currentUser && currentUser.role==="student") openStuNotificationsPage();
 }
 }
 
