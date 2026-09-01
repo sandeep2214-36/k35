@@ -645,6 +645,22 @@ localStorage.setItem("currentPrincipalSession",JSON.stringify(user));
 openDashboard();
 }
 
+function hideAllRoleContent(){
+// Hard reset so HOD/Lecturer/Student/Principal pages never mix
+const ids=[
+"principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage",
+"hodDash","hodSubjectCatsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage",
+"studentDash","stuSubjectHistoryPage","stuMarksPage","stuMarksDetailPage","stuAttendancePage","stuSessionSubmitPage","stuTimetablePage","stuNotificationsPage",
+"lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage",
+"classesPage"
+];
+ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add("hidden"); });
+if(typeof hideAllPrincipalDrillPages==="function") hideAllPrincipalDrillPages();
+if(typeof hideAllHodDrillPages==="function") hideAllHodDrillPages();
+if(typeof hideAllLecDrillPages==="function") hideAllLecDrillPages();
+if(typeof hideAllStuPages==="function") hideAllStuPages();
+}
+
 function openDashboard(){
 hideAll();
 document.getElementById("dashboard").classList.remove("hidden");
@@ -652,14 +668,7 @@ document.getElementById("dashboard").classList.remove("hidden");
 document.getElementById("dashTitle").innerText="Welcome, "+(currentUser.name||"");
 document.getElementById("dashSubtitle").innerText="Role: "+String(currentUser.role||"").toUpperCase();
 
-// Hide all role dashboards + drill pages first (prevent mixed UI)
-document.getElementById("principalDash").classList.add("hidden");
-document.getElementById("hodDash").classList.add("hidden");
-document.getElementById("studentDash").classList.add("hidden");
-document.getElementById("lecturerDash").classList.add("hidden");
-if(typeof hideAllPrincipalDrillPages==="function") hideAllPrincipalDrillPages();
-if(typeof hideAllHodDrillPages==="function") hideAllHodDrillPages();
-if(typeof hideAllLecDrillPages==="function") hideAllLecDrillPages();
+hideAllRoleContent();
 document.getElementById("mainDashboard").classList.remove("hidden");
 const classesPage=document.getElementById("classesPage");
 if(classesPage) classesPage.classList.add("hidden");

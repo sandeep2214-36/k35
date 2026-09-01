@@ -52,7 +52,8 @@ return Array.from(depts);
 }
 
 function loadLecturerDash(){
-hideAllLecDrillPages();
+if(typeof hideAllRoleContent==="function") hideAllRoleContent();
+else hideAllLecDrillPages();
 document.getElementById("lecturerDash").classList.remove("hidden");
 const groups=lecLecturerGroups();
 const gEl=document.getElementById("lecHomeGroupCount");

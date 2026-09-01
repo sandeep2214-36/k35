@@ -20,7 +20,8 @@ return getData("attendanceRecords").filter(r=>r.studentId===currentUser.id);
 }
 
 function loadStudentDash(){
-hideAllStuPages();
+if(typeof hideAllRoleContent==="function") hideAllRoleContent();
+else hideAllStuPages();
 document.getElementById("studentDash").classList.remove("hidden");
 document.getElementById("stuHomeName").innerText=currentUser.name||"Student";
 document.getElementById("stuHomeDept").innerText=`Department: ${currentUser.department||"—"} | Roll: ${currentUser.roll||"—"}`;

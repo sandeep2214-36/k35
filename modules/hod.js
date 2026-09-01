@@ -57,7 +57,8 @@ return subjects;
 }
 
 function loadHodDash(){
-hideAllHodDrillPages();
+if(typeof hideAllRoleContent==="function") hideAllRoleContent();
+else hideAllHodDrillPages();
 document.getElementById("hodDash").classList.remove("hidden");
 
 const students=getData("students").filter(x=>x.hodId===currentUser.id);
