@@ -1027,6 +1027,9 @@ grid-template-columns:1fr;
 <button id="sidebarStudentsBtn" class="sidebar-item hidden" onclick="navigateSidebar('students')">
 <i class="fa-solid fa-user-graduate"></i> Students
 </button>
+<button id="sidebarMarksBtn" class="sidebar-item hidden" onclick="navigateSidebar('marks')">
+<i class="fa-solid fa-chart-column"></i> Marks
+</button>
 <button id="sidebarAttendanceBtn" class="sidebar-item hidden" onclick="navigateSidebar('attendance')">
 <i class="fa-solid fa-clipboard-check"></i> Attendance
 </button>
@@ -1711,75 +1714,84 @@ Student <span>Pro</span>
 
 <!-- STUDENT DASHBOARD -->
 <div id="studentDash" class="hidden">
+<div class="section" style="margin-bottom:16px;">
+<div class="section-title"><h3 id="stuHomeName">Student</h3></div>
+<p style="color:#94a3b8" id="stuHomeDept">—</p>
+</div>
 <div class="stats">
-<div class="stat">
-<small>Department</small>
-<h2 id="studentDepartment"></h2>
+<div class="stat" style="cursor:default"><small>Total Working Days</small><h2 id="stuWorkDays">0</h2></div>
+<div class="stat" style="cursor:default"><small>Present Days</small><h2 id="stuPresentDays">0</h2></div>
+<div class="stat" style="cursor:default"><small>Percentage</small><h2 id="stuPercentage">0%</h2></div>
 </div>
-<div class="stat">
-<small>Roll Number</small>
-<h2 id="studentRoll"></h2>
-</div>
-<div class="stat">
-<small>Attendance</small>
-<h2 id="studentAttendance"></h2>
-</div>
-<div class="stat">
-<small>Status</small>
-<h2>Active</h2>
-</div>
-</div>
-
-<div class="stats">
-<div class="stat">
-<small>Total Working Days</small>
-<h2 id="studentTotalWorkingDays">0</h2>
-</div>
-<div class="stat">
-<small>Present Days</small>
-<h2 id="studentPresentDays">0</h2>
-</div>
-<div class="stat">
-<small>Absent Days</small>
-<h2 id="studentAbsentDays">0</h2>
-</div>
-<div class="stat">
-<small>Percentage</small>
-<h2 id="studentOverallPercentage">0%</h2>
-</div>
-</div>
-
 <div class="section">
-<h3>Subject-wise Attendance Breakdown</h3>
-<p style="color:#94a3b8; font-size:13px; margin-bottom:16px;">Click on any subject to view detailed history</p>
-<div id="studentSubjectsList"></div>
+<div class="section-title"><h3>Subject-wise Percentage</h3></div>
+<div id="stuSubjectsGrid" class="principal-box-grid"></div>
+</div>
 </div>
 
-<div id="subjectHistorySection" class="section hidden">
-<div style="margin-bottom:16px;">
-<button class="back" style="margin-bottom:0;" onclick="closeSubjectHistory()">
-<i class="fa-solid fa-arrow-left"></i> Back to Subjects
-</button>
-</div>
-<h3 id="selectedSubjectTitle" style="margin-bottom:16px;">Subject History</h3>
-<div id="subjectHistoryRecords"></div>
-</div>
-
+<div id="stuSubjectHistoryPage" class="hidden">
+<button class="back" onclick="closeStuPages()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
 <div class="section">
-<h3>Academic Details</h3>
-<div class="profile-row">
-<span>Principal</span>
-<strong id="studentPrincipal"></strong>
-</div>
-<div class="profile-row">
-<span>HOD</span>
-<strong id="studentHod"></strong>
-</div>
-<div class="profile-row">
-<span>College</span>
-<strong id="studentCollege"></strong>
+<div class="section-title"><h3 id="stuSubjectHistoryTitle">Subject History</h3></div>
+<div id="stuSubjectHistoryList"></div>
 </div>
 </div>
+
+<div id="stuMarksPage" class="hidden">
+<button class="back" onclick="closeStuPages()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+<div class="section">
+<div class="section-title"><h3>Marks – Subjects</h3></div>
+<div id="stuMarksSubjectsList" class="principal-box-grid"></div>
+</div>
+</div>
+
+<div id="stuMarksDetailPage" class="hidden">
+<button class="back" onclick="openStuMarksPage()"><i class="fa-solid fa-arrow-left"></i> Back to Marks</button>
+<div class="section">
+<div class="section-title"><h3 id="stuMarksDetailTitle">Marks</h3></div>
+<div id="stuMarksDetailList"></div>
+</div>
+</div>
+
+<div id="stuAttendancePage" class="hidden">
+<button class="back" onclick="closeStuPages()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+<div class="section">
+<div class="section-title"><h3>Live Attendance Sessions</h3></div>
+<p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">Only active sessions for your department. One present per session.</p>
+<div id="stuLiveSessions" class="principal-box-grid"></div>
+<div id="stuAttMsg" class="msg error" style="margin-top:12px;"></div>
+</div>
+</div>
+
+<div id="stuSessionSubmitPage" class="hidden">
+<button class="back" onclick="openStuAttendancePage()"><i class="fa-solid fa-arrow-left"></i> Back</button>
+<div class="section">
+<div class="section-title"><h3>Mark Present</h3></div>
+<div id="stuSessionInfo"></div>
+<button class="primary" style="margin-top:16px;" onclick="submitStuAttendance()">Submit Present</button>
+<div id="stuSessionMsg" class="msg error" style="margin-top:12px;"></div>
+</div>
+</div>
+
+<div id="stuTimetablePage" class="hidden">
+<button class="back" onclick="closeStuPages()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+<div class="section">
+<div class="section-title"><h3>Time Table</h3></div>
+<div class="filter-bar" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;" id="stuDayFilters">
+<button class="filter-btn active" onclick="renderStuTimetable('Monday', this)">Monday</button>
+<button class="filter-btn" onclick="renderStuTimetable('Tuesday', this)">Tuesday</button>
+<button class="filter-btn" onclick="renderStuTimetable('Wednesday', this)">Wednesday</button>
+<button class="filter-btn" onclick="renderStuTimetable('Thursday', this)">Thursday</button>
+<button class="filter-btn" onclick="renderStuTimetable('Friday', this)">Friday</button>
+<button class="filter-btn" onclick="renderStuTimetable('Saturday', this)">Saturday</button>
+</div>
+<div id="stuTimetableList"></div>
+</div>
+</div>
+
+<div id="stuNotificationsPage" class="hidden">
+<button class="back" onclick="closeStuPages()"><i class="fa-solid fa-arrow-left"></i> Back to Home</button>
+<div class="section"><div class="section-title"><h3>Notifications</h3></div><div class="today-empty">No new notifications.</div></div>
 </div>
 
 <!-- LECTURER DASHBOARD -->
@@ -2177,10 +2189,12 @@ if(view === 'home'){
 if(typeof closeHodDrillDown==="function") closeHodDrillDown();
 if(typeof closePrincipalDrillDown==="function") closePrincipalDrillDown();
 if(typeof closeLecDrillDown==="function") closeLecDrillDown();
+if(typeof closeStuPages==="function") closeStuPages();
 showMainDashboardView();
 if(currentUser && currentUser.role==="hod") loadHodDash();
 if(currentUser && currentUser.role==="principal") loadPrincipalDash();
 if(currentUser && currentUser.role==="lecturer") loadLecturerDash();
+if(currentUser && currentUser.role==="student") loadStudentDash();
 }
 if(view === 'classes') showClasses();
 if(view === 'profile') openProfile();
@@ -2198,9 +2212,19 @@ if(currentUser && currentUser.role==="lecturer") openLecNotifications();
 }
 if(view === 'attendance'){
 if(currentUser && currentUser.role==="lecturer") openLecAttendancePage();
+if(currentUser && currentUser.role==="student") openStuAttendancePage();
 }
 if(view === 'add'){
 if(currentUser && currentUser.role==="lecturer") openLecAddSubjectPage();
+}
+if(view === 'marks'){
+if(currentUser && currentUser.role==="student") openStuMarksPage();
+}
+if(view === 'timetable'){
+if(currentUser && currentUser.role==="student") openStuTimetablePage();
+}
+if(view === 'notifications'){
+if(currentUser && currentUser.role==="student") openStuNotificationsPage();
 }
 }
 
@@ -2710,8 +2734,6 @@ localStorage.removeItem("currentPrincipalSession");
 
 if(user.role==="student"){
 localStorage.setItem("currentStudentSession",JSON.stringify(user));
-window.location.href="student.html";
-return;
 }
 if(user.role==="lecturer"){
 localStorage.setItem("currentLecturerSession",JSON.stringify(user));
@@ -2749,19 +2771,16 @@ const sidebarClassesBtn=document.getElementById("sidebarClassesBtn");
 const studentsBtn=document.getElementById("studentsNavButton");
 const sidebarStudentsBtn=document.getElementById("sidebarStudentsBtn");
 
-if(currentUser.role==="student"){
-classesBtn.classList.remove("hidden");
-sidebarClassesBtn.classList.remove("hidden");
-}else{
 classesBtn.classList.add("hidden");
 sidebarClassesBtn.classList.add("hidden");
-}
 
 if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 const sidebarTimetableBtn=document.getElementById("sidebarTimetableBtn");
 const sidebarNotifyBtn=document.getElementById("sidebarNotifyBtn");
 const sidebarAttendanceBtn=document.getElementById("sidebarAttendanceBtn");
 const sidebarAddBtn=document.getElementById("sidebarAddBtn");
+const sidebarMarksBtn=document.getElementById("sidebarMarksBtn");
+if(sidebarMarksBtn) sidebarMarksBtn.classList.add("hidden");
 if(currentUser.role==="principal"){
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
 if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
@@ -2774,6 +2793,13 @@ if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
 if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
 if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
+}else if(currentUser.role==="student"){
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
+if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
+if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.remove("hidden");
+if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
+if(sidebarMarksBtn) sidebarMarksBtn.classList.remove("hidden");
 }else if(currentUser.role==="lecturer"){
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
 if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
@@ -3454,144 +3480,265 @@ document.getElementById("hodNotificationsPage").classList.remove("hidden");
 function showHodLecturersList(){ /* legacy removed – HOD uses subject drill-down */ }
 function hideHodDynamicList(){ /* legacy removed */ }
 
+let stuDrillState={ subjectName:null, session:null };
+
+function stuPageIds(){
+return ["studentDash","stuSubjectHistoryPage","stuMarksPage","stuMarksDetailPage","stuAttendancePage","stuSessionSubmitPage","stuTimetablePage","stuNotificationsPage"];
+}
+function hideAllStuPages(){
+stuPageIds().forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add("hidden"); });
+}
+function closeStuPages(){
+if(!currentUser||currentUser.role!=="student") return;
+hideAllStuPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+loadStudentDash();
+}
+
+function stuRecords(){
+return getData("attendanceRecords").filter(r=>r.studentId===currentUser.id);
+}
+
 function loadStudentDash(){
+hideAllStuPages();
 document.getElementById("studentDash").classList.remove("hidden");
+document.getElementById("stuHomeName").innerText=currentUser.name||"Student";
+document.getElementById("stuHomeDept").innerText=`Department: ${currentUser.department||"—"} | Roll: ${currentUser.roll||"—"}`;
+const records=stuRecords();
+const total=records.length;
+const present=records.filter(r=>r.status==="Present"||r.status==="Late").length;
+const pct=total?Math.round((present/total)*100):(currentUser.attendancePercentage||0);
+document.getElementById("stuWorkDays").innerText=total;
+document.getElementById("stuPresentDays").innerText=present;
+document.getElementById("stuPercentage").innerText=pct+"%";
 
-document.getElementById("studentDepartment").innerText=currentUser.department;
-document.getElementById("studentRoll").innerText=currentUser.roll;
-document.getElementById("studentAttendance").innerText=(currentUser.attendancePercentage||0)+"%";
-
-document.getElementById("studentPrincipal").innerText=currentUser.principalName;
-document.getElementById("studentHod").innerText=currentUser.hodName;
-document.getElementById("studentCollege").innerText=currentUser.college;
-
-loadStudentDetailedAttendance();
-}
-
-function loadStudentDetailedAttendance(){
-const attendanceRecords = getData("attendanceRecords");
-const studentRecords = attendanceRecords.filter(r => r.studentId === currentUser.id);
-
-const totalWorkingDays = studentRecords.length;
-const presentDays = studentRecords.filter(r => r.status === "Present" || r.status === "Late").length;
-const absentDays = studentRecords.filter(r => r.status === "Absent").length;
-const percentage = totalWorkingDays > 0 ? Math.round((presentDays / totalWorkingDays) * 100) : 0;
-
-document.getElementById("studentTotalWorkingDays").innerText = totalWorkingDays;
-document.getElementById("studentPresentDays").innerText = presentDays;
-document.getElementById("studentAbsentDays").innerText = absentDays;
-document.getElementById("studentOverallPercentage").innerText = percentage + "%";
-
-const lecturers = getData("lecturers").filter(l => l.department === currentUser.department);
-let subjectsMap = {};
-
-lecturers.forEach(l => {
-if(l.subjects && Array.isArray(l.subjects)){
-l.subjects.forEach(s => {
-if(!subjectsMap[s.name]){
-subjectsMap[s.name] = {
-name: s.name,
-records: []
-};
-}
+const map={};
+records.forEach(r=>{
+const n=r.subjectName||"General";
+if(!map[n]) map[n]=[];
+map[n].push(r);
 });
-}
+// also subjects from department lecturers
+getData("lecturers").forEach(l=>{
+(l.subjects||[]).forEach(s=>{
+if(!s||!s.name) return;
+const ok=!s.department||s.department===currentUser.department||l.department===currentUser.department;
+if(ok && !map[s.name]) map[s.name]=[];
 });
-
-studentRecords.forEach(r => {
-if(!subjectsMap[r.subjectName]){
-subjectsMap[r.subjectName] = {
-name: r.subjectName,
-records: []
-};
-}
 });
-
-studentRecords.forEach(r => {
-if(subjectsMap[r.subjectName]){
-subjectsMap[r.subjectName].records.push(r);
-}
-});
-
-const subjectsListEl = document.getElementById("studentSubjectsList");
-subjectsListEl.innerHTML = "";
-
-const subjectNames = Object.keys(subjectsMap);
-
-if(!subjectNames.length){
-subjectsListEl.innerHTML = `<div class="today-empty">No subject records found.</div>`;
-return;
-}
-
-subjectNames.forEach(subjName => {
-const records = subjectsMap[subjName].records;
-const subjTotal = records.length;
-const subjPresent = records.filter(r => r.status === "Present" || r.status === "Late").length;
-const subjPercentage = subjTotal > 0 ? Math.round((subjPresent / subjTotal) * 100) : 0;
-
-let badgeClass = "good";
-if(subjPercentage < 75) badgeClass = "low";
-else if(subjPercentage < 85) badgeClass = "medium";
-
-const card = document.createElement("div");
-card.className = "class-card";
-card.style.cursor = "pointer";
-card.onclick = () => showSubjectHistory(subjName, records);
-
-card.innerHTML = `
-<div class="class-top">
-<div>
-<div class="class-subject">${subjName}</div>
-<div class="class-meta">Total Working Days: <strong>${subjTotal}</strong> | Present: <strong>${subjPresent}</strong></div>
-</div>
-<div>
-<span class="badge ${badgeClass}">${subjPercentage}%</span>
-</div>
-</div>
-`;
-
-subjectsListEl.appendChild(card);
+const grid=document.getElementById("stuSubjectsGrid");
+grid.innerHTML="";
+const names=Object.keys(map);
+if(!names.length){ grid.innerHTML=`<div class="today-empty">No subjects yet.</div>`; return; }
+names.forEach(n=>{
+const rec=map[n];
+const t=rec.length;
+const p=rec.filter(r=>r.status==="Present"||r.status==="Late").length;
+const sp=t?Math.round((p/t)*100):0;
+let badge=sp>=75?"good":(sp>=50?"medium":"low");
+const safe=n.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box" onclick="openStuSubjectHistory('${safe}')"><div><h4>${n}</h4><p>Working: ${t} | Present: ${p}</p></div><div class="box-footer"><span class="badge ${badge}">${sp}%</span></div></div>`;
 });
 }
 
-function showSubjectHistory(subjectName, records){
-document.getElementById("subjectHistorySection").classList.remove("hidden");
-document.getElementById("selectedSubjectTitle").innerText = subjectName + " - Attendance History";
-
-const container = document.getElementById("subjectHistoryRecords");
-container.innerHTML = "";
-
-if(!records || !records.length){
-container.innerHTML = `<div class="today-empty">No attendance history available for this subject.</div>`;
-return;
-}
-
-records.sort((a,b) => new Date(b.date) - new Date(a.date));
-
-records.forEach(r => {
-let badgeClass = "good";
-if(r.status === "Absent") badgeClass = "low";
-if(r.status === "Late") badgeClass = "medium";
-
-container.innerHTML += `
-<div class="profile-row">
-<div>
-<strong>Date: ${r.date}</strong><br>
-<small style="color:#94a3b8">Location: ${r.location || 'Not Recorded'}</small>
-</div>
-<div>
-<span class="badge ${badgeClass}">${r.status}</span>
-</div>
-</div>
-`;
+function openStuSubjectHistory(subjectName){
+stuDrillState.subjectName=subjectName;
+hideAllStuPages();
+document.getElementById("stuSubjectHistoryPage").classList.remove("hidden");
+document.getElementById("stuSubjectHistoryTitle").innerText=`${subjectName} – Your History`;
+const list=document.getElementById("stuSubjectHistoryList");
+const records=stuRecords().filter(r=>(r.subjectName||"General")===subjectName).sort((a,b)=>new Date(b.date)-new Date(a.date));
+if(!records.length){ list.innerHTML=`<div class="today-empty">No attendance history for this subject.</div>`; return; }
+list.innerHTML="";
+records.forEach(r=>{
+let badge=r.status==="Absent"?"low":(r.status==="Late"?"medium":"good");
+list.innerHTML+=`<div class="group"><div><strong>${r.date||"—"}</strong><br><small style="color:#94a3b8">${r.time||""}</small></div><span class="badge ${badge}">${r.status||"—"}</span></div>`;
 });
-
-document.getElementById("subjectHistorySection").scrollIntoView({ behavior: 'smooth' });
 }
 
-function closeSubjectHistory(){
-document.getElementById("subjectHistorySection").classList.add("hidden");
+function openStuMarksPage(){
+if(!currentUser||currentUser.role!=="student") return;
+hideAllStuPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+document.getElementById("stuMarksPage").classList.remove("hidden");
+const list=document.getElementById("stuMarksSubjectsList");
+const marks=getData("marksRecords").filter(m=>m.studentId===currentUser.id);
+const bySub={};
+marks.forEach(m=>{ const n=m.subject||"General"; if(!bySub[n]) bySub[n]=[]; bySub[n].push(m); });
+const names=Object.keys(bySub);
+if(!names.length){ list.innerHTML=`<div class="today-empty">No marks added yet.</div>`; return; }
+list.innerHTML="";
+names.forEach(n=>{
+const safe=n.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+list.innerHTML+=`<div class="principal-box" onclick="openStuMarksDetail('${safe}')"><div><h4>${n}</h4><p>${bySub[n].length} exam(s)</p></div></div>`;
+});
 }
+
+function openStuMarksDetail(subjectName){
+hideAllStuPages();
+document.getElementById("stuMarksDetailPage").classList.remove("hidden");
+document.getElementById("stuMarksDetailTitle").innerText=`${subjectName} – Marks`;
+const list=document.getElementById("stuMarksDetailList");
+const marks=getData("marksRecords").filter(m=>m.studentId===currentUser.id && m.subject===subjectName);
+if(!marks.length){ list.innerHTML=`<div class="today-empty">No marks for this subject.</div>`; return; }
+list.innerHTML="";
+marks.forEach(m=>{
+const max=Number(m.maxMarks||0);
+const obt=Number(m.marksObtained||0);
+const pct=max?Math.round((obt/max)*100):0;
+list.innerHTML+=`<div class="group"><div><strong>${m.examType||"Exam"}</strong><br><small style="color:#94a3b8">Marks: ${obt} / ${max}</small></div><span class="badge ${pct>=40?"good":"low"}">${pct}%</span></div>`;
+});
+}
+
+function openStuAttendancePage(){
+if(!currentUser||currentUser.role!=="student") return;
+hideAllStuPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+document.getElementById("stuAttendancePage").classList.remove("hidden");
+const box=document.getElementById("stuLiveSessions");
+const msg=document.getElementById("stuAttMsg");
+msg.style.display="none";
+const sessions=getData("attendanceSessions").filter(s=>s.active && s.department===currentUser.department);
+if(!sessions.length){ box.innerHTML=`<div class="today-empty">No active attendance session for your group.</div>`; return; }
+box.innerHTML="";
+sessions.forEach(s=>{
+const lec=getData("lecturers").find(l=>l.id===s.lecturerId);
+box.innerHTML+=`<div class="principal-box" onclick='openStuSessionSubmit(${JSON.stringify(s.id)})'><div><h4>${s.subject||"Subject"}</h4><p>Lecturer: ${(lec&&lec.name)||"—"}</p><p>Department: ${s.department||"—"}</p><p>Window: ${s.winStart||"—"} – ${s.winEnd||"—"}</p><p>Radius: ${s.radius||50}m</p></div></div>`;
+});
+}
+
+function openStuSessionSubmit(sessionId){
+const session=getData("attendanceSessions").find(s=>s.id===sessionId && s.active);
+if(!session){ openStuAttendancePage(); return; }
+stuDrillState.session=session;
+hideAllStuPages();
+document.getElementById("stuSessionSubmitPage").classList.remove("hidden");
+const lec=getData("lecturers").find(l=>l.id===session.lecturerId);
+document.getElementById("stuSessionInfo").innerHTML=`
+<div class="principal-box" style="cursor:default"><div>
+<h4>${session.subject||"Subject"}</h4>
+<p>Lecturer: ${(lec&&lec.name)||"—"}</p>
+<p>Department: ${session.department||"—"}</p>
+<p>Time window: ${session.winStart||"—"} – ${session.winEnd||"—"}</p>
+<p>Radius: ${session.radius||50}m</p>
+</div></div>`;
+document.getElementById("stuSessionMsg").style.display="none";
+}
+
+function haversineMeters(lat1,lon1,lat2,lon2){
+const R=6371000;
+const toRad=d=>d*Math.PI/180;
+const dLat=toRad(lat2-lat1), dLon=toRad(lon2-lon1);
+const a=Math.sin(dLat/2)**2+Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+return 2*R*Math.asin(Math.sqrt(a));
+}
+
+function submitStuAttendance(){
+const msg=document.getElementById("stuSessionMsg");
+const session=stuDrillState.session;
+if(!session||!session.active){ msg.className="msg error"; msg.innerText="Session not active."; msg.style.display="block"; return; }
+if(session.department!==currentUser.department){ msg.className="msg error"; msg.innerText="Not your department session."; msg.style.display="block"; return; }
+
+// one present per session per student
+const already=getData("attendanceRecords").some(r=>r.sessionId===session.id && r.studentId===currentUser.id);
+if(already){ msg.className="msg error"; msg.innerText="Already marked for this session."; msg.style.display="block"; return; }
+
+// device lock: one student per mobile device per session
+const deviceKey="stuDeviceSession_"+session.id;
+const locked=localStorage.getItem(deviceKey);
+if(locked && locked!==currentUser.id){
+msg.className="msg error"; msg.innerText="This device already used for another student in this session."; msg.style.display="block"; return;
+}
+
+const now=new Date();
+const hh=String(now.getHours()).padStart(2,"0");
+const mm=String(now.getMinutes()).padStart(2,"0");
+const nowT=`${hh}:${mm}`;
+if(session.winStart && session.winEnd && (nowT<session.winStart || nowT>session.winEnd)){
+msg.className="msg error"; msg.innerText="Outside attendance time window."; msg.style.display="block"; return;
+}
+
+if(!navigator.geolocation){ msg.className="msg error"; msg.innerText="Location required."; msg.style.display="block"; return; }
+navigator.geolocation.getCurrentPosition((pos)=>{
+const dist=haversineMeters(pos.coords.latitude,pos.coords.longitude,session.lat,session.lng);
+if(dist>(session.radius||50)){
+msg.className="msg error"; msg.innerText=`Outside radius (${Math.round(dist)}m).`; msg.style.display="block"; return;
+}
+const records=getData("attendanceRecords");
+records.push({
+id:"att_"+Date.now(),
+sessionId:session.id,
+date:new Date().toISOString().split("T")[0],
+time:nowT,
+studentId:currentUser.id,
+subjectName:session.subject,
+status:"Present",
+department:session.department,
+lecturerId:session.lecturerId
+});
+saveData("attendanceRecords",records);
+localStorage.setItem(deviceKey,currentUser.id);
+// update student percentage
+const students=getData("students");
+const idx=students.findIndex(s=>s.id===currentUser.id);
+if(idx>=0){
+const mine=records.filter(r=>r.studentId===currentUser.id);
+const p=mine.filter(r=>r.status==="Present"||r.status==="Late").length;
+students[idx].attendancePercentage=mine.length?Math.round((p/mine.length)*100):0;
+saveData("students",students);
+currentUser=students[idx];
+}
+msg.className="msg success"; msg.innerText="Present marked successfully."; msg.style.display="block";
+},()=>{ msg.className="msg error"; msg.innerText="Location permission denied."; msg.style.display="block"; });
+}
+
+function openStuTimetablePage(){
+if(!currentUser||currentUser.role!=="student") return;
+hideAllStuPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+document.getElementById("stuTimetablePage").classList.remove("hidden");
+const first=document.querySelector("#stuDayFilters .filter-btn");
+renderStuTimetable("Monday", first);
+}
+
+function renderStuTimetable(day, btn){
+if(btn){
+document.querySelectorAll("#stuDayFilters .filter-btn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+const list=document.getElementById("stuTimetableList");
+const items=[];
+getData("lecturers").forEach(l=>{
+(l.subjects||[]).forEach(s=>{
+const dept=s.department||l.department||"";
+if(dept && dept!==currentUser.department) return;
+if(!dept && l.department!==currentUser.department) return;
+const days=s.days||[];
+const ok=!days.length||days.some(d=>String(d).toLowerCase().startsWith(String(day).toLowerCase().slice(0,3)));
+if(!ok) return;
+items.push({subject:s.name, lecturer:l.name, start:s.startTime||s.start||"—", end:s.endTime||s.end||"—"});
+});
+});
+if(!items.length){ list.innerHTML=`<div class="today-empty">No classes on ${day}.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+items.forEach(it=>{
+grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${it.subject}</h4><p>Lecturer: ${it.lecturer}</p><p>Time: ${it.start} – ${it.end}</p><p>Day: ${day}</p></div></div>`;
+});
+}
+
+function openStuNotificationsPage(){
+if(!currentUser||currentUser.role!=="student") return;
+hideAllStuPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+document.getElementById("stuNotificationsPage").classList.remove("hidden");
+}
+
+function showSubjectHistory(){ /* legacy removed */ }
+function closeSubjectHistory(){ /* legacy removed */ }
+function loadStudentDetailedAttendance(){ /* legacy removed */ }
 
 let lecDrillState = { subjectName: null, category: null, studentId: null, marksSubject: null, groupDept: null, verifiedHod: null };
 let lecActiveSession = null;
