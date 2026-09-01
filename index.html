@@ -1787,7 +1787,7 @@ Student <span>Pro</span>
 <div class="stats">
 <div class="stat" onclick="openLecGroupsPage()" style="cursor:pointer">
 <small>Groups</small>
-<h2 id="lecHomeGroupName">—</h2>
+<h2 id="lecHomeGroupCount">0</h2>
 </div>
 <div class="stat" onclick="openLecMarksHome()" style="cursor:pointer">
 <small>Marks</small>
@@ -1935,13 +1935,13 @@ Student <span>Pro</span>
 <div class="input-group">
 <label>Select Days</label>
 <div class="days" id="lecAddSubDays" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px;">
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Monday"> Monday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Tuesday"> Tuesday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Wednesday"> Wednesday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Thursday"> Thursday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Friday"> Friday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Saturday"> Saturday</label>
-<label class="day" style="display:flex;align-items:center;gap:6px;"><input type="checkbox" value="Sunday"> Sunday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Monday"> Monday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Tuesday"> Tuesday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Wednesday"> Wednesday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Thursday"> Thursday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Friday"> Friday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Saturday"> Saturday</label>
+<label class="day" onclick="toggleLecDayChip(event, this)"><input type="checkbox" value="Sunday"> Sunday</label>
 </div>
 </div>
 <button class="primary" onclick="submitLecAddSubject()">Submit Subject</button>
@@ -1952,6 +1952,23 @@ Student <span>Pro</span>
 <div id="lecNotificationsPage" class="hidden">
 <button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
 <div class="section"><div class="section-title"><h3>Notifications</h3></div><div class="today-empty">No new notifications.</div></div>
+</div>
+
+<div id="lecTimetablePage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Time Table</h3></div>
+<div class="filter-bar" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;" id="lecDayFilters">
+<button class="filter-btn active" onclick="renderLecTimetable('Monday', this)">Monday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Tuesday', this)">Tuesday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Wednesday', this)">Wednesday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Thursday', this)">Thursday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Friday', this)">Friday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Saturday', this)">Saturday</button>
+<button class="filter-btn" onclick="renderLecTimetable('Sunday', this)">Sunday</button>
+</div>
+<div id="lecTimetableList"></div>
+</div>
 </div>
 
 </div>
@@ -2166,7 +2183,10 @@ if(view === 'students'){
 if(currentUser && currentUser.role==="principal") openPrincipalStudentsSearch();
 if(currentUser && currentUser.role==="hod") openHodStudentsSearch();
 }
-if(view === 'timetable') openHodTimetable();
+if(view === 'timetable'){
+if(currentUser && currentUser.role==="hod") openHodTimetable();
+if(currentUser && currentUser.role==="lecturer") openLecTimetable();
+}
 if(view === 'notifications'){
 if(currentUser && currentUser.role==="hod") openHodNotifications();
 if(currentUser && currentUser.role==="lecturer") openLecNotifications();
@@ -2714,7 +2734,7 @@ if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
 if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
 }else if(currentUser.role==="lecturer"){
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
-if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
 if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.remove("hidden");
 if(sidebarAddBtn) sidebarAddBtn.classList.remove("hidden");
@@ -3507,7 +3527,7 @@ let lecDrillState = { subjectName: null, category: null, studentId: null, marksS
 let lecActiveSession = null;
 
 function lecPageIds(){
-return ["lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage"];
+return ["lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage"];
 }
 
 function hideAllLecDrillPages(){
@@ -3550,9 +3570,9 @@ function loadLecturerDash(){
 hideAllLecDrillPages();
 document.getElementById("lecturerDash").classList.remove("hidden");
 const dept = currentUser.department || "Group";
-const gEl=document.getElementById("lecHomeGroupName");
+const gEl=document.getElementById("lecHomeGroupCount");
 const dEl=document.getElementById("lecHomeDeptLine");
-if(gEl) gEl.innerText = dept;
+if(gEl) gEl.innerText = dept ? "1" : "0";
 if(dEl) dEl.innerText = `${dept} • ${currentUser.name || "Lecturer"} • Subjects: ${(currentUser.subjects||[]).length}`;
 }
 
@@ -3927,6 +3947,7 @@ document.getElementById("lecAddSubNameField").value="";
 document.getElementById("lecAddSubStart").value="";
 document.getElementById("lecAddSubEnd").value="";
 document.querySelectorAll("#lecAddSubDays input").forEach(c=>{ c.checked=false; });
+document.querySelectorAll("#lecAddSubDays .day").forEach(d=>d.classList.remove("active"));
 document.getElementById("lecAddSubDept").value=currentUser.department||"";
 }
 
@@ -3937,6 +3958,46 @@ document.getElementById("mainDashboard").classList.remove("hidden");
 const classesPage=document.getElementById("classesPage");
 if(classesPage) classesPage.classList.add("hidden");
 document.getElementById("lecNotificationsPage").classList.remove("hidden");
+}
+
+function toggleLecDayChip(e, el){
+if(e) e.preventDefault();
+const input=el.querySelector("input[type='checkbox']");
+if(!input) return;
+input.checked=!input.checked;
+el.classList.toggle("active", input.checked);
+}
+
+function openLecTimetable(){
+if(!currentUser||currentUser.role!=="lecturer") return;
+hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("lecTimetablePage").classList.remove("hidden");
+const firstBtn=document.querySelector("#lecDayFilters .filter-btn");
+renderLecTimetable("Monday", firstBtn);
+}
+
+function renderLecTimetable(day, btn){
+if(btn){
+document.querySelectorAll("#lecDayFilters .filter-btn").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+const list=document.getElementById("lecTimetableList");
+const items=(currentUser.subjects||[]).filter(s=>{
+const days=s.days||[];
+return !days.length || days.some(d=>String(d).toLowerCase()===String(day).toLowerCase());
+});
+if(!items.length){
+list.innerHTML=`<div class="today-empty">No classes on ${day}.</div>`;
+return;
+}
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+items.forEach(s=>{
+grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${s.name||"—"}</h4><p>Group: ${currentUser.department||"—"}</p><p>Time: ${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Day: ${day}</p></div></div>`;
+});
 }
 
 function toggleLecturerGroupFilter(){}
