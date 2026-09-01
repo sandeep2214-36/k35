@@ -3395,11 +3395,20 @@ document.querySelectorAll("#hodDayFilters .filter-btn").forEach(b=>b.classList.r
 btn.classList.add("active");
 }
 const list=document.getElementById("hodTimetableList");
-const lecturers=getData("lecturers").filter(l=>l.hodId===currentUser.id);
+const hodId=currentUser.id;
+const hodDept=currentUser.department||"";
 const items=[];
-lecturers.forEach(l=>{
+// Only subjects belonging to this HOD department (tagged or primary)
+getData("lecturers").forEach(l=>{
 if(!Array.isArray(l.subjects)) return;
 l.subjects.forEach(s=>{
+const taggedHod=s.hodId;
+const taggedDept=s.department||"";
+const belongs=
+(taggedHod && taggedHod===hodId) ||
+(taggedDept && hodDept && taggedDept===hodDept) ||
+(!taggedHod && !taggedDept && l.hodId===hodId);
+if(!belongs) return;
 const days=s.days||s.weekDays||[];
 const dayMatch=!days.length || days.some(d=>String(d).toLowerCase()===String(day).toLowerCase());
 if(dayMatch){
@@ -3407,7 +3416,8 @@ items.push({
 lecturer:l.name||"—",
 subject:s.name||"—",
 start:s.start||s.startTime||"—",
-end:s.end||s.endTime||"—"
+end:s.end||s.endTime||"—",
+department:taggedDept||hodDept||"—"
 });
 }
 });
@@ -3424,6 +3434,7 @@ grid.innerHTML+=`
 <div>
 <h4>${it.subject}</h4>
 <p>Lecturer: ${it.lecturer}</p>
+<p>Group: ${it.department}</p>
 <p>Time: ${it.start} – ${it.end}</p>
 <p>Day: ${day}</p>
 </div>
