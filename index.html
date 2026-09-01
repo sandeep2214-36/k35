@@ -2196,8 +2196,12 @@ if(view === 'notifications'){
 if(currentUser && currentUser.role==="hod") openHodNotifications();
 if(currentUser && currentUser.role==="lecturer") openLecNotifications();
 }
-if(view === 'attendance') openLecAttendancePage();
-if(view === 'add') openLecAddSubjectPage();
+if(view === 'attendance'){
+if(currentUser && currentUser.role==="lecturer") openLecAttendancePage();
+}
+if(view === 'add'){
+if(currentUser && currentUser.role==="lecturer") openLecAddSubjectPage();
+}
 }
 
 function hideAll(){
@@ -3599,7 +3603,8 @@ const grid=list.querySelector(".principal-box-grid");
 groups.forEach(dept=>{
 const students=getData("students").filter(s=>s.department===dept);
 const safe=String(dept).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-grid.innerHTML+=`<div class="principal-box" onclick="openLecGroupSubjectsPage('${safe}')"><div><h4>${dept}</h4><p>Students: ${students.length}</p><p>Your teaching group</p></div></div>`;
+const isPrimary = dept === (currentUser.department||"");
+grid.innerHTML+=`<div class="principal-box"><div onclick="openLecGroupSubjectsPage('${safe}')" style="cursor:pointer"><h4>${dept}</h4><p>Students: ${students.length}</p><p>Your teaching group</p></div><div class="box-footer">${isPrimary?`<span class="badge good">Primary</span>`:`<button class="nav-btn" style="padding:6px 10px;font-size:11px;color:#fca5a5;" onclick="event.stopPropagation(); removeLecGroup('${safe}')"><i class="fa-solid fa-trash"></i> Remove Group</button>`}</div></div>`;
 });
 }
 
@@ -3615,12 +3620,13 @@ if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects in th
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 const students=getData("students").filter(s=>s.department===dept);
-subjects.forEach(s=>{
+subjects.forEach((s, idx)=>{
 let sum=0; students.forEach(st=>{ sum+=lecStudentSubjectPct(st.id,s.name); });
 const avg=students.length?Math.round(sum/students.length):0;
 let badgeClass=avg>=75?"good":(avg>=50?"medium":"low");
 const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-grid.innerHTML+=`<div class="principal-box" onclick="openLecSubjectCatsPage('${safe}')"><div><h4>${s.name}</h4><p>${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Days: ${(s.days||[]).join(", ")||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${avg}%</span></div></div>`;
+const safeDept=String(dept).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box"><div onclick="openLecSubjectCatsPage('${safe}')" style="cursor:pointer"><h4>${s.name}</h4><p>${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Days: ${(s.days||[]).join(", ")||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${avg}%</span><button class="nav-btn" style="padding:6px 10px;font-size:11px;color:#fca5a5;" onclick="event.stopPropagation(); removeLecSubject('${safe}','${safeDept}')"><i class="fa-solid fa-trash"></i> Remove</button></div></div>`;
 });
 }
 
@@ -3913,6 +3919,39 @@ saved++;
 msg.className="msg success";
 msg.innerText=`Saved ${saved} marks records.`;
 msg.style.display="block";
+}
+
+function removeLecSubject(subjectName, deptName){
+if(!currentUser||currentUser.role!=="lecturer") return;
+if(!confirm(`Remove subject "${subjectName}"?`)) return;
+const lecturers=getData("lecturers");
+const idx=lecturers.findIndex(l=>l.id===currentUser.id);
+if(idx<0) return;
+lecturers[idx].subjects=(lecturers[idx].subjects||[]).filter(s=>{
+const sameName=s.name===subjectName;
+const sameDept=!deptName || !s.department || s.department===deptName || (!s.department && deptName===(currentUser.department||""));
+return !(sameName && sameDept);
+});
+saveData("lecturers",lecturers);
+currentUser=lecturers[idx];
+openLecGroupSubjectsPage(deptName||currentUser.department);
+}
+
+function removeLecGroup(deptName){
+if(!currentUser||currentUser.role!=="lecturer") return;
+if(!deptName) return;
+if(deptName===(currentUser.department||"")){
+alert("Primary department group cannot be removed.");
+return;
+}
+if(!confirm(`Remove all subjects under group "${deptName}"?`)) return;
+const lecturers=getData("lecturers");
+const idx=lecturers.findIndex(l=>l.id===currentUser.id);
+if(idx<0) return;
+lecturers[idx].subjects=(lecturers[idx].subjects||[]).filter(s=>s.department!==deptName);
+saveData("lecturers",lecturers);
+currentUser=lecturers[idx];
+openLecGroupsPage();
 }
 
 function openLecAddSubjectPage(){
