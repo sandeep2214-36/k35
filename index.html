@@ -1027,6 +1027,12 @@ grid-template-columns:1fr;
 <button id="sidebarStudentsBtn" class="sidebar-item hidden" onclick="navigateSidebar('students')">
 <i class="fa-solid fa-user-graduate"></i> Students
 </button>
+<button id="sidebarAttendanceBtn" class="sidebar-item hidden" onclick="navigateSidebar('attendance')">
+<i class="fa-solid fa-clipboard-check"></i> Attendance
+</button>
+<button id="sidebarAddBtn" class="sidebar-item hidden" onclick="navigateSidebar('add')">
+<i class="fa-solid fa-plus"></i> Add
+</button>
 <button id="sidebarTimetableBtn" class="sidebar-item hidden" onclick="navigateSidebar('timetable')">
 <i class="fa-solid fa-clock"></i> Time Table
 </button>
@@ -1779,106 +1785,165 @@ Student <span>Pro</span>
 <!-- LECTURER DASHBOARD -->
 <div id="lecturerDash" class="hidden">
 <div class="stats">
-<div class="stat" onclick="toggleLecturerGroupFilter()">
-<small>Department Group</small>
-<h2 id="lecturerDepartment"></h2>
+<div class="stat" onclick="openLecGroupsPage()" style="cursor:pointer">
+<small>Groups</small>
+<h2 id="lecHomeGroupName">—</h2>
 </div>
-<div class="stat">
-<small>Subjects</small>
-<h2 id="lecturerSubjectCount"></h2>
-</div>
-<div class="stat">
-<small>Mobile</small>
-<h2 id="lecturerMobile"></h2>
-</div>
-<div class="stat">
-<small>Status</small>
-<h2>Active</h2>
+<div class="stat" onclick="openLecMarksHome()" style="cursor:pointer">
+<small>Marks</small>
+<h2 id="lecHomeMarksLabel">Open</h2>
 </div>
 </div>
-
-<!-- 3 ATTENDANCE RANGE BOXES FOR LECTURER (GROUP SELECT) -->
-<div id="lecturerGroupBoxes" class="attendance-boxes hidden">
-<div class="att-box high" onclick="showLecturerStudentsList('high')">
-<h3 id="lecHighCount">0</h3>
-<span>≥ 75% Attendance</span>
-</div>
-<div class="att-box mid" onclick="showLecturerStudentsList('mid')">
-<h3 id="lecMidCount">0</h3>
-<span>50% - 74% Attendance</span>
-</div>
-<div class="att-box low" onclick="showLecturerStudentsList('low')">
-<h3 id="lecLowCount">0</h3>
-<span>Below 49% Attendance</span>
-</div>
-</div>
-
-<div id="lecturerDynamicListSection" class="section hidden">
-<div class="section-title">
-<h3 id="lecturerListTitle">Department Students</h3>
-<button class="back" style="margin-bottom:0;" onclick="hideLecturerDynamicList()">Close</button>
-</div>
-<div id="lecturerDynamicListContent"></div>
-</div>
-
-<div style="margin-bottom:24px;">
-<button class="primary" style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:16px;padding:18px;" onclick="toggleManualAttendance()">
-<i class="fa-solid fa-clipboard-user"></i> MANUAL ATTENDANCE
-</button>
-</div>
-
 <div class="section">
-<h3>My Subjects</h3>
-<div id="lecturerSubjects" class="subject-list"></div>
-</div>
-
-<div id="manualAttendanceSection" class="section hidden">
-<div style="margin-bottom:16px;">
-<button class="back" onclick="toggleManualAttendance()">
-<i class="fa-solid fa-arrow-left"></i> Back to Dashboard
-</button>
-</div>
-<div class="section-title">
-<h3><i class="fa-solid fa-pen-to-square"></i> Manual Attendance & Location Update</h3>
-</div>
-
-<div id="attMsg" class="msg error"></div>
-
-<div class="input-group">
-<label>Select Subject</label>
-<select id="attSubjectSelect"></select>
-</div>
-
-<div class="input-group">
-<label>Select Student</label>
-<select id="attStudentSelect"></select>
-</div>
-
-<div class="input-group">
-<label>Date</label>
-<input id="attDate" type="date">
-</div>
-
-<div class="input-group">
-<label>Status</label>
-<select id="attStatus">
-<option value="Present">Present</option>
-<option value="Absent">Absent</option>
-<option value="Late">Late</option>
-</select>
-</div>
-
-<div class="input-group">
-<label>Current Location Coordinates</label>
-<div style="display:flex;gap:10px;">
-<input id="attLocation" placeholder="Click button to fetch location" readonly>
-<button type="button" class="nav-btn" style="white-space:nowrap;" onclick="fetchLocation()"><i class="fa-solid fa-location-dot"></i> Get Location</button>
+<div class="section-title"><h3>Department</h3></div>
+<p style="color:#94a3b8" id="lecHomeDeptLine">—</p>
 </div>
 </div>
 
-<button class="primary" onclick="submitAttendanceRecord()">Submit Attendance</button>
+<!-- LECTURER DRILL PAGES -->
+<div id="lecGroupsPage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section"><div class="section-title"><h3>Your Groups</h3></div><div id="lecGroupsList"></div></div>
+</div>
+
+<div id="lecGroupSubjectsPage" class="hidden">
+<button class="back" onclick="openLecGroupsPage()"><i class="fa-solid fa-arrow-left"></i> Back to Groups</button>
+<div class="section"><div class="section-title"><h3 id="lecGroupSubjectsTitle">Subjects</h3></div><div id="lecGroupSubjectsList"></div></div>
+</div>
+
+<div id="lecSubjectCatsPage" class="hidden">
+<button class="back" onclick="openLecGroupSubjectsPage()"><i class="fa-solid fa-arrow-left"></i> Back to Subjects</button>
+<div class="section">
+<div class="section-title"><h3 id="lecSubjectCatsTitle">Attendance Categories</h3></div>
+<div class="attendance-boxes">
+<div class="att-box high" onclick="openLecCategoryStudents('high')"><h3 id="lecCatHigh">0</h3><span>Above 75%</span></div>
+<div class="att-box mid" onclick="openLecCategoryStudents('mid')"><h3 id="lecCatMid">0</h3><span>50% – 74%</span></div>
+<div class="att-box low" onclick="openLecCategoryStudents('low')"><h3 id="lecCatLow">0</h3><span>Below 49%</span></div>
 </div>
 </div>
+</div>
+
+<div id="lecCategoryStudentsPage" class="hidden">
+<button class="back" onclick="openLecSubjectCatsPage(lecDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section"><div class="section-title"><h3 id="lecCategoryStudentsTitle">Students</h3></div><div id="lecCategoryStudentsList"></div></div>
+</div>
+
+<div id="lecStudentHistoryPage" class="hidden">
+<button class="back" onclick="openLecCategoryStudents(lecDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<div class="section"><div class="section-title"><h3 id="lecStudentHistoryTitle">Attendance History</h3></div><div id="lecStudentHistoryList"></div></div>
+</div>
+
+<div id="lecMarksGroupsPage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section"><div class="section-title"><h3>Marks – Select Group</h3></div><div id="lecMarksGroupsList"></div></div>
+</div>
+
+<div id="lecMarksSubjectsPage" class="hidden">
+<button class="back" onclick="openLecMarksHome()"><i class="fa-solid fa-arrow-left"></i> Back to Groups</button>
+<div class="section"><div class="section-title"><h3 id="lecMarksSubjectsTitle">Marks – Subjects</h3></div><div id="lecMarksSubjectsList"></div></div>
+</div>
+
+<div id="lecMarksCatsPage" class="hidden">
+<button class="back" onclick="openLecMarksSubjectsPage()"><i class="fa-solid fa-arrow-left"></i> Back to Subjects</button>
+<div class="section">
+<div class="section-title"><h3 id="lecMarksCatsTitle">Marks Categories</h3></div>
+<div class="attendance-boxes">
+<div class="att-box high" onclick="openLecMarksStudents('high')"><h3 id="lecMarksCatHigh">0</h3><span>80%+</span></div>
+<div class="att-box mid" onclick="openLecMarksStudents('mid')"><h3 id="lecMarksCatMid">0</h3><span>41% – 74%</span></div>
+<div class="att-box low" onclick="openLecMarksStudents('low')"><h3 id="lecMarksCatLow">0</h3><span>Below 40%</span></div>
+</div>
+</div>
+</div>
+
+<div id="lecMarksStudentsPage" class="hidden">
+<button class="back" onclick="openLecMarksCatsPage(lecDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section"><div class="section-title"><h3 id="lecMarksStudentsTitle">Students Marks</h3></div><div id="lecMarksStudentsList"></div></div>
+</div>
+
+<div id="lecAttendancePage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Today's Session Boxes</h3></div>
+<p style="color:#94a3b8;font-size:13px;margin-bottom:12px;">Based on your subject timings for today.</p>
+<div id="lecSessionBoxes" class="principal-box-grid"></div>
+</div>
+<div class="section">
+<button class="primary" onclick="openLecManualAttendance()"><i class="fa-solid fa-clipboard-user"></i> Manual Attendance</button>
+</div>
+</div>
+
+<div id="lecSessionStartPage" class="hidden">
+<button class="back" onclick="openLecAttendancePage()"><i class="fa-solid fa-arrow-left"></i> Back to Attendance</button>
+<div class="section">
+<div class="section-title"><h3 id="lecSessionStartTitle">Start Session</h3></div>
+<div id="lecSessionMsg" class="msg error"></div>
+<div class="input-group"><label>Allowed Radius (meters)</label><input id="lecSessionRadius" type="number" value="50" min="10"></div>
+<div class="input-group"><label>Window Start</label><input id="lecSessionWinStart" type="time"></div>
+<div class="input-group"><label>Window End</label><input id="lecSessionWinEnd" type="time"></div>
+<button class="primary" onclick="startLecAttendanceSession()">Start Attendance Session</button>
+</div>
+<div id="lecActiveSessionPanel" class="section hidden">
+<div class="section-title"><h3>Active Session</h3></div>
+<p id="lecActiveSessionInfo" style="color:#94a3b8;margin-bottom:12px;"></p>
+<button class="primary" style="background:linear-gradient(135deg,#ef4444,#b91c1c);" onclick="closeLecAttendanceSession()">Close Session</button>
+</div>
+</div>
+
+<div id="lecManualAttendancePage" class="hidden">
+<button class="back" onclick="openLecAttendancePage()"><i class="fa-solid fa-arrow-left"></i> Back to Attendance</button>
+<div class="section">
+<div class="section-title"><h3>Manual Attendance</h3></div>
+<div id="lecManAttMsg" class="msg error"></div>
+<div class="input-group"><label>Group / Department</label><input id="lecManGroup" readonly></div>
+<div class="input-group"><label>Roll Number</label><input id="lecManRoll" placeholder="Enter roll number"></div>
+<div class="input-group"><label>Subject</label><select id="lecManSubject"></select></div>
+<div class="input-group"><label>Status</label><select id="lecManStatus"><option value="Present">Present</option><option value="Absent">Absent</option></select></div>
+<button class="primary" onclick="submitLecManualAttendance()">Save Attendance</button>
+</div>
+</div>
+
+<div id="lecAddMarksPage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Add Marks</h3></div>
+<div id="lecAddMarksMsg" class="msg error"></div>
+<div class="input-group"><label>Department</label><input id="lecAddMarksDept" readonly></div>
+<div class="input-group"><label>Subject</label><select id="lecAddMarksSubject"></select></div>
+<div class="input-group"><label>Exam Type</label><input id="lecAddMarksExam" placeholder="e.g. Internal 1"></div>
+<div class="input-group"><label>Maximum Marks</label><input id="lecAddMarksMax" type="number" value="40" min="1"></div>
+<button class="primary" onclick="loadLecMarksEntryRows()">Load Students</button>
+</div>
+<div id="lecMarksEntrySection" class="section hidden">
+<div class="section-title"><h3>Enter Marks</h3></div>
+<div id="lecMarksEntryList"></div>
+<button class="primary" style="margin-top:12px;" onclick="saveLecMarksEntry()">Submit Marks</button>
+</div>
+</div>
+
+<div id="lecAddSubjectPage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3>Add Subject / Class</h3></div>
+<div id="lecAddSubMsg" class="msg error"></div>
+<div class="input-group"><label>HOD / Department Code</label><input id="lecAddSubCode" placeholder="Enter HOD lecturer invite code"></div>
+<div class="input-group"><label>Your Name</label><input id="lecAddSubName" readonly></div>
+<div class="input-group"><label>Mobile</label><input id="lecAddSubMobile" readonly></div>
+<div class="input-group"><label>Department</label><input id="lecAddSubDept" readonly></div>
+<div class="input-group"><label>Subject Name</label><input id="lecAddSubNameField" placeholder="Subject name"></div>
+<div class="input-group"><label>From Time</label><input id="lecAddSubStart" type="time"></div>
+<div class="input-group"><label>To Time</label><input id="lecAddSubEnd" type="time"></div>
+<div class="input-group"><label>Date / Day</label><select id="lecAddSubDay">
+<option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+</select></div>
+<button class="primary" onclick="submitLecAddSubject()">Submit Subject</button>
+</div>
+</div>
+
+<div id="lecNotificationsPage" class="hidden">
+<button class="back" onclick="closeLecDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section"><div class="section-title"><h3>Notifications</h3></div><div class="today-empty">No new notifications.</div></div>
+</div>
+
 </div>
 
 <!-- CLASSES PAGE -->
@@ -2077,11 +2142,13 @@ overlay.classList.toggle("show");
 function navigateSidebar(view){
 toggleSidebar();
 if(view === 'home'){
-closeHodDrillDown && closeHodDrillDown();
-closePrincipalDrillDown && closePrincipalDrillDown();
+if(typeof closeHodDrillDown==="function") closeHodDrillDown();
+if(typeof closePrincipalDrillDown==="function") closePrincipalDrillDown();
+if(typeof closeLecDrillDown==="function") closeLecDrillDown();
 showMainDashboardView();
 if(currentUser && currentUser.role==="hod") loadHodDash();
 if(currentUser && currentUser.role==="principal") loadPrincipalDash();
+if(currentUser && currentUser.role==="lecturer") loadLecturerDash();
 }
 if(view === 'classes') showClasses();
 if(view === 'profile') openProfile();
@@ -2090,7 +2157,12 @@ if(currentUser && currentUser.role==="principal") openPrincipalStudentsSearch();
 if(currentUser && currentUser.role==="hod") openHodStudentsSearch();
 }
 if(view === 'timetable') openHodTimetable();
-if(view === 'notifications') openHodNotifications();
+if(view === 'notifications'){
+if(currentUser && currentUser.role==="hod") openHodNotifications();
+if(currentUser && currentUser.role==="lecturer") openLecNotifications();
+}
+if(view === 'attendance') openLecAttendancePage();
+if(view === 'add') openLecAddSubjectPage();
 }
 
 function hideAll(){
@@ -2582,7 +2654,6 @@ localStorage.setItem("currentStudentSession",JSON.stringify(user));
 window.location.href="student.html";
 return;
 }
-// Lecturer uses same dashboard page style as Principal
 if(user.role==="lecturer"){
 localStorage.setItem("currentLecturerSession",JSON.stringify(user));
 }
@@ -2606,7 +2677,7 @@ const sidebarClassesBtn=document.getElementById("sidebarClassesBtn");
 const studentsBtn=document.getElementById("studentsNavButton");
 const sidebarStudentsBtn=document.getElementById("sidebarStudentsBtn");
 
-if(currentUser.role==="student"||currentUser.role==="lecturer"){
+if(currentUser.role==="student"){
 classesBtn.classList.remove("hidden");
 sidebarClassesBtn.classList.remove("hidden");
 }else{
@@ -2617,18 +2688,32 @@ sidebarClassesBtn.classList.add("hidden");
 if(studentsBtn){ studentsBtn.classList.add("hidden"); studentsBtn.style.display="none"; }
 const sidebarTimetableBtn=document.getElementById("sidebarTimetableBtn");
 const sidebarNotifyBtn=document.getElementById("sidebarNotifyBtn");
+const sidebarAttendanceBtn=document.getElementById("sidebarAttendanceBtn");
+const sidebarAddBtn=document.getElementById("sidebarAddBtn");
 if(currentUser.role==="principal"){
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
 if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.add("hidden");
+if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
+if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
 }else if(currentUser.role==="hod"){
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
 if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
+if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
+if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
+}else if(currentUser.role==="lecturer"){
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
+if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
+if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.remove("hidden");
+if(sidebarAddBtn) sidebarAddBtn.classList.remove("hidden");
 }else{
 if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
 if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.add("hidden");
+if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
+if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
 }
 
 if(currentUser.role==="principal"){
@@ -3408,130 +3493,427 @@ function closeSubjectHistory(){
 document.getElementById("subjectHistorySection").classList.add("hidden");
 }
 
-function loadLecturerDash(){
+let lecDrillState = { subjectName: null, category: null, studentId: null, marksSubject: null };
+let lecActiveSession = null;
+
+function lecPageIds(){
+return ["lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage"];
+}
+
+function hideAllLecDrillPages(){
+lecPageIds().forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add("hidden"); });
+}
+
+function closeLecDrillDown(){
+if(!currentUser || currentUser.role!=="lecturer") return;
+hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
 document.getElementById("lecturerDash").classList.remove("hidden");
-
-document.getElementById("lecturerDepartment").innerText=currentUser.department;
-document.getElementById("lecturerSubjectCount").innerText=currentUser.subjects.length;
-document.getElementById("lecturerMobile").innerText=currentUser.mobile;
-
-const container=document.getElementById("lecturerSubjects");
-container.innerHTML="";
-
-currentUser.subjects.forEach(s=>{
-container.innerHTML+=`
-<div class="class-card">
-<div class="class-top">
-<div>
-<div class="class-subject">${s.name}</div>
-<div class="class-meta">
-Days: ${s.days.join(", ")}
-</div>
-</div>
-<div class="class-time">
-${s.startTime} - ${s.endTime}
-</div>
-</div>
-</div>
-`;
-});
-
-// Update 3 attendance boxes for Lecturer Department
-const deptStudents = getData("students").filter(s => s.department === currentUser.department);
-const high = deptStudents.filter(s => (s.attendancePercentage || 0) >= 75).length;
-const mid = deptStudents.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75).length;
-const low = deptStudents.filter(s => (s.attendancePercentage || 0) < 50).length;
-
-document.getElementById("lecHighCount").innerText = high;
-document.getElementById("lecMidCount").innerText = mid;
-document.getElementById("lecLowCount").innerText = low;
-
-populateManualAttendanceDropdowns();
+loadLecturerDash();
 }
 
-function toggleLecturerGroupFilter(){
-const boxes = document.getElementById("lecturerGroupBoxes");
-boxes.classList.toggle("hidden");
+function lecDeptStudents(){
+return getData("students").filter(s => s.department === currentUser.department || s.hodId === currentUser.hodId);
 }
 
-function showLecturerStudentsList(type){
-const students = getData("students").filter(s => s.department === currentUser.department);
-let filtered = students;
-let title = "Department Students";
-
-if(type === 'high'){
-filtered = students.filter(s => (s.attendancePercentage || 0) >= 75);
-title = "Department Students (≥ 75% Attendance)";
-}else if(type === 'mid'){
-filtered = students.filter(s => (s.attendancePercentage || 0) >= 50 && (s.attendancePercentage || 0) < 75);
-title = "Department Students (50% - 74% Attendance)";
-}else if(type === 'low'){
-filtered = students.filter(s => (s.attendancePercentage || 0) < 50);
-title = "Department Students (Below 49% Attendance)";
+function lecStudentSubjectPct(studentId, subjectName){
+const records = getData("attendanceRecords").filter(r => r.studentId === studentId && (!subjectName || r.subjectName === subjectName));
+if(!records.length){
+const st = getData("students").find(s => s.id === studentId);
+return st ? (st.attendancePercentage || 0) : 0;
+}
+const present = records.filter(r => r.status === "Present" || r.status === "Late").length;
+return Math.round((present / records.length) * 100);
 }
 
-document.getElementById("lecturerListTitle").innerText = title;
-const container = document.getElementById("lecturerDynamicListContent");
-container.innerHTML = "";
+function lecStudentMarksPct(studentId, subjectName){
+const marks = getData("marksRecords").filter(m => m.studentId === studentId && (!subjectName || m.subject === subjectName));
+if(!marks.length) return 0;
+let obt=0,max=0;
+marks.forEach(m=>{ obt+=Number(m.marksObtained||0); max+=Number(m.maxMarks||0); });
+return max>0 ? Math.round((obt/max)*100) : 0;
+}
 
-if(!filtered.length){
-container.innerHTML = `<div class="today-empty">No students found in this range.</div>`;
-}else{
-filtered.forEach(s => {
-let badgeClass = "good";
-const att = s.attendancePercentage || 0;
-if(att < 50) badgeClass = "low";
-else if(att < 75) badgeClass = "medium";
+function loadLecturerDash(){
+hideAllLecDrillPages();
+document.getElementById("lecturerDash").classList.remove("hidden");
+const dept = currentUser.department || "Group";
+const gEl=document.getElementById("lecHomeGroupName");
+const dEl=document.getElementById("lecHomeDeptLine");
+if(gEl) gEl.innerText = dept;
+if(dEl) dEl.innerText = `${dept} • ${currentUser.name || "Lecturer"} • Subjects: ${(currentUser.subjects||[]).length}`;
+}
 
-container.innerHTML += `
-<div class="profile-row">
-<div>
-<strong>${s.name} (Roll: ${s.roll})</strong><br>
-<small style="color:#94a3b8">Mobile: ${s.mobile}</small>
-</div>
-<div>
-<span class="badge ${badgeClass}">${att}%</span>
-</div>
-</div>
-`;
+function openLecGroupsPage(){
+hideAllLecDrillPages();
+document.getElementById("lecGroupsPage").classList.remove("hidden");
+const list=document.getElementById("lecGroupsList");
+const dept=currentUser.department||"Group";
+const students=lecDeptStudents();
+list.innerHTML=`<div class="principal-box-grid">
+<div class="principal-box" onclick="openLecGroupSubjectsPage()">
+<div><h4>${dept}</h4><p>Students: ${students.length}</p><p>Your teaching group</p></div>
+</div></div>`;
+}
+
+function openLecGroupSubjectsPage(){
+hideAllLecDrillPages();
+document.getElementById("lecGroupSubjectsPage").classList.remove("hidden");
+document.getElementById("lecGroupSubjectsTitle").innerText=`${currentUser.department||"Group"} – Subjects`;
+const list=document.getElementById("lecGroupSubjectsList");
+const subjects=currentUser.subjects||[];
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects added yet. Use Add in sidebar.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+const students=lecDeptStudents();
+subjects.forEach(s=>{
+let sum=0; students.forEach(st=>{ sum+=lecStudentSubjectPct(st.id,s.name); });
+const avg=students.length?Math.round(sum/students.length):0;
+let badgeClass=avg>=75?"good":(avg>=50?"medium":"low");
+const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box" onclick="openLecSubjectCatsPage('${safe}')"><div><h4>${s.name}</h4><p>${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Days: ${(s.days||[]).join(", ")||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${avg}%</span></div></div>`;
 });
 }
 
-const section = document.getElementById("lecturerDynamicListSection");
-section.classList.remove("hidden");
-section.scrollIntoView({ behavior: 'smooth' });
-}
-
-function hideLecturerDynamicList(){
-document.getElementById("lecturerDynamicListSection").classList.add("hidden");
-}
-
-function toggleManualAttendance(){
-const sec = document.getElementById("manualAttendanceSection");
-sec.classList.toggle("hidden");
-if(!sec.classList.contains("hidden")){
-populateManualAttendanceDropdowns();
-}
-}
-
-function populateManualAttendanceDropdowns(){
-if(!currentUser || currentUser.role !== "lecturer") return;
-
-const subjSelect = document.getElementById("attSubjectSelect");
-subjSelect.innerHTML = "<option value=''>Select Subject</option>";
-currentUser.subjects.forEach(s => {
-subjSelect.innerHTML += `<option value="${s.name}">${s.name}</option>`;
+function openLecSubjectCatsPage(subjectName){
+lecDrillState.subjectName=subjectName;
+hideAllLecDrillPages();
+document.getElementById("lecSubjectCatsPage").classList.remove("hidden");
+document.getElementById("lecSubjectCatsTitle").innerText=`${subjectName} – Categories`;
+const students=lecDeptStudents();
+let high=0,mid=0,low=0;
+students.forEach(st=>{
+const pct=lecStudentSubjectPct(st.id,subjectName);
+if(pct>=75) high++; else if(pct>=50) mid++; else low++;
 });
-
-const studentSelect = document.getElementById("attStudentSelect");
-studentSelect.innerHTML = "<option value=''>Select Student</option>";
-const students = getData("students").filter(s => s.department === currentUser.department);
-students.forEach(s => {
-studentSelect.innerHTML += `<option value="${s.id}">${s.name} (${s.roll})</option>`;
-});
-
-document.getElementById("attDate").value = new Date().toISOString().split("T")[0];
+document.getElementById("lecCatHigh").innerText=high;
+document.getElementById("lecCatMid").innerText=mid;
+document.getElementById("lecCatLow").innerText=low;
 }
+
+function openLecCategoryStudents(category){
+lecDrillState.category=category;
+hideAllLecDrillPages();
+document.getElementById("lecCategoryStudentsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+document.getElementById("lecCategoryStudentsTitle").innerText=`${lecDrillState.subjectName} – ${titleMap[category]}`;
+const students=lecDeptStudents().filter(st=>{
+const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
+if(category==="high") return pct>=75;
+if(category==="mid") return pct>=50 && pct<75;
+return pct<50;
+});
+const list=document.getElementById("lecCategoryStudentsList");
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+students.forEach(st=>{
+const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
+let badgeClass=pct>=75?"good":(pct>=50?"medium":"low");
+grid.innerHTML+=`<div class="principal-box" onclick="openLecStudentHistory('${st.id}')"><div><h4>${st.name}</h4><p>Roll: ${st.roll||"—"}</p><p>Mobile: ${st.mobile||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div></div>`;
+});
+}
+
+function openLecStudentHistory(studentId){
+lecDrillState.studentId=studentId;
+hideAllLecDrillPages();
+document.getElementById("lecStudentHistoryPage").classList.remove("hidden");
+const st=getData("students").find(s=>s.id===studentId);
+document.getElementById("lecStudentHistoryTitle").innerText=`${st?st.name:"Student"} – History`;
+let records=getData("attendanceRecords").filter(r=>r.studentId===studentId && (!lecDrillState.subjectName || r.subjectName===lecDrillState.subjectName));
+records.sort((a,b)=>new Date(b.date)-new Date(a.date));
+const list=document.getElementById("lecStudentHistoryList");
+if(!records.length){ list.innerHTML=`<div class="today-empty">No attendance history.</div>`; return; }
+list.innerHTML="";
+records.forEach(r=>{
+let badgeClass=r.status==="Absent"?"low":(r.status==="Late"?"medium":"good");
+list.innerHTML+=`<div class="group"><div><strong>${r.date||"—"}</strong><br><small style="color:#94a3b8">${r.subjectName||""} ${r.time?"• "+r.time:""}</small></div><span class="badge ${badgeClass}">${r.status||"—"}</span></div>`;
+});
+}
+
+function openLecMarksHome(){
+hideAllLecDrillPages();
+document.getElementById("lecMarksGroupsPage").classList.remove("hidden");
+const dept=currentUser.department||"Group";
+document.getElementById("lecMarksGroupsList").innerHTML=`
+<div class="principal-box-grid">
+<div class="principal-box" onclick="openLecMarksSubjectsPage()"><div><h4>${dept}</h4><p>View marks by subject categories</p></div></div>
+<div class="principal-box" onclick="openLecAddMarksPage()"><div><h4>Add Marks</h4><p>Enter exam marks for department students</p></div></div>
+</div>`;
+}
+
+function openLecMarksSubjectsPage(){
+hideAllLecDrillPages();
+document.getElementById("lecMarksSubjectsPage").classList.remove("hidden");
+document.getElementById("lecMarksSubjectsTitle").innerText=`${currentUser.department||"Group"} – Marks Subjects`;
+const list=document.getElementById("lecMarksSubjectsList");
+const subjects=currentUser.subjects||[];
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects found.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+subjects.forEach(s=>{
+const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box" onclick="openLecMarksCatsPage('${safe}')"><div><h4>${s.name}</h4><p>View marks categories</p></div></div>`;
+});
+}
+
+function openLecMarksCatsPage(subjectName){
+lecDrillState.marksSubject=subjectName;
+lecDrillState.subjectName=subjectName;
+hideAllLecDrillPages();
+document.getElementById("lecMarksCatsPage").classList.remove("hidden");
+document.getElementById("lecMarksCatsTitle").innerText=`${subjectName} – Marks Categories`;
+const students=lecDeptStudents();
+let high=0,mid=0,low=0;
+students.forEach(st=>{
+const pct=lecStudentMarksPct(st.id,subjectName);
+if(pct>=80) high++; else if(pct>=41) mid++; else low++;
+});
+document.getElementById("lecMarksCatHigh").innerText=high;
+document.getElementById("lecMarksCatMid").innerText=mid;
+document.getElementById("lecMarksCatLow").innerText=low;
+}
+
+function openLecMarksStudents(category){
+hideAllLecDrillPages();
+document.getElementById("lecMarksStudentsPage").classList.remove("hidden");
+const titleMap={high:"80%+",mid:"41% – 74%",low:"Below 40%"};
+document.getElementById("lecMarksStudentsTitle").innerText=`${lecDrillState.marksSubject} – ${titleMap[category]}`;
+const students=lecDeptStudents().filter(st=>{
+const pct=lecStudentMarksPct(st.id,lecDrillState.marksSubject);
+if(category==="high") return pct>=80;
+if(category==="mid") return pct>=41 && pct<80;
+return pct<41;
+});
+const list=document.getElementById("lecMarksStudentsList");
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+students.forEach(st=>{
+const pct=lecStudentMarksPct(st.id,lecDrillState.marksSubject);
+let badgeClass=pct>=80?"good":(pct>=41?"medium":"low");
+grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${st.name}</h4><p>Roll: ${st.roll||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div></div>`;
+});
+}
+
+function openLecAttendancePage(){
+if(!currentUser||currentUser.role!=="lecturer") return;
+hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("lecAttendancePage").classList.remove("hidden");
+const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const today=days[new Date().getDay()];
+const box=document.getElementById("lecSessionBoxes");
+box.innerHTML="";
+const subjects=(currentUser.subjects||[]).filter(s=>!s.days||!s.days.length||s.days.some(d=>String(d).toLowerCase()===today.toLowerCase()));
+if(!subjects.length){ box.innerHTML=`<div class="today-empty">No classes scheduled for ${today}.</div>`; return; }
+subjects.forEach((s,idx)=>{
+const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+box.innerHTML+=`<div class="principal-box" onclick="openLecSessionStart('${safe}','${s.startTime||""}','${s.endTime||""}')"><div><h4>${s.name}</h4><p>Group: ${currentUser.department||"—"}</p><p>Time: ${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Day: ${today}</p></div></div>`;
+});
+}
+
+function openLecSessionStart(subject,start,end){
+hideAllLecDrillPages();
+document.getElementById("lecSessionStartPage").classList.remove("hidden");
+document.getElementById("lecSessionStartTitle").innerText=`${subject} • ${currentUser.department||""}`;
+document.getElementById("lecSessionMsg").style.display="none";
+document.getElementById("lecSessionWinStart").value=start||"";
+document.getElementById("lecSessionWinEnd").value=end||"";
+document.getElementById("lecActiveSessionPanel").classList.add("hidden");
+lecDrillState.subjectName=subject;
+}
+
+function startLecAttendanceSession(){
+const radius=Number(document.getElementById("lecSessionRadius").value)||50;
+const winStart=document.getElementById("lecSessionWinStart").value;
+const winEnd=document.getElementById("lecSessionWinEnd").value;
+const msg=document.getElementById("lecSessionMsg");
+if(!winStart||!winEnd){ msg.innerText="Please set time window."; msg.style.display="block"; return; }
+if(!navigator.geolocation){ msg.innerText="Geolocation not supported."; msg.style.display="block"; return; }
+navigator.geolocation.getCurrentPosition((pos)=>{
+lecActiveSession={
+id:"sess_"+Date.now(),
+lecturerId:currentUser.id,
+department:currentUser.department,
+subject:lecDrillState.subjectName,
+radius,
+winStart,winEnd,
+lat:pos.coords.latitude,
+lng:pos.coords.longitude,
+active:true,
+date:new Date().toISOString().split("T")[0]
+};
+const sessions=getData("attendanceSessions");
+sessions.push(lecActiveSession);
+saveData("attendanceSessions",sessions);
+localStorage.setItem("activeLecSession",JSON.stringify(lecActiveSession));
+document.getElementById("lecActiveSessionPanel").classList.remove("hidden");
+document.getElementById("lecActiveSessionInfo").innerText=`${lecActiveSession.subject} | ${lecActiveSession.department} | Window ${winStart}-${winEnd} | Radius ${radius}m`;
+msg.style.display="none";
+},()=>{ msg.innerText="Location permission required to start session."; msg.style.display="block"; });
+}
+
+function closeLecAttendanceSession(){
+if(lecActiveSession){
+lecActiveSession.active=false;
+const sessions=getData("attendanceSessions").map(s=>s.id===lecActiveSession.id?{...s,active:false}:s);
+saveData("attendanceSessions",sessions);
+}
+lecActiveSession=null;
+localStorage.removeItem("activeLecSession");
+document.getElementById("lecActiveSessionPanel").classList.add("hidden");
+}
+
+function openLecManualAttendance(){
+hideAllLecDrillPages();
+document.getElementById("lecManualAttendancePage").classList.remove("hidden");
+document.getElementById("lecManGroup").value=currentUser.department||"";
+document.getElementById("lecManAttMsg").style.display="none";
+const sel=document.getElementById("lecManSubject");
+sel.innerHTML="";
+(currentUser.subjects||[]).forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+}
+
+function submitLecManualAttendance(){
+const msg=document.getElementById("lecManAttMsg");
+const roll=(document.getElementById("lecManRoll").value||"").trim();
+const subject=document.getElementById("lecManSubject").value;
+const status=document.getElementById("lecManStatus").value;
+if(!roll||!subject){ msg.innerText="Enter roll number and subject."; msg.style.display="block"; return; }
+const student=lecDeptStudents().find(s=>String(s.roll).toLowerCase()===roll.toLowerCase());
+if(!student){ msg.innerText="Student not found in your department."; msg.style.display="block"; return; }
+const records=getData("attendanceRecords");
+records.push({
+id:"att_"+Date.now(),
+date:new Date().toISOString().split("T")[0],
+time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
+studentId:student.id,
+subjectName:subject,
+status,
+department:currentUser.department,
+lecturerId:currentUser.id
+});
+saveData("attendanceRecords",records);
+msg.className="msg success";
+msg.innerText="Attendance saved for "+student.name;
+msg.style.display="block";
+}
+
+function openLecAddMarksPage(){
+hideAllLecDrillPages();
+document.getElementById("lecAddMarksPage").classList.remove("hidden");
+document.getElementById("lecAddMarksDept").value=currentUser.department||"";
+document.getElementById("lecAddMarksMsg").style.display="none";
+document.getElementById("lecMarksEntrySection").classList.add("hidden");
+const sel=document.getElementById("lecAddMarksSubject");
+sel.innerHTML="";
+(currentUser.subjects||[]).forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+}
+
+function loadLecMarksEntryRows(){
+const exam=(document.getElementById("lecAddMarksExam").value||"").trim();
+const max=Number(document.getElementById("lecAddMarksMax").value);
+const msg=document.getElementById("lecAddMarksMsg");
+if(!exam||!max){ msg.innerText="Enter exam type and max marks."; msg.style.display="block"; return; }
+msg.style.display="none";
+const students=lecDeptStudents();
+const list=document.getElementById("lecMarksEntryList");
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in department.</div>`; document.getElementById("lecMarksEntrySection").classList.remove("hidden"); return; }
+list.innerHTML="";
+students.forEach(st=>{
+list.innerHTML+=`<div class="group"><div><strong>${st.name}</strong><br><small style="color:#94a3b8">Roll: ${st.roll||"—"}</small></div><input type="number" class="lec-mark-input" data-student-id="${st.id}" min="0" max="${max}" placeholder="Marks" style="width:100px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(15,23,42,0.6);color:#fff;"></div>`;
+});
+document.getElementById("lecMarksEntrySection").classList.remove("hidden");
+}
+
+function saveLecMarksEntry(){
+const exam=(document.getElementById("lecAddMarksExam").value||"").trim();
+const max=Number(document.getElementById("lecAddMarksMax").value);
+const subject=document.getElementById("lecAddMarksSubject").value;
+const msg=document.getElementById("lecAddMarksMsg");
+const inputs=document.querySelectorAll(".lec-mark-input");
+let saved=0;
+for(const input of inputs){
+const val=input.value.trim();
+if(val==="") continue;
+const num=Number(val);
+if(num>max){ msg.className="msg error"; msg.innerText=`Marks cannot exceed max (${max}).`; msg.style.display="block"; return; }
+if(num<0){ msg.className="msg error"; msg.innerText="Marks cannot be negative."; msg.style.display="block"; return; }
+const marks=getData("marksRecords");
+marks.push({
+id:"mark_"+Date.now()+"_"+Math.random(),
+studentId:input.getAttribute("data-student-id"),
+subject, examType:exam, maxMarks:max, marksObtained:num,
+department:currentUser.department, lecturerId:currentUser.id,
+date:new Date().toISOString().split("T")[0]
+});
+saveData("marksRecords",marks);
+saved++;
+}
+msg.className="msg success";
+msg.innerText=`Saved ${saved} marks records.`;
+msg.style.display="block";
+}
+
+function openLecAddSubjectPage(){
+if(!currentUser||currentUser.role!=="lecturer") return;
+hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("lecAddSubjectPage").classList.remove("hidden");
+document.getElementById("lecAddSubName").value=currentUser.name||"";
+document.getElementById("lecAddSubMobile").value=currentUser.mobile||"";
+document.getElementById("lecAddSubDept").value=currentUser.department||"";
+document.getElementById("lecAddSubMsg").style.display="none";
+}
+
+function submitLecAddSubject(){
+const msg=document.getElementById("lecAddSubMsg");
+const code=(document.getElementById("lecAddSubCode").value||"").trim().toUpperCase();
+const subj=(document.getElementById("lecAddSubNameField").value||"").trim();
+const start=document.getElementById("lecAddSubStart").value;
+const end=document.getElementById("lecAddSubEnd").value;
+const day=document.getElementById("lecAddSubDay").value;
+if(!code||!subj||!start||!end){ msg.className="msg error"; msg.innerText="Fill code, subject name and timings."; msg.style.display="block"; return; }
+const hods=getData("hods");
+const hod=hods.find(h=>h.lecturerInviteCode===code);
+if(!hod){ msg.className="msg error"; msg.innerText="Invalid HOD lecturer code."; msg.style.display="block"; return; }
+if(hod.department && currentUser.department && hod.department!==currentUser.department){
+msg.className="msg error"; msg.innerText="Code department does not match your department."; msg.style.display="block"; return;
+}
+const lecturers=getData("lecturers");
+const idx=lecturers.findIndex(l=>l.id===currentUser.id);
+if(idx<0){ msg.className="msg error"; msg.innerText="Lecturer account not found."; msg.style.display="block"; return; }
+if(!Array.isArray(lecturers[idx].subjects)) lecturers[idx].subjects=[];
+lecturers[idx].subjects.push({ name:subj, startTime:start, endTime:end, days:[day] });
+saveData("lecturers",lecturers);
+currentUser=lecturers[idx];
+msg.className="msg success";
+msg.innerText="Subject added successfully to your group.";
+msg.style.display="block";
+document.getElementById("lecAddSubNameField").value="";
+}
+
+function openLecNotifications(){
+if(!currentUser||currentUser.role!=="lecturer") return;
+hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
+document.getElementById("lecNotificationsPage").classList.remove("hidden");
+}
+
+function toggleLecturerGroupFilter(){}
+function showLecturerStudentsList(){}
+function hideLecturerDynamicList(){}
+function toggleManualAttendance(){ openLecManualAttendance(); }
+function populateManualAttendanceDropdowns(){}
 
 function fetchLocation(){
 if(navigator.geolocation){
