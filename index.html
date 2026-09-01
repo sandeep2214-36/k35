@@ -1907,7 +1907,7 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3>Add Marks</h3></div>
 <div id="lecAddMarksMsg" class="msg error"></div>
-<div class="input-group"><label>Department</label><input id="lecAddMarksDept" readonly></div>
+<div class="input-group"><label>Group / Department</label><select id="lecAddMarksDept" onchange="fillLecAddMarksSubjects()"></select></div>
 <div class="input-group"><label>Subject</label><select id="lecAddMarksSubject"></select></div>
 <div class="input-group"><label>Exam Type</label><input id="lecAddMarksExam" placeholder="e.g. Internal 1"></div>
 <div class="input-group"><label>Maximum Marks</label><input id="lecAddMarksMax" type="number" value="40" min="1"></div>
@@ -3692,26 +3692,35 @@ list.innerHTML+=`<div class="group"><div><strong>${r.date||"—"}</strong><br><s
 function openLecMarksHome(){
 hideAllLecDrillPages();
 document.getElementById("lecMarksGroupsPage").classList.remove("hidden");
-const dept=currentUser.department||"Group";
-document.getElementById("lecMarksGroupsList").innerHTML=`
-<div class="principal-box-grid">
-<div class="principal-box" onclick="openLecMarksSubjectsPage()"><div><h4>${dept}</h4><p>View marks by subject categories</p></div></div>
-<div class="principal-box" onclick="openLecAddMarksPage()"><div><h4>Add Marks</h4><p>Enter exam marks for department students</p></div></div>
-</div>`;
+const groups=lecLecturerGroups();
+const list=document.getElementById("lecMarksGroupsList");
+if(!groups.length){
+list.innerHTML=`<div class="today-empty">No groups found.</div>`;
+return;
+}
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+groups.forEach(dept=>{
+const safe=String(dept).replace(/\\/g,"\\\\").replace(/'/g,"\\'");
+grid.innerHTML+=`<div class="principal-box" onclick="openLecMarksSubjectsPage('${safe}')"><div><h4>${dept}</h4><p>View marks by subject for this group</p></div></div>`;
+});
+grid.innerHTML+=`<div class="principal-box" onclick="openLecAddMarksPage()"><div><h4>Add Marks</h4><p>Enter exam marks for a selected group</p></div></div>`;
 }
 
-function openLecMarksSubjectsPage(){
+function openLecMarksSubjectsPage(deptName){
+if(deptName) lecDrillState.groupDept=deptName;
+const dept=lecDrillState.groupDept||currentUser.department||"Group";
 hideAllLecDrillPages();
 document.getElementById("lecMarksSubjectsPage").classList.remove("hidden");
-document.getElementById("lecMarksSubjectsTitle").innerText=`${currentUser.department||"Group"} – Marks Subjects`;
+document.getElementById("lecMarksSubjectsTitle").innerText=`${dept} – Marks Subjects`;
 const list=document.getElementById("lecMarksSubjectsList");
-const subjects=currentUser.subjects||[];
-if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects found.</div>`; return; }
+const subjects=(currentUser.subjects||[]).filter(s=>!s.department || s.department===dept || (!s.department && dept===(currentUser.department||"")));
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects found for this group.</div>`; return; }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 subjects.forEach(s=>{
 const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-grid.innerHTML+=`<div class="principal-box" onclick="openLecMarksCatsPage('${safe}')"><div><h4>${s.name}</h4><p>View marks categories</p></div></div>`;
+grid.innerHTML+=`<div class="principal-box" onclick="openLecMarksCatsPage('${safe}')"><div><h4>${s.name}</h4><p>Group: ${dept}</p></div></div>`;
 });
 }
 
@@ -3868,26 +3877,38 @@ msg.style.display="block";
 setTimeout(()=>{ msg.style.display="none"; msg.innerText=""; }, 1500);
 }
 
+function fillLecAddMarksSubjects(){
+const dept=document.getElementById("lecAddMarksDept").value;
+lecDrillState.groupDept=dept;
+const sel=document.getElementById("lecAddMarksSubject");
+sel.innerHTML="";
+(currentUser.subjects||[]).filter(s=>!s.department || s.department===dept || (!s.department && dept===(currentUser.department||"")))
+.forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+}
+
 function openLecAddMarksPage(){
 hideAllLecDrillPages();
 document.getElementById("lecAddMarksPage").classList.remove("hidden");
-document.getElementById("lecAddMarksDept").value=currentUser.department||"";
 document.getElementById("lecAddMarksMsg").style.display="none";
 document.getElementById("lecMarksEntrySection").classList.add("hidden");
-const sel=document.getElementById("lecAddMarksSubject");
-sel.innerHTML="";
-(currentUser.subjects||[]).forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+const deptSel=document.getElementById("lecAddMarksDept");
+deptSel.innerHTML="";
+lecLecturerGroups().forEach(d=>{ deptSel.innerHTML+=`<option value="${d}">${d}</option>`; });
+if(lecDrillState.groupDept) deptSel.value=lecDrillState.groupDept;
+fillLecAddMarksSubjects();
 }
 
 function loadLecMarksEntryRows(){
 const exam=(document.getElementById("lecAddMarksExam").value||"").trim();
 const max=Number(document.getElementById("lecAddMarksMax").value);
 const msg=document.getElementById("lecAddMarksMsg");
+const dept=document.getElementById("lecAddMarksDept").value;
+lecDrillState.groupDept=dept;
 if(!exam||!max){ msg.innerText="Enter exam type and max marks."; msg.style.display="block"; return; }
 msg.style.display="none";
-const students=lecDeptStudents();
+const students=lecDeptStudents(dept);
 const list=document.getElementById("lecMarksEntryList");
-if(!students.length){ list.innerHTML=`<div class="today-empty">No students in department.</div>`; document.getElementById("lecMarksEntrySection").classList.remove("hidden"); return; }
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this group.</div>`; document.getElementById("lecMarksEntrySection").classList.remove("hidden"); return; }
 list.innerHTML="";
 students.forEach(st=>{
 list.innerHTML+=`<div class="group"><div><strong>${st.name}</strong><br><small style="color:#94a3b8">Roll: ${st.roll||"—"}</small></div><input type="number" class="lec-mark-input" data-student-id="${st.id}" min="0" max="${max}" placeholder="Marks" style="width:100px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(15,23,42,0.6);color:#fff;"></div>`;
