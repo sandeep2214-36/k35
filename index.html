@@ -3834,28 +3834,54 @@ localStorage.removeItem("activeLecSession");
 document.getElementById("lecActiveSessionPanel").classList.add("hidden");
 }
 
+function fillLecManualSubjects(){
+const dept=document.getElementById("lecManGroup").value;
+lecDrillState.groupDept=dept;
+const sel=document.getElementById("lecManSubject");
+sel.innerHTML="";
+const subjects=(currentUser.subjects||[]).filter(s=>
+!s.department || s.department===dept || (!s.department && dept===(currentUser.department||""))
+);
+if(!subjects.length){
+sel.innerHTML=`<option value="">No subjects in this group</option>`;
+return;
+}
+subjects.forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+}
+
 function openLecManualAttendance(){
 if(!currentUser||currentUser.role!=="lecturer") return;
 hideAllLecDrillPages();
 document.getElementById("lecManualAttendancePage").classList.remove("hidden");
-document.getElementById("lecManGroup").value=currentUser.department||"";
 document.getElementById("lecManRoll").value="";
 document.getElementById("lecManStatus").value="Present";
 document.getElementById("lecManAttMsg").style.display="none";
 document.getElementById("lecManAttMsg").innerText="";
-const sel=document.getElementById("lecManSubject");
-sel.innerHTML="";
-(currentUser.subjects||[]).forEach(s=>{ sel.innerHTML+=`<option value="${s.name}">${s.name}</option>`; });
+const groupSel=document.getElementById("lecManGroup");
+groupSel.innerHTML="";
+const groups=lecLecturerGroups();
+if(!groups.length){
+groupSel.innerHTML=`<option value="">No groups</option>`;
+document.getElementById("lecManSubject").innerHTML=`<option value="">No subjects</option>`;
+return;
+}
+groups.forEach(d=>{ groupSel.innerHTML+=`<option value="${d}">${d}</option>`; });
+if(lecDrillState.groupDept && groups.includes(lecDrillState.groupDept)){
+groupSel.value=lecDrillState.groupDept;
+}
+fillLecManualSubjects();
 }
 
 function submitLecManualAttendance(){
 const msg=document.getElementById("lecManAttMsg");
+const dept=(document.getElementById("lecManGroup").value||"").trim();
 const roll=(document.getElementById("lecManRoll").value||"").trim();
 const subject=document.getElementById("lecManSubject").value;
 const status=document.getElementById("lecManStatus").value;
-if(!roll||!subject){ msg.className="msg error"; msg.innerText="Enter roll number and subject."; msg.style.display="block"; return; }
-const student=lecDeptStudents().find(s=>String(s.roll).toLowerCase()===roll.toLowerCase());
-if(!student){ msg.className="msg error"; msg.innerText="Student not found in your department."; msg.style.display="block"; return; }
+lecDrillState.groupDept=dept;
+if(!dept||!roll||!subject){ msg.className="msg error"; msg.innerText="Select group, enter roll and subject."; msg.style.display="block"; return; }
+const student=lecDeptStudents(dept).find(s=>String(s.roll).toLowerCase()===roll.toLowerCase());
+if(!student){ msg.className="msg error"; msg.innerText="Student not found in selected group."; msg.style.display="block"; return; }
 const records=getData("attendanceRecords");
 records.push({
 id:"att_"+Date.now(),
@@ -3864,11 +3890,10 @@ time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),
 studentId:student.id,
 subjectName:subject,
 status,
-department:currentUser.department,
+department:dept,
 lecturerId:currentUser.id
 });
 saveData("attendanceRecords",records);
-// Save only – clear form, do not keep submitted details visible
 document.getElementById("lecManRoll").value="";
 document.getElementById("lecManStatus").value="Present";
 msg.className="msg success";
