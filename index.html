@@ -3553,8 +3553,11 @@ document.getElementById("lecturerDash").classList.remove("hidden");
 loadLecturerDash();
 }
 
-function lecDeptStudents(){
-return getData("students").filter(s => s.department === currentUser.department || s.hodId === currentUser.hodId);
+function lecDeptStudents(deptOverride){
+// Always filter by the selected group department only (not mixed groups)
+const dept = deptOverride || lecDrillState.groupDept || currentUser.department || "";
+if(!dept) return [];
+return getData("students").filter(s => String(s.department||"") === String(dept));
 }
 
 function lecStudentSubjectPct(studentId, subjectName){
