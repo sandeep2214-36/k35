@@ -3824,8 +3824,34 @@ grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${st
 });
 }
 
+function lecNormalizeDay(d){
+const x=String(d||"").trim().toLowerCase();
+if(x.startsWith("mon")) return "monday";
+if(x.startsWith("tue")) return "tuesday";
+if(x.startsWith("wed")) return "wednesday";
+if(x.startsWith("thu")) return "thursday";
+if(x.startsWith("fri")) return "friday";
+if(x.startsWith("sat")) return "saturday";
+if(x.startsWith("sun")) return "sunday";
+return x;
+}
+
+function lecSubjectOnDay(s, dayName){
+const days=s.days||s.weekDays||[];
+if(!days.length) return true;
+const target=lecNormalizeDay(dayName);
+return days.some(d=>lecNormalizeDay(d)===target);
+}
+
+function refreshCurrentLecturer(){
+if(!currentUser||currentUser.role!=="lecturer") return;
+const latest=getData("lecturers").find(l=>l.id===currentUser.id);
+if(latest) currentUser=latest;
+}
+
 function openLecAttendancePage(){
 if(!currentUser||currentUser.role!=="lecturer") return;
+refreshCurrentLecturer();
 hideAllLecDrillPages();
 document.getElementById("mainDashboard").classList.remove("hidden");
 const classesPage=document.getElementById("classesPage");
@@ -3835,18 +3861,27 @@ const days=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturda
 const today=days[new Date().getDay()];
 const box=document.getElementById("lecSessionBoxes");
 box.innerHTML="";
-const subjects=(currentUser.subjects||[]).filter(s=>!s.days||!s.days.length||s.days.some(d=>String(d).toLowerCase()===today.toLowerCase()));
-if(!subjects.length){ box.innerHTML=`<div class="today-empty">No classes scheduled for ${today}.</div>`; return; }
-subjects.forEach((s,idx)=>{
+const allSubjects=currentUser.subjects||[];
+const subjects=allSubjects.filter(s=>lecSubjectOnDay(s, today));
+if(!subjects.length){
+box.innerHTML=`<div class="today-empty">No classes scheduled for ${today}. (Total subjects: ${allSubjects.length})</div>`;
+return;
+}
+subjects.forEach(s=>{
 const safe=(s.name||"").replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-box.innerHTML+=`<div class="principal-box" onclick="openLecSessionStart('${safe}','${s.startTime||""}','${s.endTime||""}')"><div><h4>${s.name}</h4><p>Group: ${currentUser.department||"—"}</p><p>Time: ${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Day: ${today}</p></div></div>`;
+const dept=s.department||currentUser.department||"—";
+const start=s.startTime||s.start||"";
+const end=s.endTime||s.end||"";
+box.innerHTML+=`<div class="principal-box" onclick="openLecSessionStart('${safe}','${start}','${end}','${String(dept).replace(/'/g,"\\'")}')"><div><h4>${s.name}</h4><p>Group: ${dept}</p><p>Time: ${start||"—"} – ${end||"—"}</p><p>Day: ${today}</p></div></div>`;
 });
 }
 
-function openLecSessionStart(subject,start,end){
+function openLecSessionStart(subject,start,end,dept){
 hideAllLecDrillPages();
 document.getElementById("lecSessionStartPage").classList.remove("hidden");
-document.getElementById("lecSessionStartTitle").innerText=`${subject} • ${currentUser.department||""}`;
+const group=dept||lecDrillState.groupDept||currentUser.department||"";
+if(dept) lecDrillState.groupDept=dept;
+document.getElementById("lecSessionStartTitle").innerText=`${subject} • ${group}`;
 document.getElementById("lecSessionMsg").style.display="none";
 document.getElementById("lecSessionWinStart").value=start||"";
 document.getElementById("lecSessionWinEnd").value=end||"";
@@ -4174,11 +4209,9 @@ if(btn){
 document.querySelectorAll("#lecDayFilters .filter-btn").forEach(b=>b.classList.remove("active"));
 btn.classList.add("active");
 }
+refreshCurrentLecturer();
 const list=document.getElementById("lecTimetableList");
-const items=(currentUser.subjects||[]).filter(s=>{
-const days=s.days||[];
-return !days.length || days.some(d=>String(d).toLowerCase()===String(day).toLowerCase());
-});
+const items=(currentUser.subjects||[]).filter(s=>lecSubjectOnDay(s, day));
 if(!items.length){
 list.innerHTML=`<div class="today-empty">No classes on ${day}.</div>`;
 return;
@@ -4186,7 +4219,8 @@ return;
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 items.forEach(s=>{
-grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${s.name||"—"}</h4><p>Group: ${currentUser.department||"—"}</p><p>Time: ${s.startTime||"—"} – ${s.endTime||"—"}</p><p>Day: ${day}</p></div></div>`;
+const dept=s.department||currentUser.department||"—";
+grid.innerHTML+=`<div class="principal-box" style="cursor:default"><div><h4>${s.name||"—"}</h4><p>Group: ${dept}</p><p>Time: ${s.startTime||s.start||"—"} – ${s.endTime||s.end||"—"}</p><p>Day: ${day}</p></div></div>`;
 });
 }
 
