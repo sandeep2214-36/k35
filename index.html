@@ -2676,18 +2676,38 @@ const hods=getData("hods");
 const students=getData("students");
 const lecturers=getData("lecturers");
 
-let user=
-principals.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash)||
-hods.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash)||
-students.find(x=>(x.id===identity||x.roll===identity||x.mobile===identity)&&x.passwordHash===hash)||
-lecturers.find(x=>(x.id===identity||x.mobile===identity)&&x.passwordHash===hash);
+// Collect all credential matches, prefer exact account ID over shared mobile
+const candidates=[];
+principals.forEach(x=>{ if((x.id===identity||x.mobile===identity)&&x.passwordHash===hash) candidates.push(x); });
+hods.forEach(x=>{ if((x.id===identity||x.mobile===identity)&&x.passwordHash===hash) candidates.push(x); });
+students.forEach(x=>{ if((x.id===identity||x.roll===identity||x.mobile===identity)&&x.passwordHash===hash) candidates.push(x); });
+lecturers.forEach(x=>{ if((x.id===identity||x.mobile===identity)&&x.passwordHash===hash) candidates.push(x); });
+
+let user=candidates.find(x=>x.id===identity) || candidates[0] || null;
 
 if(!user){
 showMsg("loginMsg","Invalid credentials.");
 return;
 }
 
+// Ensure role is always set (old records safety)
+if(!user.role){
+if(principals.some(p=>p.id===user.id)) user.role="principal";
+else if(hods.some(h=>h.id===user.id)) user.role="hod";
+else if(students.some(s=>s.id===user.id)) user.role="student";
+else if(lecturers.some(l=>l.id===user.id)) user.role="lecturer";
+}
+
 currentUser=user;
+
+// Clear other role sessions so pages don't open wrong dashboard
+try{
+localStorage.removeItem("currentStudentSession");
+localStorage.removeItem("currentLecturerSession");
+localStorage.removeItem("currentHodSession");
+localStorage.removeItem("currentPrincipalSession");
+}catch(e){}
+
 if(user.role==="student"){
 localStorage.setItem("currentStudentSession",JSON.stringify(user));
 window.location.href="student.html";
@@ -2696,6 +2716,12 @@ return;
 if(user.role==="lecturer"){
 localStorage.setItem("currentLecturerSession",JSON.stringify(user));
 }
+if(user.role==="hod"){
+localStorage.setItem("currentHodSession",JSON.stringify(user));
+}
+if(user.role==="principal"){
+localStorage.setItem("currentPrincipalSession",JSON.stringify(user));
+}
 openDashboard();
 }
 
@@ -2703,13 +2729,20 @@ function openDashboard(){
 hideAll();
 document.getElementById("dashboard").classList.remove("hidden");
 
-document.getElementById("dashTitle").innerText="Welcome, "+currentUser.name;
-document.getElementById("dashSubtitle").innerText="Role: "+currentUser.role.toUpperCase();
+document.getElementById("dashTitle").innerText="Welcome, "+(currentUser.name||"");
+document.getElementById("dashSubtitle").innerText="Role: "+String(currentUser.role||"").toUpperCase();
 
+// Hide all role dashboards + drill pages first (prevent mixed UI)
 document.getElementById("principalDash").classList.add("hidden");
 document.getElementById("hodDash").classList.add("hidden");
 document.getElementById("studentDash").classList.add("hidden");
 document.getElementById("lecturerDash").classList.add("hidden");
+if(typeof hideAllPrincipalDrillPages==="function") hideAllPrincipalDrillPages();
+if(typeof hideAllHodDrillPages==="function") hideAllHodDrillPages();
+if(typeof hideAllLecDrillPages==="function") hideAllLecDrillPages();
+document.getElementById("mainDashboard").classList.remove("hidden");
+const classesPage=document.getElementById("classesPage");
+if(classesPage) classesPage.classList.add("hidden");
 
 const classesBtn=document.getElementById("classesNavButton");
 const sidebarClassesBtn=document.getElementById("sidebarClassesBtn");
