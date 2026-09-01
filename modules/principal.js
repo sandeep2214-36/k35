@@ -127,7 +127,8 @@ return subjects;
 }
 
 function loadPrincipalDash(){
-hideAllPrincipalDrillPages();
+if(typeof hideAllRoleContent==="function") hideAllRoleContent();
+else hideAllPrincipalDrillPages();
 document.getElementById("principalDash").classList.remove("hidden");
 
 const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
