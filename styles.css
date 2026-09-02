@@ -235,16 +235,22 @@ color:#86efac;
 }
 
 .back{
-background: rgba(212, 175, 55, 0.15);
+background: rgba(212, 175, 55, 0.18);
 padding:10px 16px;
 border-radius:12px;
 margin-bottom:20px;
 display:inline-flex;
 align-items:center;
 gap:8px;
-font-weight:600;
-color:#1f1f1f;
+font-weight:700;
+color:#f0d56e;
 font-size: 14px;
+border: 1px solid #d4af37;
+box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
+}
+.back:hover{
+background: linear-gradient(135deg, #d4af37, #f0d56e);
+color:#0a0a0a;
 }
 
 /* SUBJECT FORM */
