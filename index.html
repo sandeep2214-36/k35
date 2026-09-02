@@ -316,17 +316,13 @@ Don't have an account?
 </div>
 
 <div class="input-group">
-<label>Semester</label>
-<select id="sSemester">
-<option value="">Select Semester</option>
-<option value="1">1st Semester</option>
-<option value="2">2nd Semester</option>
-<option value="3">3rd Semester</option>
-<option value="4">4th Semester</option>
-<option value="5">5th Semester</option>
-<option value="6">6th Semester</option>
-<option value="7">7th Semester</option>
-<option value="8">8th Semester</option>
+<label>Year</label>
+<select id="sYear">
+<option value="">Select Year</option>
+<option value="1">1st Year</option>
+<option value="2">2nd Year</option>
+<option value="3">3rd Year</option>
+<option value="4">4th Year</option>
 </select>
 </div>
 
@@ -565,15 +561,15 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3 id="principalSubjectCatsTitle">Attendance Categories</h3></div>
 <div class="attendance-boxes">
-<div class="att-box high" onclick="openPrincipalCategoryStudents('high')">
+<div class="att-box high" onclick="openPrincipalCategoryYears('high')">
 <h3 id="principalCatHigh">0</h3>
 <span>Above 75%</span>
 </div>
-<div class="att-box mid" onclick="openPrincipalCategoryStudents('mid')">
+<div class="att-box mid" onclick="openPrincipalCategoryYears('mid')">
 <h3 id="principalCatMid">0</h3>
 <span>50% – 74%</span>
 </div>
-<div class="att-box low" onclick="openPrincipalCategoryStudents('low')">
+<div class="att-box low" onclick="openPrincipalCategoryYears('low')">
 <h3 id="principalCatLow">0</h3>
 <span>Below 49%</span>
 </div>
@@ -581,8 +577,16 @@ Student <span>Pro</span>
 </div>
 </div>
 
-<div id="principalCategoryStudentsPage" class="hidden">
+<div id="principalCategoryYearsPage" class="hidden">
 <button class="back" onclick="openPrincipalSubjectCatsPage(principalDrillState.hodId, principalDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section">
+<div class="section-title"><h3 id="principalCategoryYearsTitle">Select Year</h3></div>
+<div id="principalCategoryYearsList" class="principal-box-grid"></div>
+</div>
+</div>
+
+<div id="principalCategoryStudentsPage" class="hidden">
+<button class="back" onclick="openPrincipalCategoryYears(principalDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Years</button>
 <div class="section">
 <div class="section-title"><h3 id="principalCategoryStudentsTitle">Students</h3></div>
 <div id="principalCategoryStudentsList"></div>
@@ -590,7 +594,7 @@ Student <span>Pro</span>
 </div>
 
 <div id="principalStudentHistoryPage" class="hidden">
-<button class="back" onclick="openPrincipalCategoryStudents(principalDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<button class="back" onclick="openPrincipalCategoryStudents(principalDrillState.category, principalDrillState.year)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
 <div class="section">
 <div class="section-title"><h3 id="principalStudentHistoryTitle">Attendance History</h3></div>
 <div id="principalStudentHistoryList"></div>
@@ -661,15 +665,23 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3 id="hodSubjectCatsTitle">Attendance Categories</h3></div>
 <div class="attendance-boxes">
-<div class="att-box high" onclick="openHodCategoryStudents('high')"><h3 id="hodCatHigh">0</h3><span>Above 75%</span></div>
-<div class="att-box mid" onclick="openHodCategoryStudents('mid')"><h3 id="hodCatMid">0</h3><span>50% – 74%</span></div>
-<div class="att-box low" onclick="openHodCategoryStudents('low')"><h3 id="hodCatLow">0</h3><span>Below 49%</span></div>
+<div class="att-box high" onclick="openHodCategoryYears('high')"><h3 id="hodCatHigh">0</h3><span>Above 75%</span></div>
+<div class="att-box mid" onclick="openHodCategoryYears('mid')"><h3 id="hodCatMid">0</h3><span>50% – 74%</span></div>
+<div class="att-box low" onclick="openHodCategoryYears('low')"><h3 id="hodCatLow">0</h3><span>Below 49%</span></div>
 </div>
 </div>
 </div>
 
-<div id="hodCategoryStudentsPage" class="hidden">
+<div id="hodCategoryYearsPage" class="hidden">
 <button class="back" onclick="openHodSubjectCatsPage(hodDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section">
+<div class="section-title"><h3 id="hodCategoryYearsTitle">Select Year</h3></div>
+<div id="hodCategoryYearsList" class="principal-box-grid"></div>
+</div>
+</div>
+
+<div id="hodCategoryStudentsPage" class="hidden">
+<button class="back" onclick="openHodCategoryYears(hodDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Years</button>
 <div class="section">
 <div class="section-title"><h3 id="hodCategoryStudentsTitle">Students</h3></div>
 <div id="hodCategoryStudentsList"></div>
@@ -677,7 +689,7 @@ Student <span>Pro</span>
 </div>
 
 <div id="hodStudentHistoryPage" class="hidden">
-<button class="back" onclick="openHodCategoryStudents(hodDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<button class="back" onclick="openHodCategoryStudents(hodDrillState.category, hodDrillState.year)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
 <div class="section">
 <div class="section-title"><h3 id="hodStudentHistoryTitle">Attendance History</h3></div>
 <div id="hodStudentHistoryList"></div>

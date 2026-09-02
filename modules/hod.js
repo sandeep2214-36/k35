@@ -1,7 +1,7 @@
-let hodDrillState = { subjectName: null, category: null, studentId: null };
+let hodDrillState = { subjectName: null, category: null, year: null, studentId: null };
 
 function hideAllHodDrillPages(){
-["hodDash","hodSubjectCatsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage"].forEach(id=>{
+["hodDash","hodSubjectCatsPage","hodCategoryYearsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage"].forEach(id=>{
 const el=document.getElementById(id);
 if(el) el.classList.add("hidden");
 });
@@ -117,22 +117,46 @@ document.getElementById("hodCatMid").innerText=mid;
 document.getElementById("hodCatLow").innerText=low;
 }
 
-function openHodCategoryStudents(category){
+function openHodCategoryYears(category){
 hodDrillState.category=category;
+hodDrillState.year=null;
 hideAllHodDrillPages();
-document.getElementById("hodCategoryStudentsPage").classList.remove("hidden");
+document.getElementById("hodCategoryYearsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
-document.getElementById("hodCategoryStudentsTitle").innerText=`${hodDrillState.subjectName||"Subject"} – ${titleMap[category]||category}`;
-const students=getData("students").filter(s=>s.hodId===currentUser.id);
-const list=document.getElementById("hodCategoryStudentsList");
-const filtered=students.filter(st=>{
+document.getElementById("hodCategoryYearsTitle").innerText=`${hodDrillState.subjectName||"Subject"} – ${titleMap[category]||category} – Years`;
+const list=document.getElementById("hodCategoryYearsList");
+list.innerHTML="";
+[1,2,3,4].forEach(y=>{
+const students=getData("students").filter(s=>s.hodId===currentUser.id && String(s.year||s.semester||"")===String(y));
+const count=students.filter(st=>{
 const pct=hodStudentSubjectPct(st.id, hodDrillState.subjectName==="General"?null:hodDrillState.subjectName);
 if(category==="high") return pct>=75;
 if(category==="mid") return pct>=50 && pct<75;
 return pct<50;
+}).length;
+list.innerHTML+=`<div class="principal-box" onclick="openHodCategoryStudents('${category}','${y}')"><div><h4>${y}${y===1?'st':y===2?'nd':y===3?'rd':'th'} Year</h4><p>Students in this category: ${count}</p></div></div>`;
+});
+}
+
+function openHodCategoryStudents(category, year){
+if(category) hodDrillState.category=category;
+if(year) hodDrillState.year=String(year);
+hideAllHodDrillPages();
+document.getElementById("hodCategoryStudentsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+const cat=hodDrillState.category;
+const yr=hodDrillState.year;
+document.getElementById("hodCategoryStudentsTitle").innerText=`${hodDrillState.subjectName||"Subject"} – ${titleMap[cat]||cat} – Year ${yr||"—"}`;
+const students=getData("students").filter(s=>s.hodId===currentUser.id && (!yr || String(s.year||s.semester||"")===String(yr)));
+const list=document.getElementById("hodCategoryStudentsList");
+const filtered=students.filter(st=>{
+const pct=hodStudentSubjectPct(st.id, hodDrillState.subjectName==="General"?null:hodDrillState.subjectName);
+if(cat==="high") return pct>=75;
+if(cat==="mid") return pct>=50 && pct<75;
+return pct<50;
 });
 if(!filtered.length){
-list.innerHTML=`<div class="today-empty">No students in this category.</div>`;
+list.innerHTML=`<div class="today-empty">No students in this category for this year.</div>`;
 return;
 }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
@@ -147,6 +171,7 @@ grid.innerHTML+=`
 <div>
 <h4>${st.name}</h4>
 <p>Roll: ${st.roll||"—"}</p>
+<p>Year: ${st.year||st.semester||"—"}</p>
 <p>Mobile: ${st.mobile||"—"}</p>
 </div>
 <div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div>

@@ -1,7 +1,7 @@
-let principalDrillState = { hodId: null, subjectName: null, category: null, studentId: null };
+let principalDrillState = { hodId: null, subjectName: null, category: null, year: null, studentId: null };
 
 function hideAllPrincipalDrillPages(){
-["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage"].forEach(id=>{
+["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage"].forEach(id=>{
 const el=document.getElementById(id);
 if(el) el.classList.add("hidden");
 });
@@ -258,23 +258,51 @@ document.getElementById("principalCatMid").innerText=mid;
 document.getElementById("principalCatLow").innerText=low;
 }
 
-function openPrincipalCategoryStudents(category){
+function studentYearValue(st){
+return String(st.year||st.semester||"").trim();
+}
+
+function openPrincipalCategoryYears(category){
 principalDrillState.category=category;
+principalDrillState.year=null;
+hideAllPrincipalDrillPages();
+document.getElementById("principalCategoryYearsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+document.getElementById("principalCategoryYearsTitle").innerText=`${principalDrillState.subjectName||"Subject"} – ${titleMap[category]||category} – Years`;
+const list=document.getElementById("principalCategoryYearsList");
+list.innerHTML="";
+[1,2,3,4].forEach(y=>{
+const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId && studentYearValue(s)===String(y));
+const count=students.filter(st=>{
+const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName==="General"?null:principalDrillState.subjectName);
+if(category==="high") return pct>=75;
+if(category==="mid") return pct>=50 && pct<75;
+return pct<50;
+}).length;
+list.innerHTML+=`<div class="principal-box" onclick="openPrincipalCategoryStudents('${category}','${y}')"><div><h4>${y}${y===1?'st':y===2?'nd':y===3?'rd':'th'} Year</h4><p>Students in this category: ${count}</p></div></div>`;
+});
+}
+
+function openPrincipalCategoryStudents(category, year){
+if(category) principalDrillState.category=category;
+if(year) principalDrillState.year=String(year);
 hideAllPrincipalDrillPages();
 document.getElementById("principalCategoryStudentsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
-document.getElementById("principalCategoryStudentsTitle").innerText=`${principalDrillState.subjectName || "Subject"} – ${titleMap[category]||category}`;
-const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId);
+const cat=principalDrillState.category;
+const yr=principalDrillState.year;
+document.getElementById("principalCategoryStudentsTitle").innerText=`${principalDrillState.subjectName || "Subject"} – ${titleMap[cat]||cat} – Year ${yr||"—"}`;
+const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId && (!yr || studentYearValue(s)===String(yr)));
 const list=document.getElementById("principalCategoryStudentsList");
 list.innerHTML="";
 const filtered=students.filter(st=>{
 const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName === "General" ? null : principalDrillState.subjectName);
-if(category==="high") return pct>=75;
-if(category==="mid") return pct>=50 && pct<75;
+if(cat==="high") return pct>=75;
+if(cat==="mid") return pct>=50 && pct<75;
 return pct<50;
 });
 if(!filtered.length){
-list.innerHTML=`<div class="today-empty">No students in this category.</div>`;
+list.innerHTML=`<div class="today-empty">No students in this category for this year.</div>`;
 return;
 }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
@@ -289,6 +317,7 @@ grid.innerHTML+=`
 <div>
 <h4>${st.name}</h4>
 <p>Roll: ${st.roll || "—"}</p>
+<p>Year: ${studentYearValue(st)||"—"}</p>
 <p>Mobile: ${st.mobile || "—"}</p>
 </div>
 <div class="box-footer">
