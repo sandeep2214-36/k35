@@ -855,20 +855,28 @@ Student <span>Pro</span>
 <div class="section">
 <div class="section-title"><h3 id="lecSubjectCatsTitle">Attendance Categories</h3></div>
 <div class="attendance-boxes">
-<div class="att-box high" onclick="openLecCategoryStudents('high')"><h3 id="lecCatHigh">0</h3><span>Above 75%</span></div>
-<div class="att-box mid" onclick="openLecCategoryStudents('mid')"><h3 id="lecCatMid">0</h3><span>50% – 74%</span></div>
-<div class="att-box low" onclick="openLecCategoryStudents('low')"><h3 id="lecCatLow">0</h3><span>Below 49%</span></div>
+<div class="att-box high" onclick="openLecCategoryYears('high')"><h3 id="lecCatHigh">0</h3><span>Above 75%</span></div>
+<div class="att-box mid" onclick="openLecCategoryYears('mid')"><h3 id="lecCatMid">0</h3><span>50% – 74%</span></div>
+<div class="att-box low" onclick="openLecCategoryYears('low')"><h3 id="lecCatLow">0</h3><span>Below 49%</span></div>
 </div>
+</div>
+</div>
+
+<div id="lecCategoryYearsPage" class="hidden">
+<button class="back" onclick="openLecSubjectCatsPage(lecDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<div class="section">
+<div class="section-title"><h3 id="lecCategoryYearsTitle">Select Year</h3></div>
+<div id="lecCategoryYearsList" class="principal-box-grid"></div>
 </div>
 </div>
 
 <div id="lecCategoryStudentsPage" class="hidden">
-<button class="back" onclick="openLecSubjectCatsPage(lecDrillState.subjectName)"><i class="fa-solid fa-arrow-left"></i> Back to Categories</button>
+<button class="back" onclick="openLecCategoryYears(lecDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Years</button>
 <div class="section"><div class="section-title"><h3 id="lecCategoryStudentsTitle">Students</h3></div><div id="lecCategoryStudentsList"></div></div>
 </div>
 
 <div id="lecStudentHistoryPage" class="hidden">
-<button class="back" onclick="openLecCategoryStudents(lecDrillState.category)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
+<button class="back" onclick="openLecCategoryStudents(lecDrillState.category, lecDrillState.year)"><i class="fa-solid fa-arrow-left"></i> Back to Students</button>
 <div class="section"><div class="section-title"><h3 id="lecStudentHistoryTitle">Attendance History</h3></div><div id="lecStudentHistoryList"></div></div>
 </div>
 

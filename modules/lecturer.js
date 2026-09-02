@@ -1,8 +1,8 @@
-let lecDrillState = { subjectName: null, category: null, studentId: null, marksSubject: null, groupDept: null, verifiedHod: null };
+let lecDrillState = { subjectName: null, category: null, year: null, studentId: null, marksSubject: null, groupDept: null, verifiedHod: null };
 let lecActiveSession = null;
 
 function lecPageIds(){
-return ["lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage"];
+return ["lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryYearsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage"];
 }
 
 function hideAllLecDrillPages(){
@@ -116,26 +116,51 @@ document.getElementById("lecCatMid").innerText=mid;
 document.getElementById("lecCatLow").innerText=low;
 }
 
-function openLecCategoryStudents(category){
+function openLecCategoryYears(category){
 lecDrillState.category=category;
+lecDrillState.year=null;
 hideAllLecDrillPages();
-document.getElementById("lecCategoryStudentsPage").classList.remove("hidden");
+document.getElementById("lecCategoryYearsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
-document.getElementById("lecCategoryStudentsTitle").innerText=`${lecDrillState.subjectName} – ${titleMap[category]}`;
-const students=lecDeptStudents().filter(st=>{
+document.getElementById("lecCategoryYearsTitle").innerText=`${lecDrillState.subjectName||"Subject"} – ${titleMap[category]||category} – Years`;
+const list=document.getElementById("lecCategoryYearsList");
+list.innerHTML="";
+[1,2,3,4].forEach(y=>{
+const students=lecDeptStudents().filter(st=>String(st.year||st.semester||"")===String(y));
+const count=students.filter(st=>{
 const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
 if(category==="high") return pct>=75;
 if(category==="mid") return pct>=50 && pct<75;
 return pct<50;
+}).length;
+list.innerHTML+=`<div class="principal-box" onclick="openLecCategoryStudents('${category}','${y}')"><div><h4>${y}${y===1?'st':y===2?'nd':y===3?'rd':'th'} Year</h4><p>Students in this category: ${count}</p></div></div>`;
+});
+}
+
+function openLecCategoryStudents(category, year){
+if(category) lecDrillState.category=category;
+if(year) lecDrillState.year=String(year);
+hideAllLecDrillPages();
+document.getElementById("lecCategoryStudentsPage").classList.remove("hidden");
+const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
+const cat=lecDrillState.category;
+const yr=lecDrillState.year;
+document.getElementById("lecCategoryStudentsTitle").innerText=`${lecDrillState.subjectName} – ${titleMap[cat]||cat} – Year ${yr||"—"}`;
+const students=lecDeptStudents().filter(st=>{
+if(yr && String(st.year||st.semester||"")!==String(yr)) return false;
+const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
+if(cat==="high") return pct>=75;
+if(cat==="mid") return pct>=50 && pct<75;
+return pct<50;
 });
 const list=document.getElementById("lecCategoryStudentsList");
-if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category.</div>`; return; }
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category for this year.</div>`; return; }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 students.forEach(st=>{
 const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
 let badgeClass=pct>=75?"good":(pct>=50?"medium":"low");
-grid.innerHTML+=`<div class="principal-box" onclick="openLecStudentHistory('${st.id}')"><div><h4>${st.name}</h4><p>Roll: ${st.roll||"—"}</p><p>Mobile: ${st.mobile||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div></div>`;
+grid.innerHTML+=`<div class="principal-box" onclick="openLecStudentHistory('${st.id}')"><div><h4>${st.name}</h4><p>Roll: ${st.roll||"—"}</p><p>Year: ${st.year||st.semester||"—"}</p><p>Mobile: ${st.mobile||"—"}</p></div><div class="box-footer"><span class="badge ${badgeClass}">${pct}%</span></div></div>`;
 });
 }
 
