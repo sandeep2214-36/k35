@@ -651,7 +651,7 @@ openDashboard();
 function hideAllRoleContent(){
 // Hard reset so HOD/Lecturer/Student/Principal pages never mix
 const ids=[
-"principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage",
+"principalDash","principalGroupsPage","principalYearGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage",
 "hodDash","hodSubjectCatsPage","hodCategoryYearsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage",
 "studentDash","stuSubjectHistoryPage","stuMarksPage","stuMarksDetailPage","stuAttendancePage","stuSessionSubmitPage","stuTimetablePage","stuNotificationsPage",
 "lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryYearsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage",
