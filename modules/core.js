@@ -328,15 +328,15 @@ hideMsg("studentMsg");
 
 const name=document.getElementById("sName").value.trim();
 const roll=document.getElementById("sRoll").value.trim();
-const semester=document.getElementById("sSemester").value.trim();
+const year=document.getElementById("sYear").value.trim();
 const mobile=document.getElementById("sMobile").value.trim();
 const parent=document.getElementById("sParent").value.trim();
 const parentMobile=document.getElementById("sParentMobile").value.trim();
 const password=document.getElementById("sPassword").value;
 const confirm=document.getElementById("sConfirm").value;
 
-if(!name||!roll||!semester||!mobile||!parent||!parentMobile||!password||!confirm){
-showMsg("studentMsg","Please fill all fields and select semester.");
+if(!name||!roll||!year||!mobile||!parent||!parentMobile||!password||!confirm){
+showMsg("studentMsg","Please fill all fields and select year (1-4).");
 return;
 }
 
