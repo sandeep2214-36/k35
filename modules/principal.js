@@ -1,7 +1,7 @@
 let principalDrillState = { hodId: null, subjectName: null, category: null, year: null, studentId: null };
 
 function hideAllPrincipalDrillPages(){
-["principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage"].forEach(id=>{
+["principalDash","principalGroupsPage","principalYearGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage"].forEach(id=>{
 const el=document.getElementById(id);
 if(el) el.classList.add("hidden");
 });
@@ -130,6 +130,7 @@ function loadPrincipalDash(){
 if(typeof hideAllRoleContent==="function") hideAllRoleContent();
 else hideAllPrincipalDrillPages();
 document.getElementById("principalDash").classList.remove("hidden");
+principalDrillState.year=null;
 
 const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
 const students=getData("students").filter(x=>x.principalId===currentUser.id);
@@ -138,6 +139,41 @@ document.getElementById("groupCount").innerText=hods.length;
 document.getElementById("hodCount").innerText=hods.length;
 document.getElementById("studentCount").innerText=students.length;
 document.getElementById("principalHodCode").innerText=currentUser.hodInviteCode;
+
+// Year-wise Analysis on home
+const yGrid=document.getElementById("principalYearsGrid");
+if(yGrid){
+yGrid.innerHTML="";
+[1,2,3,4].forEach(y=>{
+const ys=students.filter(s=>String(s.year||s.semester||"")===String(y));
+let avg=0;
+if(ys.length) avg=Math.round(ys.reduce((a,b)=>a+(b.attendancePercentage||0),0)/ys.length);
+let badge=avg>=75?"good":(avg>=50?"medium":"low");
+const label=y===1?"1st":y===2?"2nd":y===3?"3rd":"4th";
+yGrid.innerHTML+=`<div class="principal-box" onclick="openPrincipalYearGroups('${y}')"><div><h4>${label} Year</h4><p>Students: ${ys.length}</p></div><div class="box-footer"><span class="badge ${badge}">AVG ${avg}%</span></div></div>`;
+});
+}
+}
+
+function openPrincipalYearGroups(year){
+principalDrillState.year=String(year);
+hideAllPrincipalDrillPages();
+document.getElementById("principalYearGroupsPage").classList.remove("hidden");
+const label=year==="1"?"1st":year==="2"?"2nd":year==="3"?"3rd":"4th";
+document.getElementById("principalYearGroupsTitle").innerText=`${label} Year – Groups`;
+const hods=getData("hods").filter(x=>x.principalId===currentUser.id);
+const students=getData("students").filter(x=>x.principalId===currentUser.id && String(x.year||x.semester||"")===String(year));
+const list=document.getElementById("principalYearGroupsList");
+if(!hods.length){ list.innerHTML=`<div class="today-empty">No groups found.</div>`; return; }
+list.innerHTML=`<div class="principal-box-grid"></div>`;
+const grid=list.querySelector(".principal-box-grid");
+hods.forEach(h=>{
+const deptStudents=students.filter(s=>s.hodId===h.id);
+let deptAvg=0;
+if(deptStudents.length) deptAvg=Math.round(deptStudents.reduce((a,b)=>a+(b.attendancePercentage||0),0)/deptStudents.length);
+let badgeClass=deptAvg>=75?"good":(deptAvg>=50?"medium":"low");
+grid.innerHTML+=`<div class="principal-box" onclick="openPrincipalGroupSubjectsPage('${h.id}')"><div><h4>${h.department||"Group"}</h4><p>HOD: ${h.name||"—"}</p><p>Mobile: ${h.mobile||"—"}</p><p>Students (Year ${year}): ${deptStudents.length}</p></div><div class="box-footer"><span class="badge ${badgeClass}">AVG ${deptAvg}%</span></div></div>`;
+});
 }
 
 function openPrincipalGroupsPage(){
@@ -264,7 +300,11 @@ return String(st.year||st.semester||"").trim();
 
 function openPrincipalCategoryYears(category){
 principalDrillState.category=category;
-principalDrillState.year=null;
+// If year already chosen from Year-wise Analysis, skip to students
+if(principalDrillState.year){
+openPrincipalCategoryStudents(category, principalDrillState.year);
+return;
+}
 hideAllPrincipalDrillPages();
 document.getElementById("principalCategoryYearsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};

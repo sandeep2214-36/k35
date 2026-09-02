@@ -520,6 +520,11 @@ Student <span>Pro</span>
 </div>
 
 <div class="section">
+<div class="section-title"><h3>Year-wise Analysis</h3></div>
+<div id="principalYearsGrid" class="principal-box-grid"></div>
+</div>
+
+<div class="section">
 <div class="section-title">
 <h3>HOD Invite Code</h3>
 </div>
@@ -532,6 +537,14 @@ Student <span>Pro</span>
 </div>
 
 <!-- PRINCIPAL DRILL-DOWN PAGES -->
+<div id="principalYearGroupsPage" class="hidden">
+<button class="back" onclick="closePrincipalDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
+<div class="section">
+<div class="section-title"><h3 id="principalYearGroupsTitle">Year – Groups</h3></div>
+<div id="principalYearGroupsList"></div>
+</div>
+</div>
+
 <div id="principalGroupsPage" class="hidden">
 <button class="back" onclick="closePrincipalDrillDown()"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</button>
 <div class="section">
@@ -635,6 +648,11 @@ Student <span>Pro</span>
 <small>Avg Attendance</small>
 <h2 id="hodAttendance">0%</h2>
 </div>
+</div>
+
+<div class="section">
+<div class="section-title"><h3>Year-wise Analysis</h3></div>
+<div id="hodYearsGrid" class="principal-box-grid"></div>
 </div>
 
 <div class="section">
