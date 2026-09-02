@@ -22,6 +22,15 @@ const y=String(year||"").trim();
 if(!y) return [];
 return (list||[]).filter(s=>studentYearValue(s)===y);
 }
+function subjectYearValue(s){
+if(!s) return "";
+return String(s.year||"").trim();
+}
+function subjectMatchesYear(s, year){
+const y=String(year||"").trim();
+if(!y) return true;
+return subjectYearValue(s)===y;
+}
 
 async function hashPassword(password){
 const encoder=new TextEncoder();
