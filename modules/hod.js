@@ -151,8 +151,10 @@ function openHodSubjectCatsPage(subjectName){
 hodDrillState.subjectName=subjectName;
 hideAllHodDrillPages();
 document.getElementById("hodSubjectCatsPage").classList.remove("hidden");
-document.getElementById("hodSubjectCatsTitle").innerText=`${subjectName} – Categories`;
-const students=getData("students").filter(s=>s.hodId===currentUser.id);
+const yr=hodDrillState.year;
+document.getElementById("hodSubjectCatsTitle").innerText=yr?`${subjectName} – Year ${yr} – Categories`:`${subjectName} – Categories`;
+let students=getData("students").filter(s=>s.hodId===currentUser.id);
+if(yr) students=studentsInYear(students, yr);
 let high=0,mid=0,low=0;
 students.forEach(st=>{
 const pct=hodStudentSubjectPct(st.id, subjectName==="General"?null:subjectName);
