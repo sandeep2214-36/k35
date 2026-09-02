@@ -80,54 +80,28 @@ document.getElementById("hodAttendance").innerText=avg+"%";
 document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode||"—";
 document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode||"—";
 
-// Year-wise Analysis
+// Groups = Year-wise (1st/2nd/3rd/4th) based on student data
 const yGrid=document.getElementById("hodYearsGrid");
 if(yGrid){
 yGrid.innerHTML="";
 [1,2,3,4].forEach(y=>{
-const ys=students.filter(s=>String(s.year||s.semester||"")===String(y));
+const ys=studentsInYear(students, y);
+const subCount=hodDepartmentSubjects(y).length;
 let yAvg=0;
 if(ys.length) yAvg=Math.round(ys.reduce((a,b)=>a+(b.attendancePercentage||0),0)/ys.length);
 let badge=yAvg>=75?"good":(yAvg>=50?"medium":"low");
 const label=y===1?"1st":y===2?"2nd":y===3?"3rd":"4th";
-yGrid.innerHTML+=`<div class="principal-box" onclick="openHodYearSubjects('${y}')"><div><h4>${label} Year</h4><p>Students: ${ys.length}</p></div><div class="box-footer"><span class="badge ${badge}">AVG ${yAvg}%</span></div></div>`;
+yGrid.innerHTML+=`<div class="principal-box" onclick="openHodYearSubjects('${y}')"><div><h4>${label} Year</h4><p>Students: ${ys.length}</p><p>Subjects: ${subCount}</p></div><div class="box-footer"><span class="badge ${badge}">AVG ${yAvg}%</span></div></div>`;
 });
 }
-
-const grid=document.getElementById("hodSubjectsGrid");
-grid.innerHTML="";
-const subjects=hodDepartmentSubjects();
-subjects.forEach(subj=>{
-let sum=0,cnt=0;
-students.forEach(st=>{
-const pct=hodStudentSubjectPct(st.id, subj==="General"?null:subj);
-sum+=pct; cnt++;
-});
-const subAvg=cnt?Math.round(sum/cnt):0;
-let badgeClass="good";
-if(subAvg<50) badgeClass="low";
-else if(subAvg<75) badgeClass="medium";
-const safe=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-grid.innerHTML+=`
-<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')">
-<div>
-<h4>${subj}</h4>
-<p>${students.length} students</p>
-</div>
-<div class="box-footer"><span class="badge ${badgeClass}">${subAvg}%</span></div>
-</div>`;
-});
 }
 
 function openHodYearSubjects(year){
+// Year group → subjects for this department + year only (lecturer-added)
 hodDrillState.year=String(year);
+hodDrillState.subjectName=null;
+hodDrillState.category=null;
 hideAllHodDrillPages();
-document.getElementById("hodDash").classList.add("hidden");
-// Reuse subject cats path: show subjects filtered context via year state
-const page=document.getElementById("hodSubjectCatsPage");
-// Actually show subjects list for this year - use a subjects-like view via openHodSubjectCats after picking subject
-// Build year subjects page on hodCategoryYearsPage repurposed title - simpler: list subjects on category years page? 
-// Use hodDash subjects but navigate to subjects for year:
 const subjects=hodDepartmentSubjects(year);
 const students=studentsInYear(getData("students").filter(x=>x.hodId===currentUser.id), year);
 document.getElementById("hodCategoryYearsPage").classList.remove("hidden");
@@ -135,17 +109,24 @@ const label=year==="1"?"1st":year==="2"?"2nd":year==="3"?"3rd":"4th";
 document.getElementById("hodCategoryYearsTitle").innerText=`${label} Year – Subjects`;
 const list=document.getElementById("hodCategoryYearsList");
 list.innerHTML="";
-if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects for Year ${year}. Lecturer must add subject with this year.</div>`; return; }
+const backBtn=document.querySelector("#hodCategoryYearsPage .back");
+if(backBtn) backBtn.setAttribute("onclick","closeHodDrillDown()");
+if(!students.length && !subjects.length){
+list.innerHTML=`<div class="today-empty">No data for ${label} Year yet (students / subjects).</div>`;
+return;
+}
+if(!subjects.length){
+list.innerHTML=`<div class="today-empty">No subjects for ${label} Year. Lecturer must add subject with Year ${year}.</div>`;
+return;
+}
 subjects.forEach(subj=>{
 let sum=0,cnt=0;
 students.forEach(st=>{ const pct=hodStudentSubjectPct(st.id, subj==="General"?null:subj); sum+=pct; cnt++; });
 const subAvg=cnt?Math.round(sum/cnt):0;
 let badge=subAvg>=75?"good":(subAvg>=50?"medium":"low");
 const safe=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-list.innerHTML+=`<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')"><div><h4>${subj}</h4><p>Year ${year} students: ${students.length}</p></div><div class="box-footer"><span class="badge ${badge}">${subAvg}%</span></div></div>`;
+list.innerHTML+=`<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')"><div><h4>${subj}</h4><p>Students (Year ${year}): ${students.length}</p></div><div class="box-footer"><span class="badge ${badge}">${subAvg}%</span></div></div>`;
 });
-const backBtn=document.querySelector("#hodCategoryYearsPage .back");
-if(backBtn) backBtn.setAttribute("onclick","closeHodDrillDown()");
 }
 
 function openHodSubjectCatsPage(subjectName){
