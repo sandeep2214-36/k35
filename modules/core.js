@@ -654,7 +654,7 @@ const ids=[
 "principalDash","principalGroupsPage","principalHodsPage","principalGroupSubjectsPage","principalSubjectCatsPage","principalCategoryYearsPage","principalCategoryStudentsPage","principalStudentHistoryPage","principalStudentsSearchPage",
 "hodDash","hodSubjectCatsPage","hodCategoryYearsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage",
 "studentDash","stuSubjectHistoryPage","stuMarksPage","stuMarksDetailPage","stuAttendancePage","stuSessionSubmitPage","stuTimetablePage","stuNotificationsPage",
-"lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage",
+"lecturerDash","lecGroupsPage","lecGroupSubjectsPage","lecSubjectCatsPage","lecCategoryYearsPage","lecCategoryStudentsPage","lecStudentHistoryPage","lecMarksGroupsPage","lecMarksSubjectsPage","lecMarksCatsPage","lecMarksStudentsPage","lecAttendancePage","lecSessionStartPage","lecManualAttendancePage","lecAddMarksPage","lecAddSubjectPage","lecNotificationsPage","lecTimetablePage",
 "classesPage"
 ];
 ids.forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.add("hidden"); });
