@@ -245,9 +245,12 @@ principalDrillState.hodId=hodId;
 hideAllPrincipalDrillPages();
 document.getElementById("principalGroupSubjectsPage").classList.remove("hidden");
 const hod=getData("hods").find(h=>h.id===hodId);
-document.getElementById("principalGroupSubjectsTitle").innerText=`${hod ? (hod.department || "Group") : "Group"} – Subject Attendance`;
+const yr=principalDrillState.year;
+const titleBase=hod ? (hod.department || "Group") : "Group";
+document.getElementById("principalGroupSubjectsTitle").innerText=yr?`${titleBase} – Year ${yr} – Subjects`:`${titleBase} – Subject Attendance`;
 const subjects=principalGroupSubjects(hodId);
-const students=getData("students").filter(s=>s.hodId===hodId);
+let students=getData("students").filter(s=>s.hodId===hodId);
+if(yr) students=studentsInYear(students, yr);
 const list=document.getElementById("principalGroupSubjectsList");
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
@@ -266,7 +269,7 @@ grid.innerHTML+=`
 <div class="principal-box" onclick="openPrincipalSubjectCatsPage('${hodId}', '${safeSubj}')">
 <div>
 <h4>${subj}</h4>
-<p>${students.length} students in this group</p>
+<p>${students.length} students${yr?` (Year ${yr})`:""}</p>
 </div>
 <div class="box-footer">
 <span class="badge ${badgeClass}">${avg}%</span>
@@ -280,8 +283,10 @@ principalDrillState.hodId=hodId;
 principalDrillState.subjectName=subjectName;
 hideAllPrincipalDrillPages();
 document.getElementById("principalSubjectCatsPage").classList.remove("hidden");
-document.getElementById("principalSubjectCatsTitle").innerText=`${subjectName} – Categories`;
-const students=getData("students").filter(s=>s.hodId===hodId);
+const yr=principalDrillState.year;
+document.getElementById("principalSubjectCatsTitle").innerText=yr?`${subjectName} – Year ${yr} – Categories`:`${subjectName} – Categories`;
+let students=getData("students").filter(s=>s.hodId===hodId);
+if(yr) students=studentsInYear(students, yr);
 let high=0,mid=0,low=0;
 students.forEach(st=>{
 const pct=principalStudentSubjectPct(st.id, subjectName === "General" ? null : subjectName);
@@ -294,13 +299,9 @@ document.getElementById("principalCatMid").innerText=mid;
 document.getElementById("principalCatLow").innerText=low;
 }
 
-function studentYearValue(st){
-return String(st.year||st.semester||"").trim();
-}
-
 function openPrincipalCategoryYears(category){
 principalDrillState.category=category;
-// If year already chosen from Year-wise Analysis, skip to students
+// If year already chosen from Year-wise Analysis, go to students for that year only
 if(principalDrillState.year){
 openPrincipalCategoryStudents(category, principalDrillState.year);
 return;
@@ -312,7 +313,7 @@ document.getElementById("principalCategoryYearsTitle").innerText=`${principalDri
 const list=document.getElementById("principalCategoryYearsList");
 list.innerHTML="";
 [1,2,3,4].forEach(y=>{
-const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId && studentYearValue(s)===String(y));
+const students=studentsInYear(getData("students").filter(s=>s.hodId===principalDrillState.hodId), y);
 const count=students.filter(st=>{
 const pct=principalStudentSubjectPct(st.id, principalDrillState.subjectName==="General"?null:principalDrillState.subjectName);
 if(category==="high") return pct>=75;
@@ -325,14 +326,19 @@ list.innerHTML+=`<div class="principal-box" onclick="openPrincipalCategoryStuden
 
 function openPrincipalCategoryStudents(category, year){
 if(category) principalDrillState.category=category;
-if(year) principalDrillState.year=String(year);
+if(year!==undefined && year!==null && year!=="") principalDrillState.year=String(year);
+const yr=principalDrillState.year;
+// Year mandatory – never show all students
+if(!yr){
+openPrincipalCategoryYears(category||principalDrillState.category);
+return;
+}
 hideAllPrincipalDrillPages();
 document.getElementById("principalCategoryStudentsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
 const cat=principalDrillState.category;
-const yr=principalDrillState.year;
-document.getElementById("principalCategoryStudentsTitle").innerText=`${principalDrillState.subjectName || "Subject"} – ${titleMap[cat]||cat} – Year ${yr||"—"}`;
-const students=getData("students").filter(s=>s.hodId===principalDrillState.hodId && (!yr || studentYearValue(s)===String(yr)));
+document.getElementById("principalCategoryStudentsTitle").innerText=`${principalDrillState.subjectName || "Subject"} – ${titleMap[cat]||cat} – Year ${yr}`;
+const students=studentsInYear(getData("students").filter(s=>s.hodId===principalDrillState.hodId), yr);
 const list=document.getElementById("principalCategoryStudentsList");
 list.innerHTML="";
 const filtered=students.filter(st=>{
@@ -342,7 +348,7 @@ if(cat==="mid") return pct>=50 && pct<75;
 return pct<50;
 });
 if(!filtered.length){
-list.innerHTML=`<div class="today-empty">No students in this category for this year.</div>`;
+list.innerHTML=`<div class="today-empty">No students in this category for Year ${yr}.</div>`;
 return;
 }
 list.innerHTML=`<div class="principal-box-grid"></div>`;

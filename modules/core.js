@@ -12,6 +12,17 @@ function saveData(key,data){
 localStorage.setItem(key,JSON.stringify(data));
 }
 
+// Year helpers – account must match selected year (1-4)
+function studentYearValue(st){
+if(!st) return "";
+return String(st.year||st.semester||"").trim();
+}
+function studentsInYear(list, year){
+const y=String(year||"").trim();
+if(!y) return [];
+return (list||[]).filter(s=>studentYearValue(s)===y);
+}
+
 async function hashPassword(password){
 const encoder=new TextEncoder();
 const data=encoder.encode(password);

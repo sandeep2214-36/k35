@@ -19,11 +19,14 @@ document.getElementById("lecturerDash").classList.remove("hidden");
 loadLecturerDash();
 }
 
-function lecDeptStudents(deptOverride){
-// Always filter by the selected group department only (not mixed groups)
+function lecDeptStudents(deptOverride, yearOverride){
+// Department + optional year (account year based)
 const dept = deptOverride || lecDrillState.groupDept || currentUser.department || "";
 if(!dept) return [];
-return getData("students").filter(s => String(s.department||"") === String(dept));
+let list=getData("students").filter(s => String(s.department||"") === String(dept));
+const yr=yearOverride!==undefined ? yearOverride : lecDrillState.year;
+if(yr) list=studentsInYear(list, yr);
+return list;
 }
 
 function lecStudentSubjectPct(studentId, subjectName){
@@ -104,7 +107,8 @@ function openLecSubjectCatsPage(subjectName){
 lecDrillState.subjectName=subjectName;
 hideAllLecDrillPages();
 document.getElementById("lecSubjectCatsPage").classList.remove("hidden");
-document.getElementById("lecSubjectCatsTitle").innerText=`${subjectName} – Categories`;
+const yr=lecDrillState.year;
+document.getElementById("lecSubjectCatsTitle").innerText=yr?`${subjectName} – Year ${yr} – Categories`:`${subjectName} – Categories`;
 const students=lecDeptStudents();
 let high=0,mid=0,low=0;
 students.forEach(st=>{
@@ -118,7 +122,10 @@ document.getElementById("lecCatLow").innerText=low;
 
 function openLecCategoryYears(category){
 lecDrillState.category=category;
-lecDrillState.year=null;
+if(lecDrillState.year){
+openLecCategoryStudents(category, lecDrillState.year);
+return;
+}
 hideAllLecDrillPages();
 document.getElementById("lecCategoryYearsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
@@ -126,7 +133,7 @@ document.getElementById("lecCategoryYearsTitle").innerText=`${lecDrillState.subj
 const list=document.getElementById("lecCategoryYearsList");
 list.innerHTML="";
 [1,2,3,4].forEach(y=>{
-const students=lecDeptStudents().filter(st=>String(st.year||st.semester||"")===String(y));
+const students=lecDeptStudents(null, y);
 const count=students.filter(st=>{
 const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
 if(category==="high") return pct>=75;
@@ -139,22 +146,25 @@ list.innerHTML+=`<div class="principal-box" onclick="openLecCategoryStudents('${
 
 function openLecCategoryStudents(category, year){
 if(category) lecDrillState.category=category;
-if(year) lecDrillState.year=String(year);
+if(year!==undefined && year!==null && year!=="") lecDrillState.year=String(year);
+const yr=lecDrillState.year;
+if(!yr){
+openLecCategoryYears(category||lecDrillState.category);
+return;
+}
 hideAllLecDrillPages();
 document.getElementById("lecCategoryStudentsPage").classList.remove("hidden");
 const titleMap={high:"Above 75%",mid:"50% – 74%",low:"Below 49%"};
 const cat=lecDrillState.category;
-const yr=lecDrillState.year;
-document.getElementById("lecCategoryStudentsTitle").innerText=`${lecDrillState.subjectName} – ${titleMap[cat]||cat} – Year ${yr||"—"}`;
-const students=lecDeptStudents().filter(st=>{
-if(yr && String(st.year||st.semester||"")!==String(yr)) return false;
+document.getElementById("lecCategoryStudentsTitle").innerText=`${lecDrillState.subjectName} – ${titleMap[cat]||cat} – Year ${yr}`;
+const students=lecDeptStudents(null, yr).filter(st=>{
 const pct=lecStudentSubjectPct(st.id,lecDrillState.subjectName);
 if(cat==="high") return pct>=75;
 if(cat==="mid") return pct>=50 && pct<75;
 return pct<50;
 });
 const list=document.getElementById("lecCategoryStudentsList");
-if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category for this year.</div>`; return; }
+if(!students.length){ list.innerHTML=`<div class="today-empty">No students in this category for Year ${yr}.</div>`; return; }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 students.forEach(st=>{
