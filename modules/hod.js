@@ -27,15 +27,16 @@ const present = records.filter(r => r.status === "Present" || r.status === "Late
 return Math.round((present / records.length) * 100);
 }
 
-function hodDepartmentSubjects(){
+function hodDepartmentSubjects(yearFilter){
 const hodId=currentUser.id;
 const hodDept=currentUser.department||"";
+const yr=yearFilter!==undefined ? yearFilter : hodDrillState.year;
 const subjects = [];
-// Include subjects tagged to this HOD/department from any lecturer (extra groups)
 getData("lecturers").forEach(l => {
 if(!Array.isArray(l.subjects)) return;
 l.subjects.forEach(s => {
 if(!s || !s.name) return;
+if(yr && !subjectMatchesYear(s, yr)) return;
 const taggedHod=s.hodId;
 const taggedDept=s.department||"";
 const belongs =
@@ -47,12 +48,14 @@ if(belongs && !subjects.includes(s.name)) subjects.push(s.name);
 });
 const records = getData("attendanceRecords").filter(r => {
 const st = getData("students").find(s => s.id === r.studentId);
-return st && st.hodId === hodId && r.subjectName;
+if(!st || st.hodId !== hodId || !r.subjectName) return false;
+if(yr && studentYearValue(st)!==String(yr)) return false;
+return true;
 });
 records.forEach(r => {
 if(r.subjectName && !subjects.includes(r.subjectName)) subjects.push(r.subjectName);
 });
-if(!subjects.length) subjects.push("General");
+if(!subjects.length && !yr) subjects.push("General");
 return subjects;
 }
 
@@ -125,15 +128,14 @@ const page=document.getElementById("hodSubjectCatsPage");
 // Actually show subjects list for this year - use a subjects-like view via openHodSubjectCats after picking subject
 // Build year subjects page on hodCategoryYearsPage repurposed title - simpler: list subjects on category years page? 
 // Use hodDash subjects but navigate to subjects for year:
-const subjects=hodDepartmentSubjects();
-const students=getData("students").filter(x=>x.hodId===currentUser.id && String(x.year||x.semester||"")===String(year));
-// Show subjects grid on a dedicated flow: open first available as list using principal-box on hodCategoryYearsPage structure
+const subjects=hodDepartmentSubjects(year);
+const students=studentsInYear(getData("students").filter(x=>x.hodId===currentUser.id), year);
 document.getElementById("hodCategoryYearsPage").classList.remove("hidden");
 const label=year==="1"?"1st":year==="2"?"2nd":year==="3"?"3rd":"4th";
 document.getElementById("hodCategoryYearsTitle").innerText=`${label} Year – Subjects`;
 const list=document.getElementById("hodCategoryYearsList");
 list.innerHTML="";
-if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects.</div>`; return; }
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects for Year ${year}. Lecturer must add subject with this year.</div>`; return; }
 subjects.forEach(subj=>{
 let sum=0,cnt=0;
 students.forEach(st=>{ const pct=hodStudentSubjectPct(st.id, subj==="General"?null:subj); sum+=pct; cnt++; });
@@ -142,7 +144,6 @@ let badge=subAvg>=75?"good":(subAvg>=50?"medium":"low");
 const safe=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
 list.innerHTML+=`<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')"><div><h4>${subj}</h4><p>Year ${year} students: ${students.length}</p></div><div class="box-footer"><span class="badge ${badge}">${subAvg}%</span></div></div>`;
 });
-// Back from this view goes to dashboard
 const backBtn=document.querySelector("#hodCategoryYearsPage .back");
 if(backBtn) backBtn.setAttribute("onclick","closeHodDrillDown()");
 }

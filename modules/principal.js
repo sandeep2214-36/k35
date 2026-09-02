@@ -96,33 +96,36 @@ const present = records.filter(r => r.status === "Present" || r.status === "Late
 return Math.round((present / records.length) * 100);
 }
 
-function principalGroupSubjects(hodId){
+function principalGroupSubjects(hodId, yearFilter){
 const hod=getData("hods").find(h=>h.id===hodId);
 const hodDept=hod ? (hod.department||"") : "";
+const yr=yearFilter!==undefined ? yearFilter : principalDrillState.year;
 const subjects = [];
-// All lecturers may teach extra groups via Add Subject — filter by subject.hodId / subject.department
 getData("lecturers").forEach(l => {
 if(!Array.isArray(l.subjects)) return;
 l.subjects.forEach(s => {
 if(!s || !s.name) return;
+if(yr && !subjectMatchesYear(s, yr)) return;
 const taggedHod=s.hodId;
 const taggedDept=s.department||"";
 const belongs =
 (taggedHod && taggedHod===hodId) ||
 (taggedDept && hodDept && taggedDept===hodDept) ||
-// legacy subjects (no tag) only under lecturer's primary HOD
 (!taggedHod && !taggedDept && l.hodId===hodId);
 if(belongs && !subjects.includes(s.name)) subjects.push(s.name);
 });
 });
+// Attendance records only if student year matches when filtering
 const records = getData("attendanceRecords").filter(r => {
 const st = getData("students").find(s => s.id === r.studentId);
-return st && st.hodId === hodId && r.subjectName;
+if(!st || st.hodId !== hodId || !r.subjectName) return false;
+if(yr && studentYearValue(st)!==String(yr)) return false;
+return true;
 });
 records.forEach(r => {
 if(r.subjectName && !subjects.includes(r.subjectName)) subjects.push(r.subjectName);
 });
-if(!subjects.length) subjects.push("General");
+if(!subjects.length && !yr) subjects.push("General");
 return subjects;
 }
 

@@ -88,8 +88,10 @@ hideAllLecDrillPages();
 document.getElementById("lecGroupSubjectsPage").classList.remove("hidden");
 document.getElementById("lecGroupSubjectsTitle").innerText=`${dept} – Subjects`;
 const list=document.getElementById("lecGroupSubjectsList");
-const subjects=(currentUser.subjects||[]).filter(s=>!s.department || s.department===dept || (!s.department && dept===(currentUser.department||"")));
-if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects in this group yet. Use Add in sidebar.</div>`; return; }
+const yr=lecDrillState.year;
+let subjects=(currentUser.subjects||[]).filter(s=>!s.department || s.department===dept || (!s.department && dept===(currentUser.department||"")));
+if(yr) subjects=subjects.filter(s=>subjectMatchesYear(s, yr));
+if(!subjects.length){ list.innerHTML=`<div class="today-empty">No subjects${yr?` for Year ${yr}`:" in this group yet"}. Use Add in sidebar.</div>`; return; }
 list.innerHTML=`<div class="principal-box-grid"></div>`;
 const grid=list.querySelector(".principal-box-grid");
 const students=getData("students").filter(s=>s.department===dept);
@@ -582,13 +584,14 @@ const msg=document.getElementById("lecAddSubMsg");
 const hod=lecDrillState.verifiedHod;
 if(!hod){ msg.className="msg error"; msg.innerText="Verify HOD code first."; msg.style.display="block"; return; }
 const subj=(document.getElementById("lecAddSubNameField").value||"").trim();
+const year=(document.getElementById("lecAddSubYear").value||"").trim();
 const start=document.getElementById("lecAddSubStart").value;
 const end=document.getElementById("lecAddSubEnd").value;
 const days=[];
 document.querySelectorAll("#lecAddSubDays input:checked").forEach(c=>days.push(c.value));
-if(!subj||!start||!end||!days.length){
+if(!subj||!year||!start||!end||!days.length){
 msg.className="msg error";
-msg.innerText="Fill subject, timings and select at least one day.";
+msg.innerText="Fill subject, year (1-4), timings and select at least one day.";
 msg.style.display="block";
 return;
 }
@@ -596,9 +599,10 @@ const lecturers=getData("lecturers");
 const idx=lecturers.findIndex(l=>l.id===currentUser.id);
 if(idx<0){ msg.className="msg error"; msg.innerText="Lecturer account not found."; msg.style.display="block"; return; }
 if(!Array.isArray(lecturers[idx].subjects)) lecturers[idx].subjects=[];
-// Keep original lecturer department. Only tag subject with HOD department.
+// Keep original lecturer department. Tag subject with HOD department + year.
 lecturers[idx].subjects.push({
 name:subj,
+year:year,
 startTime:start,
 endTime:end,
 days:days,
@@ -608,9 +612,10 @@ hodId:hod.id||null
 saveData("lecturers",lecturers);
 currentUser=lecturers[idx];
 msg.className="msg success";
-msg.innerText="Subject added. Old groups remain. You can add another.";
+msg.innerText="Subject added for Year "+year+". Old groups remain.";
 msg.style.display="block";
 document.getElementById("lecAddSubNameField").value="";
+document.getElementById("lecAddSubYear").value="";
 document.getElementById("lecAddSubStart").value="";
 document.getElementById("lecAddSubEnd").value="";
 document.querySelectorAll("#lecAddSubDays input").forEach(c=>{ c.checked=false; });
