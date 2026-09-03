@@ -1,7 +1,7 @@
 let hodDrillState = { subjectName: null, category: null, year: null, studentId: null };
 
 function hideAllHodDrillPages(){
-["hodDash","hodSubjectCatsPage","hodCategoryYearsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage"].forEach(id=>{
+["hodDash","hodYearSubjectsPage","hodSubjectCatsPage","hodCategoryYearsPage","hodCategoryStudentsPage","hodStudentHistoryPage","hodStudentsSearchPage","hodTimetablePage","hodNotificationsPage"].forEach(id=>{
 const el=document.getElementById(id);
 if(el) el.classList.add("hidden");
 });
@@ -64,34 +64,55 @@ if(typeof hideAllRoleContent==="function") hideAllRoleContent();
 else hideAllHodDrillPages();
 document.getElementById("hodDash").classList.remove("hidden");
 hodDrillState.year=null;
+hodDrillState.subjectName=null;
+hodDrillState.category=null;
 
 const deptTitle=document.getElementById("hodDepartmentTitle");
 if(deptTitle) deptTitle.innerText = currentUser.department || "Department";
 document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode||"—";
 document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode||"—";
+
+// Year boxes from student year tags in this department only
+const students=getData("students").filter(x=>x.hodId===currentUser.id);
+const yGrid=document.getElementById("hodYearsGrid");
+if(yGrid){
+yGrid.innerHTML="";
+const yearsPresent=[];
+[1,2,3,4].forEach(y=>{
+const ys=studentsInYear(students, y);
+if(ys.length) yearsPresent.push(y);
+});
+if(!yearsPresent.length){
+yGrid.innerHTML=`<div class="today-empty">No year groups yet. When students join with a year tag, boxes appear here.</div>`;
+}else{
+yearsPresent.forEach(y=>{
+const ys=studentsInYear(students, y);
+let avg=0;
+if(ys.length) avg=Math.round(ys.reduce((a,b)=>a+(b.attendancePercentage||0),0)/ys.length);
+let badge=avg>=75?"good":(avg>=50?"medium":"low");
+const label=y===1?"1st":y===2?"2nd":y===3?"3rd":"4th";
+yGrid.innerHTML+=`<div class="principal-box" onclick="openHodYearSubjects('${y}')"><div><h4>${label} Year</h4><p>Total strength: ${ys.length}</p></div><div class="box-footer"><span class="badge ${badge}">AVG ${avg}%</span></div></div>`;
+});
+}
+}
 }
 
 function openHodYearSubjects(year){
-// Year group → subjects for this department + year only (lecturer-added)
+if(!year){ closeHodDrillDown(); return; }
 hodDrillState.year=String(year);
 hodDrillState.subjectName=null;
 hodDrillState.category=null;
 hideAllHodDrillPages();
+// Strict: subjects tagged this year + this department only
 const subjects=hodDepartmentSubjects(year);
 const students=studentsInYear(getData("students").filter(x=>x.hodId===currentUser.id), year);
-document.getElementById("hodCategoryYearsPage").classList.remove("hidden");
+document.getElementById("hodYearSubjectsPage").classList.remove("hidden");
 const label=year==="1"?"1st":year==="2"?"2nd":year==="3"?"3rd":"4th";
-document.getElementById("hodCategoryYearsTitle").innerText=`${label} Year – Subjects`;
-const list=document.getElementById("hodCategoryYearsList");
+document.getElementById("hodYearSubjectsTitle").innerText=`${label} Year – Subjects`;
+const list=document.getElementById("hodYearSubjectsList");
 list.innerHTML="";
-const backBtn=document.querySelector("#hodCategoryYearsPage .back");
-if(backBtn) backBtn.setAttribute("onclick","closeHodDrillDown()");
-if(!students.length && !subjects.length){
-list.innerHTML=`<div class="today-empty">No data for ${label} Year yet (students / subjects).</div>`;
-return;
-}
 if(!subjects.length){
-list.innerHTML=`<div class="today-empty">No subjects for ${label} Year. Lecturer must add subject with Year ${year}.</div>`;
+list.innerHTML=`<div class="today-empty">No subjects for ${label} Year in this department. Lecturer must add subject with Year ${year}.</div>`;
 return;
 }
 subjects.forEach(subj=>{
@@ -100,7 +121,7 @@ students.forEach(st=>{ const pct=hodStudentSubjectPct(st.id, subj==="General"?nu
 const subAvg=cnt?Math.round(sum/cnt):0;
 let badge=subAvg>=75?"good":(subAvg>=50?"medium":"low");
 const safe=subj.replace(/\\/g,"\\\\").replace(/'/g,"\\'");
-list.innerHTML+=`<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')"><div><h4>${subj}</h4><p>Students (Year ${year}): ${students.length}</p></div><div class="box-footer"><span class="badge ${badge}">${subAvg}%</span></div></div>`;
+list.innerHTML+=`<div class="principal-box" onclick="openHodSubjectCatsPage('${safe}')"><div><h4>${subj}</h4><p>Year ${year} students: ${students.length}</p></div><div class="box-footer"><span class="badge ${badge}">${subAvg}%</span></div></div>`;
 });
 }
 
@@ -152,8 +173,9 @@ function openHodCategoryStudents(category, year){
 if(category) hodDrillState.category=category;
 if(year!==undefined && year!==null && year!=="") hodDrillState.year=String(year);
 const yr=hodDrillState.year;
+// Year must already be chosen from home year box
 if(!yr){
-openHodCategoryYears(category||hodDrillState.category);
+closeHodDrillDown();
 return;
 }
 hideAllHodDrillPages();
