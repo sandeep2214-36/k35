@@ -65,35 +65,10 @@ else hideAllHodDrillPages();
 document.getElementById("hodDash").classList.remove("hidden");
 hodDrillState.year=null;
 
-const students=getData("students").filter(x=>x.hodId===currentUser.id);
-
 const deptTitle=document.getElementById("hodDepartmentTitle");
 if(deptTitle) deptTitle.innerText = currentUser.department || "Department";
-document.getElementById("hodStudentCount").innerText=students.length;
-
-let avg=0;
-if(students.length){
-let sum=students.reduce((a,b)=>a+(b.attendancePercentage||0),0);
-avg=Math.round(sum/students.length);
-}
-document.getElementById("hodAttendance").innerText=avg+"%";
 document.getElementById("hodStudentCode").innerText=currentUser.studentInviteCode||"—";
 document.getElementById("hodLecturerCode").innerText=currentUser.lecturerInviteCode||"—";
-
-// Groups = Year-wise (1st/2nd/3rd/4th) based on student data
-const yGrid=document.getElementById("hodYearsGrid");
-if(yGrid){
-yGrid.innerHTML="";
-[1,2,3,4].forEach(y=>{
-const ys=studentsInYear(students, y);
-const subCount=hodDepartmentSubjects(y).length;
-let yAvg=0;
-if(ys.length) yAvg=Math.round(ys.reduce((a,b)=>a+(b.attendancePercentage||0),0)/ys.length);
-let badge=yAvg>=75?"good":(yAvg>=50?"medium":"low");
-const label=y===1?"1st":y===2?"2nd":y===3?"3rd":"4th";
-yGrid.innerHTML+=`<div class="principal-box" onclick="openHodYearSubjects('${y}')"><div><h4>${label} Year</h4><p>Students: ${ys.length}</p><p>Subjects: ${subCount}</p></div><div class="box-footer"><span class="badge ${badge}">AVG ${yAvg}%</span></div></div>`;
-});
-}
 }
 
 function openHodYearSubjects(year){

@@ -718,8 +718,8 @@ if(sidebarNotifyBtn) sidebarNotifyBtn.classList.add("hidden");
 if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
 if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
 }else if(currentUser.role==="hod"){
-if(sidebarStudentsBtn) sidebarStudentsBtn.classList.remove("hidden");
-if(sidebarTimetableBtn) sidebarTimetableBtn.classList.remove("hidden");
+if(sidebarStudentsBtn) sidebarStudentsBtn.classList.add("hidden");
+if(sidebarTimetableBtn) sidebarTimetableBtn.classList.add("hidden");
 if(sidebarNotifyBtn) sidebarNotifyBtn.classList.remove("hidden");
 if(sidebarAttendanceBtn) sidebarAttendanceBtn.classList.add("hidden");
 if(sidebarAddBtn) sidebarAddBtn.classList.add("hidden");
