@@ -1150,11 +1150,84 @@ Student <span>Pro</span>
 </div>
 </div>
 
+<!-- Pro Assist Chat UI -->
+<button type="button" id="proAssistFab" title="Pro Assist" aria-label="Open Pro Assist" onclick="toggleProAssist()">
+  <i class="fa-solid fa-robot"></i>
+</button>
+<div id="proAssistPanel" aria-live="polite">
+  <div class="pa-header">
+    <div>
+      <h4>Pro Assist</h4>
+      <span id="paRoleLabel">Offline academic helper</span>
+    </div>
+    <button type="button" class="pa-close" onclick="toggleProAssist(false)">Close</button>
+  </div>
+  <div class="pa-messages" id="paMessages"></div>
+  <div class="pa-input-row">
+    <input id="paInput" type="text" placeholder="Ask about attendance, marks, timetable..." maxlength="500" onkeydown="if(event.key==='Enter'){sendProAssist();}">
+    <button type="button" onclick="sendProAssist()">Send</button>
+  </div>
+</div>
+
 <script src="modules/core.js"></script>
 <script src="modules/principal.js"></script>
 <script src="modules/hod.js"></script>
 <script src="modules/student.js"></script>
 <script src="modules/lecturer.js"></script>
+<script src="modules/ai-assistant.js"></script>
+<script>
+function toggleProAssist(force){
+  var panel=document.getElementById("proAssistPanel");
+  if(!panel) return;
+  var open=force===false?false:(force===true?true:!panel.classList.contains("open"));
+  panel.classList.toggle("open", open);
+  if(open){
+    var msgs=document.getElementById("paMessages");
+    if(msgs && !msgs.dataset.greeted && window.ProAssist){
+      msgs.dataset.greeted="1";
+      if(typeof currentUser!=="undefined" && currentUser && currentUser.role){
+        ProAssist.setRole(currentUser.role);
+        var lab=document.getElementById("paRoleLabel");
+        if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Offline";
+      }
+      appendPaBubble("bot", ProAssist.greet());
+    }
+    var inp=document.getElementById("paInput");
+    if(inp) inp.focus();
+  }
+}
+function appendPaBubble(who, text){
+  var msgs=document.getElementById("paMessages");
+  if(!msgs) return;
+  var div=document.createElement("div");
+  div.className="pa-bubble "+(who==="user"?"user":"bot");
+  div.textContent=text;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+function sendProAssist(){
+  if(!window.ProAssist) return;
+  var inp=document.getElementById("paInput");
+  if(!inp) return;
+  var q=(inp.value||"").trim();
+  if(!q) return;
+  inp.value="";
+  appendPaBubble("user", q);
+  var user=(typeof currentUser!=="undefined")?currentUser:null;
+  if(user && user.role) ProAssist.setRole(user.role);
+  appendPaBubble("bot", ProAssist.reply(q, user));
+}
+function syncProAssistRole(){
+  if(!window.ProAssist) return;
+  if(typeof currentUser!=="undefined" && currentUser && currentUser.role){
+    ProAssist.setRole(currentUser.role);
+    var lab=document.getElementById("paRoleLabel");
+    if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Offline";
+    var msgs=document.getElementById("paMessages");
+    if(msgs){ msgs.innerHTML=""; msgs.dataset.greeted=""; }
+  }
+}
+</script>
 
 </body>
 </html>

@@ -753,5 +753,6 @@ loadStudentDash();
 }else if(currentUser.role==="lecturer"){
 loadLecturerDash();
 }
+if(typeof syncProAssistRole==="function") syncProAssistRole();
 }
 
