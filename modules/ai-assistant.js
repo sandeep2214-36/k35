@@ -519,6 +519,8 @@
   }
 
   function localReply(message, currentUser) {
+    var text = String(message || "").trim();
+    if (!text) return "Go ahead — type your question and I will answer.";
 
     if (isPrivacyQuery(text)) {
       history.push({ role: "user", text: text });
