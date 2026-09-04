@@ -1160,7 +1160,17 @@ Student <span>Pro</span>
       <h4>Pro Assist</h4>
       <span id="paRoleLabel">Offline academic helper</span>
     </div>
-    <button type="button" class="pa-close" onclick="toggleProAssist(false)">Close</button>
+    <div style="display:flex;gap:6px;">
+      <button type="button" class="pa-close" onclick="togglePaSettings()">AI</button>
+      <button type="button" class="pa-close" onclick="toggleProAssist(false)">Close</button>
+    </div>
+  </div>
+  <div id="paSettings" class="hidden" style="padding:10px;border-bottom:1px solid rgba(212,175,55,0.3);background:#111;">
+    <p style="color:#f5e6a3;font-size:12px;margin:0 0 8px;">Real AI uses your key only. Student lists, mobiles, attendance rows are never uploaded.</p>
+    <div class="input-group"><label>API URL (OpenAI-compatible)</label><input id="paApiUrl" placeholder="https://api.openai.com/v1"></div>
+    <div class="input-group"><label>API Key (this device only)</label><input id="paApiKey" type="password" placeholder="sk-..."></div>
+    <div class="input-group"><label>Model</label><input id="paApiModel" placeholder="gpt-4o-mini"></div>
+    <button type="button" class="primary" onclick="savePaSettings()">Save AI settings</button>
   </div>
   <div class="pa-messages" id="paMessages"></div>
   <div class="pa-input-row">
@@ -1188,7 +1198,7 @@ function toggleProAssist(force){
       if(typeof currentUser!=="undefined" && currentUser && currentUser.role){
         ProAssist.setRole(currentUser.role);
         var lab=document.getElementById("paRoleLabel");
-        if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Offline";
+        if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Private";
       }
       appendPaBubble("bot", ProAssist.greet());
     }
@@ -1215,14 +1225,45 @@ function sendProAssist(){
   appendPaBubble("user", q);
   var user=(typeof currentUser!=="undefined")?currentUser:null;
   if(user && user.role) ProAssist.setRole(user.role);
-  appendPaBubble("bot", ProAssist.reply(q, user));
+  appendPaBubble("bot", "Thinking…");
+  var done=function(ans){
+    var msgs=document.getElementById("paMessages");
+    if(msgs && msgs.lastChild) msgs.removeChild(msgs.lastChild);
+    appendPaBubble("bot", ans);
+  };
+  if(typeof ProAssist.replyAsync==="function"){
+    ProAssist.replyAsync(q, user).then(done).catch(function(){ done(ProAssist.reply(q, user)); });
+  }else{
+    done(ProAssist.reply(q, user));
+  }
+}
+function togglePaSettings(){
+  var box=document.getElementById("paSettings");
+  if(!box) return;
+  box.classList.toggle("hidden");
+  if(!box.classList.contains("hidden") && window.ProAssist && ProAssist.getAiConfig){
+    var cfg=ProAssist.getAiConfig();
+    document.getElementById("paApiUrl").value=cfg.apiUrl||"";
+    document.getElementById("paApiKey").value=cfg.apiKey||"";
+    document.getElementById("paApiModel").value=cfg.model||"gpt-4o-mini";
+  }
+}
+function savePaSettings(){
+  if(!window.ProAssist || !ProAssist.setAiConfig) return;
+  ProAssist.setAiConfig({
+    apiUrl: document.getElementById("paApiUrl").value.trim(),
+    apiKey: document.getElementById("paApiKey").value.trim(),
+    model: document.getElementById("paApiModel").value.trim()||"gpt-4o-mini"
+  });
+  appendPaBubble("bot", "AI settings saved on this device only. App student/attendance data is never uploaded.");
+  document.getElementById("paSettings").classList.add("hidden");
 }
 function syncProAssistRole(){
   if(!window.ProAssist) return;
   if(typeof currentUser!=="undefined" && currentUser && currentUser.role){
     ProAssist.setRole(currentUser.role);
     var lab=document.getElementById("paRoleLabel");
-    if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Offline";
+    if(lab) lab.textContent="Role: "+String(currentUser.role).toUpperCase()+" • Private";
     var msgs=document.getElementById("paMessages");
     if(msgs){ msgs.innerHTML=""; msgs.dataset.greeted=""; }
   }

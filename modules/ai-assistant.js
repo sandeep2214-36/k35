@@ -488,9 +488,37 @@
     return null;
   }
 
-  function reply(message, currentUser) {
-    var text = String(message || "").trim();
-    if (!text) return "Go ahead — type your question and I will answer.";
+  var DATA_KEYS = ["students","hods","lecturers","principals","attendanceRecords","marksRecords","currentUserSession"];
+
+  function getAiConfig(){
+    try{
+      return JSON.parse(localStorage.getItem("proAssistAiConfig")||"{}")||{};
+    }catch(e){ return {}; }
+  }
+  function setAiConfig(cfg){
+    var prev=getAiConfig();
+    var next={
+      apiUrl: (cfg.apiUrl!=null?cfg.apiUrl:prev.apiUrl)||"",
+      apiKey: (cfg.apiKey!=null?cfg.apiKey:prev.apiKey)||"",
+      model: (cfg.model!=null?cfg.model:prev.model)||"gpt-4o-mini"
+    };
+    localStorage.setItem("proAssistAiConfig", JSON.stringify(next));
+    return next;
+  }
+  function sanitizeUserText(text){
+    var t=String(text||"");
+    t=t.replace(/\b\d{10}\b/g,"[number-hidden]");
+    t=t.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi,"[email-hidden]");
+    t=t.replace(/ghp_[A-Za-z0-9]{20,}/g,"[secret-hidden]");
+    t=t.replace(/sk-[A-Za-z0-9]{10,}/g,"[secret-hidden]");
+    return t.slice(0,800);
+  }
+  function isAppDataQuestion(text){
+    var t=String(text||"").toLowerCase();
+    return has(t,["attendance","marks","timetable","year box","invite code","department overview","college overview","my percentage","present days"]);
+  }
+
+  function localReply(message, currentUser) {
 
     if (isPrivacyQuery(text)) {
       history.push({ role: "user", text: text });
@@ -530,6 +558,77 @@
     return answer;
   }
 
+  function reply(message, currentUser) {
+    return localReply(message, currentUser);
+  }
+
+  /**
+   * Real AI path:
+   * - App databases NEVER uploaded (students, attendance, marks, mobiles).
+   * - Only sanitized question + role label may leave the device.
+   * - App-data questions stay 100% local.
+   */
+  function replyAsync(message, currentUser) {
+    var text = String(message || "").trim();
+    var local = localReply(text, currentUser);
+    var cfg = getAiConfig();
+    var hasRemote = !!(cfg.apiUrl && cfg.apiKey);
+
+    if (!hasRemote) {
+      return Promise.resolve(local + "\n\n(Local private mode. Add your AI key in Pro Assist settings for cloud-style answers. App records still never leave this device.)");
+    }
+
+    if (isPrivacyQuery(text) || isAppDataQuestion(text)) {
+      return Promise.resolve(local);
+    }
+
+    var safeQ = sanitizeUserText(text);
+    var sys =
+      "You are Pro Assist, a helpful academic assistant for a college app. " +
+      "Style: clear and conversational like ChatGPT. " +
+      "DATA POLICY: You must never ask for or repeat personal data (names, mobiles, emails, passwords, roll lists). " +
+      "You do not receive any student database. Role=" +
+      (role || "user") +
+      ". If the question needs private records, say you can only help with general guidance.";
+
+    var url = String(cfg.apiUrl).replace(/\/$/, "");
+    if (url.indexOf("/chat/completions") === -1) url += "/chat/completions";
+
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + cfg.apiKey
+      },
+      body: JSON.stringify({
+        model: cfg.model || "gpt-4o-mini",
+        temperature: 0.6,
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: safeQ }
+        ]
+      })
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok) {
+            var err = (data && data.error && data.error.message) || ("HTTP " + res.status);
+            return local + "\n\n(Cloud AI unavailable: " + err + " — answered locally. No app database was sent.)";
+          }
+          var msg =
+            data &&
+            data.choices &&
+            data.choices[0] &&
+            data.choices[0].message &&
+            data.choices[0].message.content;
+          return sanitizeOut(msg || local);
+        });
+      })
+      .catch(function () {
+        return local + "\n\n(Network error. Answered locally. App data did not leave this device.)";
+      });
+  }
+
   function getHistory() {
     return history.slice();
   }
@@ -542,9 +641,13 @@
     setRole: setRole,
     getRole: getRole,
     reply: reply,
+    replyAsync: replyAsync,
     greet: greet,
     getHistory: getHistory,
     clearHistory: clearHistory,
+    getAiConfig: getAiConfig,
+    setAiConfig: setAiConfig,
+    DATA_KEYS_NEVER_SENT: DATA_KEYS,
     PRIVACY_REPLY: PRIVACY_REPLY
   };
 })(typeof window !== "undefined" ? window : globalThis);
