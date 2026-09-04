@@ -570,14 +570,19 @@
    */
   function replyAsync(message, currentUser) {
     var text = String(message || "").trim();
-    var local = localReply(text, currentUser);
-    var cfg = getAiConfig();
-    var hasRemote = !!(cfg.apiUrl && cfg.apiKey);
-
-    if (!hasRemote) {
-      return Promise.resolve(local + "\n\n(Local private mode. Add your AI key in Pro Assist settings for cloud-style answers. App records still never leave this device.)");
+    var local;
+    try {
+      local = localReply(text, currentUser);
+    } catch (e) {
+      local = "I can help with attendance, marks, timetable, and study tips. Please try again.";
     }
+    var cfg = getAiConfig();
+    var hasRemote = !!(cfg.apiUrl && cfg.apiKey && String(cfg.apiUrl).indexOf("http") === 0);
 
+    // No key / local-only → instant answer (no network)
+    if (!hasRemote) {
+      return Promise.resolve(local);
+    }
     if (isPrivacyQuery(text) || isAppDataQuestion(text)) {
       return Promise.resolve(local);
     }
@@ -594,7 +599,12 @@
     var url = String(cfg.apiUrl).replace(/\/$/, "");
     if (url.indexOf("/chat/completions") === -1) url += "/chat/completions";
 
-    return fetch(url, {
+    var controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = setTimeout(function () {
+      try { if (controller) controller.abort(); } catch (e) {}
+    }, 8000);
+
+    var opts = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -608,12 +618,15 @@
           { role: "user", content: safeQ }
         ]
       })
-    })
+    };
+    if (controller) opts.signal = controller.signal;
+
+    return fetch(url, opts)
       .then(function (res) {
         return res.json().then(function (data) {
+          clearTimeout(timer);
           if (!res.ok) {
-            var err = (data && data.error && data.error.message) || ("HTTP " + res.status);
-            return local + "\n\n(Cloud AI unavailable: " + err + " — answered locally. No app database was sent.)";
+            return local;
           }
           var msg =
             data &&
@@ -625,7 +638,8 @@
         });
       })
       .catch(function () {
-        return local + "\n\n(Network error. Answered locally. App data did not leave this device.)";
+        clearTimeout(timer);
+        return local;
       });
   }
 

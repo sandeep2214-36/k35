@@ -1225,17 +1225,29 @@ function sendProAssist(){
   appendPaBubble("user", q);
   var user=(typeof currentUser!=="undefined")?currentUser:null;
   if(user && user.role) ProAssist.setRole(user.role);
+
+  var cfg = (ProAssist.getAiConfig && ProAssist.getAiConfig()) || {};
+  var useCloud = !!(cfg.apiUrl && cfg.apiKey && String(cfg.apiUrl).indexOf("http")===0);
+
+  // Instant local path — no Thinking hang
+  if(!useCloud || typeof ProAssist.replyAsync!=="function"){
+    try { appendPaBubble("bot", ProAssist.reply(q, user)); }
+    catch(e){ appendPaBubble("bot", "Please try again."); }
+    return;
+  }
+
   appendPaBubble("bot", "Thinking…");
+  var finished=false;
   var done=function(ans){
+    if(finished) return;
+    finished=true;
     var msgs=document.getElementById("paMessages");
     if(msgs && msgs.lastChild) msgs.removeChild(msgs.lastChild);
-    appendPaBubble("bot", ans);
+    appendPaBubble("bot", ans || ProAssist.reply(q, user));
   };
-  if(typeof ProAssist.replyAsync==="function"){
-    ProAssist.replyAsync(q, user).then(done).catch(function(){ done(ProAssist.reply(q, user)); });
-  }else{
-    done(ProAssist.reply(q, user));
-  }
+  // Hard UI timeout 8s
+  setTimeout(function(){ done(ProAssist.reply(q, user)); }, 8000);
+  ProAssist.replyAsync(q, user).then(done).catch(function(){ done(ProAssist.reply(q, user)); });
 }
 function togglePaSettings(){
   var box=document.getElementById("paSettings");
